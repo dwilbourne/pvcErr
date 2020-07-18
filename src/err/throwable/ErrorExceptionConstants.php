@@ -138,6 +138,7 @@ class ErrorExceptionConstants
      */
     public const MEDIA_TYPE_DATA_CREATOR_FILE_ACCESS_EXCEPTION = 1023;
     public const CREATE_MEDIA_TYPE_DATA_CLASS_EXCEPTION = 1023;
+    public const MEDIA_TYPE_DATA_FILES_EXCEPTION = 1023;
 
     /**
      * Throwables Documenter
@@ -145,10 +146,10 @@ class ErrorExceptionConstants
     public const THROWABLES_DOCUMENTER_PARSE_EXCEPTION = 1023;
 
     /**
-     * mediatype
+     * message
      */
-    public const MEDIA_TYPE_DATA_FILES_EXCEPTION = 1023;
 
+    public const INVALID_MSGTEXT_EXCEPTION = 1023;
     /**
      * Parsers
      */
