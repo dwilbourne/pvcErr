@@ -19,7 +19,7 @@
 		}
 	},
 	"require": {
-		"pvc/msg": "dev-master"
+		"pvc/msg": "@dev"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^8",

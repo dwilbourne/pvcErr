@@ -1,4 +1,0 @@
-[17-Jul-2020 09:10:47 America/New_York] PHP Fatal error:  Uncaught Error: Class 'PHPUnit_TextUI_ResultPrinter' not found in C:\Users\dougw\AppData\Local\Temp\ide-phpunit.php:231
-Stack trace:
-#0 {main}
-  thrown in C:\Users\dougw\AppData\Local\Temp\ide-phpunit.php on line 231
