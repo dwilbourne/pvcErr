@@ -178,6 +178,11 @@ class ErrorExceptionConstants
      */
 
     public const INVALID_COLUMN_HEADING_EXCEPTION = 1023;
+    public const NONEXISTENT_COLUMN_HEADING_EXCEPTION = 1023;
+    public const INVALID_LINE_TERMINATOR_EXCEPTION = 1023;
+    public const INVALID_FIELD_DELIMITER_EXCEPTION = 1023;
+    public const INVALID_FIELD_ENCLOSURE_EXCEPTION = 1023;
+    public const INVALID_ESCAPE_CHARACTER_EXCEPTION = 1023;
 
     /**
      * array_utils
