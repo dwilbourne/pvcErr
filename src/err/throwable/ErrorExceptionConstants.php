@@ -234,4 +234,9 @@ class ErrorExceptionConstants
      * DOMDocument
      */
     public const INVALID_MARKUP_LANGUAGE_EXCEPTION = 1023;
+
+    /*
+     * Url exceptions
+     */
+    public const CURL_INIT_EXCEPTION = 1023;
 }
