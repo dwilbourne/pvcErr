@@ -238,5 +238,6 @@ class ErrorExceptionConstants
     /*
      * Url exceptions
      */
+    public const INVALID_URL_SCHEME_EXCEPTION = 1023;
     public const CURL_INIT_EXCEPTION = 1023;
 }
