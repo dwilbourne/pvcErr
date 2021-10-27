@@ -214,11 +214,8 @@ class ErrorExceptionConstants
      */
     public const INVALID_TIMEZONE_EXCEPTION = 1023;
     public const INVALID_UTC_OFFSET = 1023;
-
-    /**
-     * Charset Exception
-     */
     public const INVALID_CHARSEST_EXCEPTION = 1023;
+    public const INVALID_ISO_COUNTRY_CODE_EXCEPTION = 1023;
 
     /*
      * http validator server exception
