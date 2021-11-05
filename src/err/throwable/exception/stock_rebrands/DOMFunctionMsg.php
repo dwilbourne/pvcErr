@@ -7,12 +7,12 @@
 
 namespace pvc\err\throwable\exception\stock_rebrands;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 
 /**
  * Class OutOfContextMethodCallMsg
  */
-class DOMFunctionMsg extends ErrorExceptionMsg
+class DOMFunctionMsg extends Msg
 {
     public function __construct(string $DOMFunctionName)
     {

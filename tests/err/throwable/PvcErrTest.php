@@ -9,7 +9,7 @@ namespace tests\err\throwable;
 
 use PHPUnit\Framework\TestCase;
 use pvc\err\throwable\ErrorExceptionConstants as ec;
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 use pvc\err\throwable\exception\stock_rebrands\Exception;
 use pvc\err\throwable\Throwable;
 
@@ -17,7 +17,7 @@ class PvcErrTest extends TestCase
 {
 
     protected string $msgText;
-    protected ErrorExceptionMsg $msg;
+    protected Msg $msg;
     protected int $code;
     protected \Exception $previous;
 
@@ -25,7 +25,7 @@ class PvcErrTest extends TestCase
     {
         $this->msgText = 'exception message';
         $vars = [];
-        $this->msg = new ErrorExceptionMsg($vars, $this->msgText);
+        $this->msg = new Msg($vars, $this->msgText);
         $this->code = 0;
 
         $previousMsg = 'previous message';

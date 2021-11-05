@@ -7,12 +7,12 @@
 
 namespace pvc\err\throwable\exception\pvc_exceptions;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 
 /**
  * Class InvalidPHPVersionMsg
  */
-class InvalidPHPVersionMsg extends ErrorExceptionMsg
+class InvalidPHPVersionMsg extends Msg
 {
     /**
      * InvalidPHPVersionMsg constructor.

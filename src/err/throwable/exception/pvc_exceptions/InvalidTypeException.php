@@ -2,7 +2,7 @@
 
 namespace pvc\err\throwable\exception\pvc_exceptions;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 use pvc\err\throwable\exception\stock_rebrands\Exception;
 use pvc\err\throwable\ErrorExceptionConstants as ec;
 use Throwable;
@@ -14,7 +14,7 @@ use Throwable;
  */
 class InvalidTypeException extends Exception
 {
-    public function __construct(ErrorExceptionMsg $msg, int $code = 0, Throwable $previous = null)
+    public function __construct(Msg $msg, int $code = 0, Throwable $previous = null)
     {
         if ($code == 0) {
             $code = ec::INVALID_TYPE_EXCEPTION;

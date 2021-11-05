@@ -7,12 +7,12 @@
 
 namespace pvc\err\throwable\exception\pvc_exceptions;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 
 /**
  * Class OutOfContextMethodCallMsg
  */
-class OutOfContextMethodCallMsg extends ErrorExceptionMsg
+class OutOfContextMethodCallMsg extends Msg
 {
     public function __construct(string $objectName, string $methodName, string $additionalMessage)
     {

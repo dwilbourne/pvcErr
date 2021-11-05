@@ -2,7 +2,7 @@
 namespace pvc\err\throwable\exception\stock_rebrands;
 
 use pvc\err\throwable\ErrorExceptionConstants as ec;
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 use pvc\err\throwable\Throwable;
 
 /**
@@ -14,14 +14,14 @@ use pvc\err\throwable\Throwable;
  */
 class Exception extends \Exception implements Throwable
 {
-    protected ErrorExceptionMsg $msg;
+    protected Msg $msg;
 
-    public function __construct(ErrorExceptionMsg $msg = null, int $code = 0, \Throwable $previous = null)
+    public function __construct(Msg $msg = null, int $code = 0, \Throwable $previous = null)
     {
         if (is_null($msg)) {
             $msgText = 'An unspecified exception has occurred.';
             $vars = [];
-            $msg = new ErrorExceptionMsg($vars, $msgText);
+            $msg = new Msg($vars, $msgText);
         }
         $this->setMsg($msg);
         if ($code == 0) {
@@ -30,12 +30,12 @@ class Exception extends \Exception implements Throwable
         parent::__construct('', $code, $previous);
     }
 
-    public function setMsg(ErrorExceptionMsg $msg): void
+    public function setMsg(Msg $msg): void
     {
         $this->msg = $msg;
     }
 
-    public function getMsg(): ErrorExceptionMsg
+    public function getMsg(): Msg
     {
         return $this->msg;
     }

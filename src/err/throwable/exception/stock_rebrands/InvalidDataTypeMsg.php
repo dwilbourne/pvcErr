@@ -7,9 +7,9 @@
 
 namespace pvc\err\throwable\exception\stock_rebrands;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 
-class InvalidDataTypeMsg extends ErrorExceptionMsg
+class InvalidDataTypeMsg extends Msg
 {
     public function __construct(string $dataType)
     {

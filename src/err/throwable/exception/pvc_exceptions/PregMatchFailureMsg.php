@@ -7,12 +7,12 @@
 
 namespace pvc\err\throwable\exception\pvc_exceptions;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 
 /**
  * Class InvalidPHPVersionMsg
  */
-class PregMatchFailureMsg extends ErrorExceptionMsg
+class PregMatchFailureMsg extends Msg
 {
     public function __construct(string $regex, string $subject)
     {

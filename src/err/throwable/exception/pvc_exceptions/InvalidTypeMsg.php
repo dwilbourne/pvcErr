@@ -7,13 +7,13 @@
 
 namespace pvc\err\throwable\exception\pvc_exceptions;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 use pvc\err\throwable\exception\stock_rebrands\InvalidArgumentException;
 
 /**
  * Class InvalidTypeMsg
  */
-class InvalidTypeMsg extends ErrorExceptionMsg
+class InvalidTypeMsg extends Msg
 {
     /**
      * InvalidTypeMsg constructor.

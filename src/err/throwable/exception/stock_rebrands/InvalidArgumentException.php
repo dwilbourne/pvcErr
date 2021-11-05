@@ -3,7 +3,7 @@
 namespace pvc\err\throwable\exception\stock_rebrands;
 
 use pvc\err\throwable\ErrorExceptionConstants as ec;
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 use Throwable;
 
 /**
@@ -33,7 +33,7 @@ use Throwable;
  */
 class InvalidArgumentException extends Exception
 {
-    public function __construct(ErrorExceptionMsg $msg, int $code = 0, Throwable $previous = null)
+    public function __construct(Msg $msg, int $code = 0, Throwable $previous = null)
     {
         if ($code == 0) {
             $code = ec::INVALID_ARGUMENT_EXCEPTION;

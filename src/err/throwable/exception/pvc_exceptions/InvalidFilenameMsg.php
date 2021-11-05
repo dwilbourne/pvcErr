@@ -7,12 +7,12 @@
 
 namespace pvc\err\throwable\exception\pvc_exceptions;
 
-use pvc\msg\ErrorExceptionMsg;
+use pvc\msg\Msg;
 
 /**
  * Class InvalidAttributeExceptionMsg
  */
-class InvalidFilenameMsg extends ErrorExceptionMsg
+class InvalidFilenameMsg extends Msg
 {
     public function __construct(string $fileName)
     {
