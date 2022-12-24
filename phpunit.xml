@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="vendor/autoload.php"
          forceCoversAnnotation="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+
     <coverage>
         <include>
             <directory>src/err*</directory>
@@ -9,6 +10,7 @@
             <html outputDirectory="coverage"/>
         </report>
     </coverage>
+
     <logging/>
     <testsuites>
         <testsuite name="src_tests">
