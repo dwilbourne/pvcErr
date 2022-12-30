@@ -19,7 +19,7 @@ class ErrConfig implements ErrConfigInterface
     public const LIBRARY_CODES = [
         "pvcExceptions" => 1001,
         "pvcBrandedStockExceptions" => 1002,
-        "pvcStruct" => 1003,
+        "pvcTree" => 1003,
     ];
 
     /**

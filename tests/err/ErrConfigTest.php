@@ -23,7 +23,7 @@ class ErrConfigTest extends TestCase
 	{
 		$libName = "pvcExceptions";
 		$localCode = 1001;
-		$expectedGlobalCode = 10001001;
+		$expectedGlobalCode = 10011001;
 		self::assertEquals($expectedGlobalCode, ErrConfig::createExceptionCode($libName, $localCode));
 	}
 

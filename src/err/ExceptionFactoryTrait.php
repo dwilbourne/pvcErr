@@ -20,7 +20,7 @@ trait ExceptionFactoryTrait
 	 * @return Object
 	 * @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection
 	 */
-	public static function createException(string $classString, array $params = [], Throwable $prev = null): object
+	public static function createException(string $classString, array $params = [], Throwable $prev = null): \Exception
 	{
 		$localCode = self::CODES[$classString] ?? 0;
 		/** @noinspection PhpUnhandledExceptionInspection */
