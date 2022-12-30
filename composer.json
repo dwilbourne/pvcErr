@@ -20,6 +20,7 @@
 	},
 	"minimum-stability": "dev",
 	"require": {
+		"pvc/interfaces": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "*",
