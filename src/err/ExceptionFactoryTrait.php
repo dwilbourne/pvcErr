@@ -27,6 +27,7 @@ trait ExceptionFactoryTrait
 		$globalCode = ErrConfig::createExceptionCode(self::LIBRARY_NAME, $localCode);
 		// usually params can be automatically converted to strings, but if something weird happens like passing an
 		// object in as a param, let's be certain vsprintf can deal with it.
+		$newParams = [];
 		foreach($params as $param) {
 			$newParams[] = (is_scalar($param) ? $param : gettype($param));
 		}
