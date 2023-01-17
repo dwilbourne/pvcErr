@@ -21,7 +21,7 @@ class ErrConfig implements ErrConfigInterface
         "pvcBrandedStockExceptions" => 1002,
         "pvcList" => 1003,
         "pvcTree" => 1004,
-	    "pvcFileTree" => 1005,
+	    "pvcFileExplorer" => 1005,
     ];
 
     /**
