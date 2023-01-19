@@ -4,7 +4,7 @@
 
     <coverage>
         <include>
-            <directory>src/err*</directory>
+            <directory>src*</directory>
         </include>
         <report>
             <html outputDirectory="coverage"/>
@@ -14,7 +14,7 @@
     <logging/>
     <testsuites>
         <testsuite name="src_tests">
-            <directory>tests/err*</directory>
+            <directory>tests*</directory>
         </testsuite>
     </testsuites>
 </phpunit>

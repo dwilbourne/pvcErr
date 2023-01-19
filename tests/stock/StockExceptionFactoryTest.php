@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace tests\err\stock;
+namespace pvcTests\err\stock;
 
 use PHPUnit\Framework\TestCase;
 use pvc\err\stock\_ExceptionFactory;
@@ -81,8 +81,7 @@ class StockExceptionFactoryTest extends TestCase
 		foreach ($this->params as $classString => $paramArray) {
 			$exception = _ExceptionFactory::createException($classString, $paramArray);
 			self::assertTrue(0 < $exception->getCode());
-			self:
-			assertNotEmpty($exception->getMessage());
+			self:assertNotEmpty($exception->getMessage());
 		}
 	}
 }

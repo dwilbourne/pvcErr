@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace pvc\err\stock;
 
+
 use pvc\err\ExceptionFactoryTrait;
 
 class _ExceptionFactory

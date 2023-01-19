@@ -14,8 +14,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"pvc\\": "src/",
-			"tests\\": "tests/"
+			"pvc\\err\\": "src/",
+			"pvcTests\\err\\": "tests/"
 		}
 	},
 	"minimum-stability": "dev",

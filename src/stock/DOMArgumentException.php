@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace pvc\err\stock;
 
+use Exception;
+
 /**
  * DOM exceptions are thrown from attempting illegal DOM functions / methods or calling them with bad arguments
  *
