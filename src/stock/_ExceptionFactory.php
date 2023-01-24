@@ -2,6 +2,7 @@
 /** @noinspection PhpCSValidationInspection */
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -12,6 +13,10 @@ namespace pvc\err\stock;
 
 use pvc\err\ExceptionFactoryTrait;
 
+/**
+ * Class _Pvc_ExceptionFactory
+ * @package pvcErr
+ */
 class _ExceptionFactory
 {
 	use ExceptionFactoryTrait;

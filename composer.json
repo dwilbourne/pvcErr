@@ -20,12 +20,13 @@
 	},
 	"minimum-stability": "dev",
 	"require": {
-		"pvc/interfaces": "*"
+		"pvc/interfaces": "*",
+		"php-di/php-di": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "*",
+		"mikey179/vfsstream": "*",
 		"squizlabs/php_codesniffer": "*",
-		"friendsofphp/php-cs-fixer": "*",
 		"phpstan/phpstan": "*"
 	}
 }

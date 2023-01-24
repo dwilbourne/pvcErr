@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -18,6 +19,8 @@ namespace pvc\err\stock;
  * code.  For example, indexing into a fixed length array with a bad index creates an error, not an exception.
  * If it was a user that supplied the bad index, it might call for sending a message back to the user through the
  * UI, but then you do not have an exception, you have bad user input......
+ *
+ * @package pvcErr
  */
 
 class OutOfRangeException extends LogicException

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -23,6 +24,7 @@ use Exception;
  *        return new DOMElement($element_name);
  *    }
  *
+ * @package pvcErr
  */
 class DOMArgumentException extends Exception
 {

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -26,6 +27,7 @@ namespace pvc\err\stock;
  *    $f = new Foo();
  *    $f->doSomethingCrazy();
  *
+ * @package pvcErr
  */
 class BadMethodCallException extends Exception
 {

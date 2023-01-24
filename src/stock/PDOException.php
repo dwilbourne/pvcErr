@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -10,6 +11,8 @@ namespace pvc\err\stock;
 
 /**
  * Class PDOException
+ *
+ * @package pvcErr
  */
 class PDOException extends Exception
 {

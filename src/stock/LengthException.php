@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -28,6 +29,7 @@ namespace pvc\err\stock;
  *        }
  *    }
  *
+ * @package pvcErr
  */
 class LengthException extends LogicException
 {

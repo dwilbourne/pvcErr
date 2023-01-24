@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -10,6 +11,8 @@ namespace pvc\err\stock;
 
 /**
  * Class PharException
+ *
+ * @package pvcErr
  */
 class PharException extends Exception
 {

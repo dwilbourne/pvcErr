@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -45,6 +46,7 @@ namespace pvc\err\stock;
  *            return getMonthName(0);
  *        }
  *
+ * @package pvcErr
  *
  */
 class OutOfBoundsException extends RuntimeException

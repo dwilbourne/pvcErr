@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -25,6 +26,7 @@ namespace pvc\err\stock;
  *        return array_walk($array, $callback);
  *    }
  *
+ * @package pvcErr
  */
 class BadFunctionCallException extends Exception
 {

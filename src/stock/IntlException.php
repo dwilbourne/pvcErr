@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -30,6 +31,7 @@ namespace pvc\err\stock;
  *        throw new IntlException($msg, $code);
  *    }
  *
+ * @package pvcErr
  */
 class IntlException extends Exception
 {

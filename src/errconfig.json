@@ -1,0 +1,11 @@
+[
+    {
+        "pvc\\Err\\pvc" : 1001,
+        "pvc\\Err\\stock" : 1002,
+        "pvc\\struct\\list" : 1003,
+        "pvc\\struct\\range" : 1004,
+        "pvc\\struct\\tree" : 1005,
+        "pvc\\exif" : 1006,
+        "pvc\\storage\\file" : 1007
+    }
+]

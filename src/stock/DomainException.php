@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -36,6 +37,7 @@ namespace pvc\err\stock;
  *        throw new PrimaryColorException($s);
  *    }
  *
+ * @package pvcErr
  */
 class DomainException extends Exception
 {

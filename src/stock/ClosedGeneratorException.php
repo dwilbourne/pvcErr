@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -42,7 +43,7 @@ namespace pvc\err\stock;
  *        throw new pvc\ClosedGeneratorException($y);
  *    }
  *
- *
+ * @package pvcErr
  */
 class ClosedGeneratorException extends Exception
 {

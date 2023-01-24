@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -24,6 +25,8 @@ namespace pvc\err\stock;
  *        }
  *        return new DOMElement($elementName);
  *    }
+ *
+ * @package pvcErr
  */
 class DOMFunctionException extends Exception
 {

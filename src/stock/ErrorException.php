@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -14,10 +15,9 @@ namespace pvc\err\stock;
  * $file, $line and is not an error object. Unfortunately, the error constructor does not allow one to set the file
  * and line from the constructor, so there is no way to handle uncaught errors other than convert them to
  * ErrorExceptions where the constructor does allow one to specify the file and line number.
- */
-
-/**
  * Class ErrorException
+ *
+ * @package pvcErr
  */
 class ErrorException extends Exception
 {

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -13,6 +14,8 @@ namespace pvc\err\stock;
  *
  * Exception that represents error in the program logic. This kind of exception should lead directly to a fix
  * in your code.
+ *
+ * @package pvcErr
  */
 class LogicException extends Exception
 {

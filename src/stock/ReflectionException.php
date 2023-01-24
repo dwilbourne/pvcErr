@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -16,6 +17,7 @@ namespace pvc\err\stock;
  *
  *    $r = new ReflectionClass("foo");
  *
+ * @package pvcErr
  */
 class ReflectionException extends Exception
 {

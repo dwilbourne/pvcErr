@@ -43,7 +43,9 @@ use function PHPUnit\Framework\assertNotEmpty;
  */
 class StockExceptionFactoryTest extends TestCase
 {
-
+	/**
+	 * @var array<string, array<mixed>>
+	 */
 	protected array $params = [
 		Exception::class => [],
 		BadFunctionCallException::class => [],
