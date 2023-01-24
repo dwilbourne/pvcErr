@@ -11,10 +11,10 @@ namespace pvcTests\err;
 
 use PHPUnit\Framework\TestCase;
 use pvc\err\err\LibraryCodeFileNotWriteableException;
-use pvc\err\LibraryCodes;
+use pvc\err\ExceptionLibraryCodes;
 use pvcTests\err\fixture\MockFilesysFixture;
 
-class LibraryCodesTest extends TestCase
+class ExceptionLibraryCodesTest extends TestCase
 {
     protected MockFilesysFixture $fixture;
     protected string $libraryCodesFilename;
@@ -28,14 +28,14 @@ class LibraryCodesTest extends TestCase
     /**
      * testFileExistsButIsNotWriteable
      * @throws \Throwable
-     * @covers \pvc\err\LibraryCodes::parseLibraryCodesFile
+     * @covers \pvc\err\ExceptionLibraryCodes::parseLibraryCodesFile
      */
     public function testFileExistsButIsNotWriteable() : void
     {
         $filesys = $this->fixture->getLibraryCodesFileDoesExistButIsNotWriteableFixture();
         $mockFile = $filesys->getChild($this->libraryCodesFilename);
         $this->expectException(LibraryCodeFileNotWriteableException::class);
-        $libraryCodes = new LibraryCodes($mockFile);
+        $libraryCodes = new ExceptionLibraryCodes($mockFile);
     }
 
     public function testCreatesDefaultFileIfNoArgumentSuppliedAndDefaultFileDoesNotExist() : void

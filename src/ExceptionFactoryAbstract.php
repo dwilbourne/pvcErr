@@ -21,9 +21,9 @@ use Throwable;
 abstract class ExceptionFactoryAbstract implements ExceptionFactoryInterface
 {
     /**
-     * @var LibraryCodes.  Object which manages library codes and can return one for a given exception.
+     * @var ExceptionLibraryCodes.  Object which manages library codes and can return one for a given exception.
      */
-    protected LibraryCodes $libraryCodes;
+    protected ExceptionLibraryCodes $libraryCodes;
 
     /**
      * @var array<class-string, int>.  Array of local codes for an exception library
@@ -48,9 +48,9 @@ abstract class ExceptionFactoryAbstract implements ExceptionFactoryInterface
 	abstract protected function getLocalMessages(): array;
 
     /**
-     * @param LibraryCodes $libraryCodes
+     * @param ExceptionLibraryCodes $libraryCodes
      */
-    public function __construct(LibraryCodes $libraryCodes)
+    public function __construct(ExceptionLibraryCodes $libraryCodes)
     {
         $this->libraryCodes = $libraryCodes;
         $this->localCodes = $this->getLocalCodes();

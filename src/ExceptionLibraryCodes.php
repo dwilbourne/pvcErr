@@ -18,7 +18,7 @@ use pvc\err\err\LibraryCodeFileNotParseableJsonException;
 use pvc\err\err\LibraryCodeFileNotWriteableException;
 use pvc\err\err\LibraryCodeValueAlreadyInUseException;
 use pvc\err\stock\ReflectionException;
-use pvc\interfaces\err\LibraryCodesInterface;
+use pvc\interfaces\err\ExceptionLibraryCodesInterface;
 use ReflectionClass;
 use Throwable;
 
@@ -51,7 +51,7 @@ use Throwable;
  *
  * Class LibraryCodes
  */
-class LibraryCodes implements LibraryCodesInterface
+class ExceptionLibraryCodes implements ExceptionLibraryCodesInterface
 {
     /**
      * @var array<string, int> $libraryCodes.  Map of namespaces to exception library codes
