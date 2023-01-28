@@ -128,11 +128,11 @@ create a protected attribute called $exceptionFactory.  That factory should be c
 container with a string of the correct namespace and the filepath of your library codes json file as the parameters to 
 the constructor. As part of the DI creating your class, inject the factory.
 
-You use the factory to create an exception using a method call: createException(string $classString, array 
+You use the factory to create an exception using a method call: createLibraryCodesException(string $classString, array 
 $messageParams = [], Throwable $previous = null).  Because of the setup done through the DI container, your code for 
 throwing an exception looks like:
 
-    throw $this->exceptionFactory->createException($classString, $params, $previous).
+    throw $this->exceptionFactory->createLibraryCodesException($classString, $params, $previous).
 
 
 

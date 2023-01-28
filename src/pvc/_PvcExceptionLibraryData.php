@@ -9,19 +9,20 @@ declare(strict_types=1);
 
 namespace pvc\err\pvc;
 
-use pvc\err\ExceptionFactoryAbstract;
+use pvc\err\ExceptionLibraryDataAbstract;
+use pvc\interfaces\err\ExceptionLibraryDataInterface;
 
 /**
- * Class _PvcExceptionFactory
+ * Class _PvcExceptionLibrary
  * @package pvcErr
  */
-class _PvcExceptionFactory extends ExceptionFactoryAbstract
+class _PvcExceptionLibraryData extends ExceptionLibraryDataAbstract implements ExceptionLibraryDataInterface
 {
     /**
      * @function getLocalCodes
      * @return array<class-string, int>
      */
-	protected function getLocalCodes() : array
+	public function getLocalCodes() : array
     {
         return [
             InvalidArrayIndexException::class => 1001,
@@ -38,7 +39,7 @@ class _PvcExceptionFactory extends ExceptionFactoryAbstract
      * @function getLocalMessages
      * @return array<class-string, string>
      */
-	protected function getLocalMessages() : array
+	public function getLocalMessages() : array
     {
         return [
             InvalidArrayIndexException::class => 'Invalid array index %s.',
@@ -49,5 +50,23 @@ class _PvcExceptionFactory extends ExceptionFactoryAbstract
             PregMatchFailureException::class => 'preg_match failed: regex=%s; subject=%s;',
             PregReplaceFailureException::class => 'preg_replace failed: regex=%s; subject=%s; replacement=%s',
         ];
+    }
+
+    /**
+     * getNamespace
+     * @return string
+     */
+    public function getNamespace(): string
+    {
+        return __NAMESPACE__;
+    }
+
+    /**
+     * getDirectory
+     * @return string
+     */
+    public function getDirectory(): string
+    {
+        return __DIR__;
     }
 }

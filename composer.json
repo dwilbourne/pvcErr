@@ -26,6 +26,7 @@
 	"require-dev": {
 		"phpunit/phpunit": "*",
 		"mikey179/vfsstream": "*",
+		"nikic/php-parser": "*",
 		"squizlabs/php_codesniffer": "*",
 		"phpstan/phpstan": "*"
 	}

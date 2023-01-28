@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 declare (strict_types=1);
@@ -13,9 +12,9 @@ namespace pvc\err\err;
 use pvc\err\stock\LogicException;
 
 /**
- * Class LibraryCodeFileDoesNotParseToAnArrayException
+ * Class LibraryCodeFileNotReadableException
  */
-class LibraryCodeFileDoesNotParseToAnArrayException extends LogicException
+class LibraryCodeFileNotReadableException extends LogicException
 {
 
 }
