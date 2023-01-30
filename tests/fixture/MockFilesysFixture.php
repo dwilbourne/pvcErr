@@ -17,9 +17,20 @@ use bovigo\vfs\vfsStreamDirectory;
  */
 class MockFilesysFixture
 {
+    /**
+     * @var string
+     */
     protected string $jsonFileName = "libraryCodePrefixes.json";
-    protected string $root = 'root';
-    protected $perms = null;
+
+    /**
+     * @var string
+     */
+    protected string $rootFolder = 'rootFolder';
+
+    /**
+     * @var null
+     */
+    protected $defaultFilePermissions = null;
 
     /**
      * @function getJsonFileName
@@ -47,7 +58,7 @@ class MockFilesysFixture
     {
         $notJson = 'boog a lee boo';
         $filesArray = [$this->jsonFileName => $notJson];
-        return vfsStream::setup($this->root, $this->perms, $filesArray);
+        return vfsStream::setup($this->rootFolder, $this->defaultFilePermissions, $filesArray);
     }
 
     /**
@@ -58,7 +69,7 @@ class MockFilesysFixture
     {
         $jsonArrayHasKeyWhichIsNotAString = '{ "4" : 7, "foo" : "bar" }';
         $filesArray = [$this->jsonFileName => $jsonArrayHasKeyWhichIsNotAString];
-        return vfsStream::setup($this->root, $this->perms, $filesArray);
+        return vfsStream::setup($this->rootFolder, $this->defaultFilePermissions, $filesArray);
     }
 
     /**
@@ -69,7 +80,7 @@ class MockFilesysFixture
     {
         $jsonArrayHasValueWhichIsNotAnInteger = '{ "foo" : 7, "bar" : "baz" }';
         $filesArray = [$this->jsonFileName => $jsonArrayHasValueWhichIsNotAnInteger];
-        return vfsStream::setup($this->root, $this->perms, $filesArray);
+        return vfsStream::setup($this->rootFolder, $this->defaultFilePermissions, $filesArray);
     }
 
     /**
@@ -80,7 +91,7 @@ class MockFilesysFixture
     {
         $jsonArrarHasDuplicateValue = '{ "foo" : 7, "bar" : 7 }';
         $filesArray = [$this->jsonFileName => $jsonArrarHasDuplicateValue];
-        return vfsStream::setup($this->root, $this->perms, $filesArray);
+        return vfsStream::setup($this->rootFolder, $this->defaultFilePermissions, $filesArray);
     }
 
     /**
@@ -91,6 +102,6 @@ class MockFilesysFixture
     {
         $jsonArray = '{ "pvc\\\\err\\\\pvc" : 1001, "pvc\\\\err\\\\stock" : 1002 }';
         $filesArray = [$this->jsonFileName => $jsonArray];
-        return vfsStream::setup($this->root, $this->perms, $filesArray);
+        return vfsStream::setup($this->rootFolder, $this->defaultFilePermissions, $filesArray);
     }
 }

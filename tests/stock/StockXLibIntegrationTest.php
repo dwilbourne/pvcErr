@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace pvcTests\err\stock;
 
 use PHPUnit\Framework\TestCase;
-use pvc\err\ExceptionFactory;
-use pvc\err\ExceptionLibraryCodes;
+use pvc\err\XFactory;
+use pvc\err\XCodePrefixes;
 use pvc\err\stock\BadFunctionCallException;
 use pvc\err\stock\BadMethodCallException;
 use pvc\err\stock\ClosedGeneratorException;
@@ -20,7 +20,6 @@ use pvc\err\stock\DOMException;
 use pvc\err\stock\DOMFunctionException;
 use pvc\err\stock\ErrorException;
 use pvc\err\stock\Exception;
-use pvc\err\stock\ExceptionLibraryData;
 use pvc\err\stock\IntlException;
 use pvc\err\stock\InvalidArgumentException;
 use pvc\err\stock\InvalidDataTypeException;
@@ -43,8 +42,11 @@ use function PHPUnit\Framework\assertNotEmpty;
 /**
  * Class ExceptionLibraryTest
  */
-class StockExceptionLibraryIntegration extends TestCase
+class StockXLibIntegrationTest extends TestCase
 {
+    /**
+     * @var array<class-string, array<mixed>> $params
+     */
     protected array $params = [
             Exception::class => [],
             BadFunctionCallException::class => [],
@@ -75,14 +77,13 @@ class StockExceptionLibraryIntegration extends TestCase
 
     /**
      * testExceptions
-     * @covers \pvc\err\stock\_StockExceptionData::getLocalMessages
-     * @covers \pvc\err\stock\_StockExceptionData::getLocalCodes
+     * @covers \pvc\err\stock\_StockXLibData::getLocalMessages
+     * @covers \pvc\err\stock\_StockXLibData::getLocalCodes
      */
     public function testExceptions(): void
     {
-        $libraryCodes = new ExceptionLibraryCodes();
-        $exceptionData = new ExceptionLibraryData();
-        $factory = new ExceptionFactory($libraryCodes, $exceptionData);
+        $libraryCodes = new XCodePrefixes();
+        $factory = new XFactory($libraryCodes);
 
         foreach ($this->params as $classString => $paramArray) {
             $exception = $factory->createException($classString, $paramArray);

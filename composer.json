@@ -24,10 +24,12 @@
 		"php-di/php-di": "*"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "*",
+		"phpunit/phpunit": "^9",
+		"phpstan/phpstan": "*",
+		"phpstan/extension-installer": "*",
+		"phpstan/phpstan-phpunit": "*",
 		"mikey179/vfsstream": "*",
 		"nikic/php-parser": "*",
-		"squizlabs/php_codesniffer": "*",
-		"phpstan/phpstan": "*"
+		"squizlabs/php_codesniffer": "*"
 	}
 }

@@ -10,10 +10,10 @@ declare(strict_types=1);
 namespace pvcTests\err;
 
 use PHPUnit\Framework\TestCase;
-use pvc\err\ExceptionLibraryUtils;
-use pvc\interfaces\err\ExceptionLibraryDataInterface;
+use pvc\err\XLibUtils;
+use pvc\interfaces\err\XDataInterface;
 
-class ExceptionLibraryDataTestMaster extends TestCase
+class XDataTestMaster extends TestCase
 {
     /**
      * @var array<int, class-string>
@@ -21,9 +21,9 @@ class ExceptionLibraryDataTestMaster extends TestCase
     private array $exceptionClassStrings;
 
     /**
-     * @var ExceptionLibraryDataInterface
+     * @var XDataInterface
      */
-    private ExceptionLibraryDataInterface $libraryData;
+    private XDataInterface $libraryData;
 
 
     /**
@@ -32,7 +32,9 @@ class ExceptionLibraryDataTestMaster extends TestCase
      */
     public function verifylibrary(string $libraryDataClassString): void
     {
-        $this->libraryData = new $libraryDataClassString();
+        /** @var XDataInterface $object */
+        $object = new $libraryDataClassString();;
+        $this->libraryData = $object;
         $this->exceptionClassStrings = $this->getExceptionClassStringsFromDir();
         $this->verifyGetLocalCodesKeysMatchClassStringsFromDir();
         $this->verifyGetLocalMessagesKeysMatchClassStringsFromDir();
@@ -42,6 +44,10 @@ class ExceptionLibraryDataTestMaster extends TestCase
         $this->verifyGetDirectoryReturnsDirectory();
     }
 
+    /**
+     * getExceptionClassStringsFromDir
+     * @return array<int, class-string>
+     */
     protected function getExceptionClassStringsFromDir(): array
     {
         /**
@@ -53,22 +59,27 @@ class ExceptionLibraryDataTestMaster extends TestCase
         /**
          * put all the files from the directory into an array (other than . and .. )
          */
-        if (false !== ($files = array_diff(scandir($dir), array('..', '.')))) {
-            foreach ($files as $file) {
-                /**
-                 * get the class string by parsing the file
-                 */
-                $classString = ExceptionLibraryUtils::getClassStringFromFile($dir . '/' . $file);
+        if (false === ($files = scandir($dir))) {
+            return $classStrings;
+        }
+        $files = array_diff($files, array('..', '.'));
 
-                /**
-                 * validate the class string:  must be reflectable (i.e. an object) and must implement Throwable.  If
-                 * it is valid, add it to our array of exceptions in the library
-                 */
-                if (ExceptionLibraryUtils::validateExceptionClassString($classString)) {
-                    $classStrings[] = $classString;
-                }
+        foreach ($files as $file) {
+            /**
+             * get the class string by parsing the file
+             * @var class-string $classString
+             */
+            $classString = XLibUtils::getClassStringFromFile($dir . '/' . $file);
+
+            /**
+             * validate the class string:  must be reflectable (i.e. an object) and must implement Throwable.  If
+             * it is valid, add it to our array of exceptions in the library
+             */
+            if (XLibUtils::validateExceptionClassString($classString)) {
+                $classStrings[] = $classString;
             }
         }
+
         return $classStrings;
     }
 

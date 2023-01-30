@@ -33,22 +33,10 @@ class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
         if ($node instanceof Class_) {
             /**
              * if there's namespacing in the file, get the full namespaced class name (i.e. class string).  If there
-             * is no namespacing, then the namespacedName property will be null.
+             * is no namespacing, then the namespacedName property will be null and use the class name ($node->name).
+             *  Phpstan wants to make sure $node->name is a string, so we coalesce it.
              */
-            $classString = $node->namespacedName->toString();
-
-            /**
-             * if class string was not populated, then use the property value
-             */
-            if (empty($classString)) {
-                $this->className = $node->name;
-            }
-            /**
-             * otherwise use the name of the class (no namespace exists)
-             */
-            else {
-                $this->className = $classString;
-            }
+            $this->className = $node->namespacedName ? $node->namespacedName->toString() : ($node->name ?? '');
 
             /**
              * return value STOP_TRAVERSAL stops the node traverser from going any further

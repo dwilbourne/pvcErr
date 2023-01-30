@@ -9,14 +9,14 @@ declare(strict_types=1);
 
 namespace pvc\err\pvc;
 
-use pvc\err\ExceptionLibraryDataAbstract;
-use pvc\interfaces\err\ExceptionLibraryDataInterface;
+use pvc\err\XDataAbstract;
+use pvc\interfaces\err\XDataInterface;
 
 /**
  * Class _PvcExceptionLibrary
  * @package pvcErr
  */
-class _PvcExceptionLibraryData extends ExceptionLibraryDataAbstract implements ExceptionLibraryDataInterface
+class _PvcXLibData extends XDataAbstract implements XDataInterface
 {
     /**
      * @function getLocalCodes

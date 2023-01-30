@@ -9,7 +9,8 @@ declare(strict_types=1);
 namespace pvcTests\err\pvc;
 
 use PHPUnit\Framework\TestCase;
-use pvc\err\ExceptionFactory;
+use pvc\err\XFactory;
+use pvc\err\XCodePrefixes;
 use pvc\err\pvc\InvalidArrayIndexException;
 use pvc\err\pvc\InvalidArrayValueException;
 use pvc\err\pvc\InvalidAttributeNameException;
@@ -18,12 +19,11 @@ use pvc\err\pvc\InvalidPHPVersionException;
 use pvc\err\pvc\PregMatchFailureException;
 use pvc\err\pvc\PregReplaceFailureException;
 
-class PvcExceptionLibraryIntegration extends TestCase
+class PvcXLibIntegrationTest extends TestCase
 {
 
     /**
-     * setParams
-     * @return array<class-string, array<mixed>>
+     * @var array<class-string, array<int, string>> $params
      */
     protected array $params = [
             InvalidArrayIndexException::class => ['(IndexName)'],
@@ -37,14 +37,13 @@ class PvcExceptionLibraryIntegration extends TestCase
 
     /**
      * testExceptions
-     * @covers \pvc\err\pvc\_PvcExceptionData::getLocalMessages
-     * @covers \pvc\err\pvc\_PvcExceptionData::getLocalCodes
+     * @covers \pvc\err\pvc\_PvcXLibData::getLocalMessages
+     * @covers \pvc\err\pvc\_PvcXLibData::getLocalCodes
      */
     public function testExceptions(): void
     {
-        $libraryCodes = new ExceptionLibraryCodes();
-        $exceptionData = new ExceptionLibraryData();
-        $factory = new ExceptionFactory($libraryCodes, $exceptionData);
+        $libraryCodes = new XCodePrefixes();
+        $factory = new XFactory($libraryCodes);
 
         foreach ($this->params as $classString => $paramArray) {
             $exception = $factory->createException($classString, $paramArray);

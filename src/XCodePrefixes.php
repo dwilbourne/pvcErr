@@ -16,7 +16,7 @@ use pvc\err\err\LibraryCodeFileNotReadableException;
 use pvc\err\err\LibraryCodeFileNotParseableJsonException;
 use pvc\err\err\LibraryCodeFileNotWriteableException;
 use pvc\err\err\LibraryCodeValueAlreadyInUseException;
-use pvc\interfaces\err\ExceptionLibraryCodePrefixesInterface;
+use pvc\interfaces\err\XCodePrefixesInterface;
 use Throwable;
 
 /**
@@ -48,7 +48,7 @@ use Throwable;
  *
  * Class LibraryCodes
  */
-class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterface
+class XCodePrefixes implements XCodePrefixesInterface
 {
     /**
      * @var array<string, int> $libraryCodes .  Map of namespaces to exception library codes
@@ -118,7 +118,7 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
         }
 
         if (!is_readable($file)) {
-            throw $this->createLibraryCodesException(LibraryCodeFileNotReadableException::class, [$file]);
+            throw $this->createPrefixingException(LibraryCodeFileNotReadableException::class, [$file]);
         }
 
         /** @var string $fileContents */
@@ -132,20 +132,9 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
         $codes = json_decode($fileContents, $associative);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw $this->createLibraryCodesException(LibraryCodeFileNotParseableJsonException::class, [$file]);
+            throw $this->createPrefixingException(LibraryCodeFileNotParseableJsonException::class, [$file]);
         }
 
-        /**
-         * makes sure each pair is string => integer
-         */
-        foreach ($codes as $namespace => $value) {
-            if ((!is_string($namespace) || (!is_int($value)))) {
-                throw $this->createLibraryCodesException(
-                    LibraryCodeArrayElementIsInvalidException::class,
-                    [$namespace, $value]
-                );
-            }
-        }
         return $codes;
     }
 
@@ -163,7 +152,7 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
          * throw an exception if the value is already in use.
          */
         if ($namespaceAlreadyUsingPrefix = array_search($prefix, $this->libraryCodes)) {
-            throw $this->createLibraryCodesException(LibraryCodeValueAlreadyInUseException::class, [$prefix,
+            throw $this->createPrefixingException(LibraryCodeValueAlreadyInUseException::class, [$prefix,
                 $namespaceAlreadyUsingPrefix]);
         }
         $this->libraryCodes[$namespace] = $prefix;
@@ -192,8 +181,7 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
     }
 
     /**
-     * returns the library code for an exception class string, allocating a new one if necessary.  Class referred to by
-     * class string must be defined and must implement \Throwable.
+     * returns the library code for an exception namespace, allocating a new one if necessary.
      *
      * getLibraryCodePrefix
      * @param string $namespace
@@ -212,9 +200,11 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
         } else {
             $code = $this->getNextLibraryCodePrefix();
             $this->libraryCodes[$namespace] = $code;
-            if (false === file_put_contents($this->libraryCodesFilePath, json_encode($this->getLibraryCodePrefixes())
-                )) {
-                throw $this->createLibraryCodesException(LibraryCodeFileNotWriteableException::class,
+            try {
+                file_put_contents($this->libraryCodesFilePath, json_encode($this->getLibraryCodePrefixes()));
+            }
+            catch (Throwable $e) {
+                throw $this->createPrefixingException(LibraryCodeFileNotWriteableException::class,
                     [$this->libraryCodesFilePath]);
             }
         }
@@ -222,7 +212,13 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
         return $code;
     }
 
-    protected function createLibraryCodesException(string $exceptionClassString, array $params = []) :
+    /**
+     * createPrefixingException
+     * @param string $exceptionClassString
+     * @param array<mixed> $params
+     * @return Throwable
+     */
+    protected function createPrefixingException(string $exceptionClassString, array $params = []) :
     Throwable
     {
         $code = $this->getCode($exceptionClassString);
@@ -252,9 +248,8 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
         $codes =  [
             LibraryCodeFileNotReadableException::class => 10001001,
             LibraryCodeFileNotParseableJsonException::class => 10001002,
-            LibraryCodeArrayElementIsInvalidException::class => 10001003,
-            LibraryCodeValueAlreadyInUseException::class => 10001004,
-            LibraryCodeFileNotWriteableException::class => 10001006,
+            LibraryCodeValueAlreadyInUseException::class => 10001003,
+            LibraryCodeFileNotWriteableException::class => 10001004,
         ];
         return $codes[$classString] ?? 0;
     }
@@ -269,7 +264,6 @@ class ExceptionLibraryCodePrefixes implements ExceptionLibraryCodePrefixesInterf
         $messages = [
             LibraryCodeFileNotReadableException::class => 'Library code file argument %s is not readable or does not exist.',
             LibraryCodeFileNotParseableJsonException::class => 'Library code file argument %s is not a parseable json file',
-            LibraryCodeArrayElementIsInvalidException::class => 'Key value pair [%s, %s] invalid: must be <string, int>.',
             LibraryCodeValueAlreadyInUseException::class => 'Library code %s is already in use by namespace %s.',
             LibraryCodeFileNotWriteableException::class => "Library code file %s is not writeable.",
         ];

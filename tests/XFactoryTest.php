@@ -9,65 +9,92 @@ declare(strict_types=1);
 
 namespace pvcTests\err;
 
-use pvc\err\err\ExceptionFactoryArgumentException;
-use pvc\err\err\ExceptionFactoryMissingLibraryException;
-use pvc\err\ExceptionFactory;
+use PHPUnit\Framework\MockObject\MockObject;
+use pvc\err\err\XFactoryArgumentException;
+use pvc\err\err\XFactoryMissingLibraryException;
+use pvc\err\XFactory;
 use PHPUnit\Framework\TestCase;
-use pvc\err\ExceptionLibraryCodePrefixes;
-use pvc\interfaces\err\ExceptionLibraryDataInterface;
-use pvc\interfaces\err\ExceptionLibraryCodePrefixesInterface;
+use pvc\err\XCodePrefixes;
+use pvc\interfaces\err\XDataInterface;
+use pvc\interfaces\err\XCodePrefixesInterface;
 use pvcTests\err\fixture\SampleException;
 use pvcTests\err\fixture\SampleNonException;
 use pvcTests\err\fixtureWithoutExceptionData\UnfinishedException;
 
-class ExceptionFactoryTest extends TestCase
+class XFactoryTest extends TestCase
 {
-    protected ExceptionFactory $factory;
-    protected ExceptionLibraryCodePrefixesInterface $mockLibraryCodes;
-    protected ExceptionLibraryDataInterface $mockExceptionData;
+    /**
+     * @var XFactory&MockObject
+     */
+    protected XFactory&MockObject $factory;
+
+    /**
+     * @var XCodePrefixesInterface&MockObject
+     */
+    protected XCodePrefixesInterface&MockObject $mockLibraryCodes;
+
+    /**
+     * @var XDataInterface&MockObject
+     */
+    protected XDataInterface&MockObject $mockExceptionData;
+
+    /**
+     * @var string
+     */
     protected string $messageParameter = "foo";
 
     public function setup(): void
     {
-        $this->mockLibraryCodes = $this->createStub(ExceptionLibraryCodePrefixes::class);
-        $this->mockExceptionData = $this->createStub(ExceptionLibraryDataInterface::class);
-        $this->factory = $this->getMockForAbstractClass(ExceptionFactory::class, [$this->mockLibraryCodes]);
+        $this->mockLibraryCodes = $this->createMock(XCodePrefixes::class);
+        $this->mockExceptionData = $this->createMock(XDataInterface::class);
+        $this->factory = $this->getMockForAbstractClass(XFactory::class, [$this->mockLibraryCodes]);
+    }
+
+    /**
+     * testConstruct
+     * @covers \pvc\err\XFactory::__construct
+     */
+    public function testConstruct(): void
+    {
+        $factory = new XFactory($this->mockLibraryCodes);
+        self::assertInstanceOf(XFactory::class, $factory);
     }
 
     /**
      * testCreateExceptionThrowsExceptionIfClassStringIsInvalid
      * @throws \Throwable
-     * @covers \pvc\err\ExceptionFactory::createException
-     * @covers \pvc\err\ExceptionFactory::validateClassString
-     * @covers \pvc\err\ExceptionFactory::createExceptionFactoryException
-     * @covers \pvc\err\ExceptionFactory::getCode
-     * @covers \pvc\err\ExceptionFactory::getMessage
+     * @covers \pvc\err\XFactory::createException
+     * @covers \pvc\err\XFactory::createXFactoryException
+     * @covers \pvc\err\XFactory::getCode
+     * @covers \pvc\err\XFactory::getMessage
      */
     public function testCreateExceptionThrowsExceptionIfClassStringIsNotReflectable() : void
     {
-        $this->expectException(ExceptionFactoryArgumentException::class);
-        $this->factory->createException("foo");
+        /** @var class-string $badClassString */
+        $badClassString = 'foo';
+        $this->expectException(XFactoryArgumentException::class);
+        $this->factory->createException($badClassString);
     }
 
     /**
      * testCreateExceptionThrowsExceptionIfClassStringDoesNotImplementThrowable
      * @throws \Throwable
-     * @covers \pvc\err\ExceptionFactory::createException
-     * @covers \pvc\err\ExceptionFactory::validateClassString
-     * @covers \pvc\err\ExceptionFactory::createExceptionFactoryException
-     * @covers \pvc\err\ExceptionFactory::getCode
-     * @covers \pvc\err\ExceptionFactory::getMessage
+     * @covers \pvc\err\XFactory::createException
+     * @covers \pvc\err\XLibUtils::validateExceptionClassString
+     * @covers \pvc\err\XFactory::createXFactoryException
+     * @covers \pvc\err\XFactory::getCode
+     * @covers \pvc\err\XFactory::getMessage
      */
     public function testCreateExceptionThrowsExceptionIfClassStringDoesNotImplementThrowable() : void
     {
-        $this->expectException(ExceptionFactoryArgumentException::class);
+        $this->expectException(XFactoryArgumentException::class);
         $this->factory->createException(SampleNonException::class);
     }
 
     /**
      * testCreateExceptionRegistersNewLibraryDataObjectOnTheFly
-     * @covers \pvc\err\ExceptionFactory::registerExceptionLibraryData()
-     * @covers \pvc\err\ExceptionFactory::getExceptionLibraryData
+     * @covers \pvc\err\XFactory::registerExceptionLibraryData()
+     * @covers \pvc\err\XFactory::getExceptionLibraryData
      */
     public function testRegisterLibraryDataObject(): void
     {
@@ -86,7 +113,7 @@ class ExceptionFactoryTest extends TestCase
     /**
      * testCreateExceptionDiscoversNewLibraryFromExceptionClassString
      * @throws \Throwable
-     * @covers \pvc\err\ExceptionFactory::discoverLibraryDataFromClassString
+     * @covers \pvc\err\XFactory::discoverLibraryDataFromClassString
      */
     public function testCreateExceptionDiscoversNewLibraryFromExceptionClassString() : void
     {
@@ -103,20 +130,20 @@ class ExceptionFactoryTest extends TestCase
     /**
      * testCreateExceptionThrowsExceptionWhenThereIsNoExceptionLibraryData
      * @throws \Throwable
-     * @covers \pvc\err\ExceptionFactory::getLibraryDataFor
-     * @covers \pvc\err\ExceptionFactory::discoverLibraryDataFromClassString
+     * @covers \pvc\err\XFactory::getLibraryDataFor
+     * @covers \pvc\err\XFactory::discoverLibraryDataFromClassString
      */
     public function testCreateExceptionThrowsExceptionWhenThereIsNoExceptionLibraryData(): void
     {
-        $this->expectException(ExceptionFactoryMissingLibraryException::class);
+        $this->expectException(XFactoryMissingLibraryException::class);
         $this->factory->createException(UnfinishedException::class);
     }
 
     /**
      * testNonScalarParamsConvertedToTypeInMessage
      * @throws \Throwable
-     * @covers \pvc\err\ExceptionFactory::createException
-     * @covers \pvc\err\ExceptionFactory::getLibraryDataFor
+     * @covers \pvc\err\XFactory::createException
+     * @covers \pvc\err\XFactory::getLibraryDataFor
      */
     public function testNonScalarParamsConvertedToTypeInMessage() : void
     {
@@ -142,7 +169,7 @@ class ExceptionFactoryTest extends TestCase
     /**
      * testNonZeroLocalCodeResultsInFullExceptionCodeGeneration
      * @throws \Throwable
-     * @covers \pvc\err\ExceptionFactory::createException
+     * @covers \pvc\err\XFactory::createException
      */
     public function testNonZeroLocalCodeResultsInFullExceptionCodeGeneration() : void
     {
@@ -168,7 +195,7 @@ class ExceptionFactoryTest extends TestCase
     /**
      * testLocalCodeEqualToZeroResultsInExceptionCodeOfZero
      * @throws \Throwable
-     * @covers \pvc\err\ExceptionFactory::createException
+     * @covers \pvc\err\XFactory::createException
      */
     public function testLocalCodeEqualToZeroResultsInExceptionCodeOfZero() : void
     {

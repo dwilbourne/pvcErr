@@ -8,24 +8,28 @@ declare (strict_types=1);
 
 namespace pvcTests\err;
 
-use pvc\err\ExceptionLibraryDataAbstract;
+use PHPUnit\Framework\MockObject\MockObject;
+use pvc\err\XDataAbstract;
 use PHPUnit\Framework\TestCase;
 use pvcTests\err\fixture\SampleDuplicateException;
 use pvcTests\err\fixture\SampleException;
 use pvcTests\err\fixture\SampleNonException;
 
-class ExceptionLibraryDataAbstractTest extends TestCase
+class XDataAbstractTest extends TestCase
 {
-    protected ExceptionLibraryDataAbstract $mock;
+    /**
+     * @var XDataAbstract&MockObject
+     */
+    protected XDataAbstract&MockObject $mock;
 
     public function setUp(): void
     {
-        $this->mock = $this->getMockForAbstractClass(ExceptionLibraryDataAbstract::class);
+        $this->mock = $this->getMockForAbstractClass(XDataAbstract::class);
     }
 
     /**
      * testGetLocalCode
-     * @covers \pvc\err\ExceptionLibraryDataAbstract::getLocalCode
+     * @covers \pvc\err\XDataAbstract::getLocalCode
      */
     public function testGetLocalCode(): void
     {
@@ -37,7 +41,7 @@ class ExceptionLibraryDataAbstractTest extends TestCase
 
     /**
      * testGetLocalMessage
-     * @covers \pvc\err\ExceptionLibraryDataAbstract::getLocalMessage
+     * @covers \pvc\err\XDataAbstract::getLocalMessage
      */
     public function testGetLocalMessage(): void
     {

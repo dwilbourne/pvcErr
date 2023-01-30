@@ -8,12 +8,12 @@ declare (strict_types=1);
 
 namespace pvc\err;
 
-use pvc\interfaces\err\ExceptionLibraryDataInterface;
+use pvc\interfaces\err\XDataInterface;
 
 /**
  * Class ExceptionDataAbstract
  */
-abstract class ExceptionLibraryDataAbstract implements ExceptionLibraryDataInterface
+abstract class XDataAbstract implements XDataInterface
 {
 
     /**

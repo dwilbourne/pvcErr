@@ -10,13 +10,13 @@ declare (strict_types=1);
 namespace pvcTests\err\fixture;
 
 
-use pvc\err\ExceptionLibraryDataAbstract;
-use pvc\interfaces\err\ExceptionLibraryDataInterface;
+use pvc\err\XDataAbstract;
+use pvc\interfaces\err\XDataInterface;
 
 /**
  * Class FixtureExceptionData
  */
-class FixtureExceptionData extends ExceptionLibraryDataAbstract implements ExceptionLibraryDataInterface
+class FixtureExceptionData extends XDataAbstract implements XDataInterface
 {
 
     /**

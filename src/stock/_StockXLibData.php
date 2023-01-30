@@ -10,14 +10,14 @@ declare(strict_types=1);
 
 namespace pvc\err\stock;
 
-use pvc\err\ExceptionLibraryDataAbstract;
-use pvc\interfaces\err\ExceptionLibraryDataInterface;
+use pvc\err\XDataAbstract;
+use pvc\interfaces\err\XDataInterface;
 
 /**
  * Class _Pvc_ExceptionFactory
  * @package pvcErr
  */
-class _StockExceptionLibraryData extends ExceptionLibraryDataAbstract implements ExceptionLibraryDataInterface
+class _StockXLibData extends XDataAbstract implements XDataInterface
 {
 
     /**
@@ -39,7 +39,7 @@ class _StockExceptionLibraryData extends ExceptionLibraryDataAbstract implements
     }
     /**
      * getLocalCodes
-     * @return array
+     * @return array<class-string, int>
      */
     public function getLocalCodes(): array
     {
@@ -74,7 +74,7 @@ class _StockExceptionLibraryData extends ExceptionLibraryDataAbstract implements
 
     /**
      * getLocalMessages
-     * @return array
+     * @return array<class-string, string>
      */
     public function getLocalMessages(): array
     {

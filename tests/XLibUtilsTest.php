@@ -8,42 +8,48 @@ declare (strict_types=1);
 
 namespace pvcTests\err;
 
-use pvc\err\ExceptionLibraryUtils;
+use pvc\err\XLibUtils;
 use PHPUnit\Framework\TestCase;
 use pvcTests\err\fixture\SampleException;
 use pvcTests\err\fixture\SampleNonException;
 
-class ExceptionLibraryUtilsTest extends TestCase
+class XLibUtilsTest extends TestCase
 {
 
     /**
      * testValidateExceptionClassStringReturnsNullIfNotReflectable
-     * @covers \pvc\err\ExceptionLibraryUtils::validateExceptionClassString
+     * @covers \pvc\err\XLibUtils::validateExceptionClassString
      */
     public function testValidateExceptionClassStringReturnsNullIfNotReflectable(): void
     {
-        self::assertNull(ExceptionLibraryUtils::validateExceptionClassString("foo"));
+        /** @var class-string $badClassString */
+        $badClassString = "foo";
+        self::assertNull(XLibUtils::validateExceptionClassString($badClassString));
     }
 
     /**
      * testValidateExceptionClassStringReturnsNullIfNotAnException
-     * @covers \pvc\err\ExceptionLibraryUtils::validateExceptionClassString
+     * @covers \pvc\err\XLibUtils::validateExceptionClassString
      */
     public function testValidateExceptionClassStringReturnsNullIfNotAnException(): void
     {
-        self::assertNull(ExceptionLibraryUtils::validateExceptionClassString(SampleNonException::class));
+        self::assertNull(XLibUtils::validateExceptionClassString(SampleNonException::class));
     }
 
     /**
      * testValidateExceptionClassStringReturnsReflectionIfItIsAnException
-     * @covers \pvc\err\ExceptionLibraryUtils::validateExceptionClassString
+     * @covers \pvc\err\XLibUtils::validateExceptionClassString
      */
     public function testValidateExceptionClassStringReturnsReflectionIfItIsAnException(): void
     {
-        self::assertInstanceOf(\ReflectionClass::class, ExceptionLibraryUtils::validateExceptionClassString
+        self::assertInstanceOf(\ReflectionClass::class, XLibUtils::validateExceptionClassString
         (SampleException::class));
     }
 
+    /**
+     * dataProvider
+     * @return array<int, array<int, bool|string>>
+     */
     protected function dataProvider() : array
     {
         /**
@@ -64,10 +70,10 @@ class ExceptionLibraryUtilsTest extends TestCase
      * @param string $filename
      * @param string|false $expectedResult
      * @dataProvider dataProvider
-     * @covers \pvc\err\ExceptionLibraryUtils::getClassStringFromFile
+     * @covers \pvc\err\XLibUtils::getClassStringFromFile
      */
     public function testGetClassStringFromFileReturnsFalseIfNotAnObject(string $filename, $expectedResult): void
     {
-        self::assertEquals($expectedResult, ExceptionLibraryUtils::getClassStringFromFile($filename));
+        self::assertEquals($expectedResult, XLibUtils::getClassStringFromFile($filename));
     }
 }

@@ -15,7 +15,7 @@ use pvc\err\stock\LogicException;
 /**
  * Class ExceptionFactoryLocalMessagesException
  */
-class ExceptionFactoryMissingLibraryException extends LogicException
+class XFactoryMissingLibraryException extends LogicException
 {
 
 }

@@ -9,11 +9,11 @@ declare(strict_types=1);
 
 namespace pvc\err;
 
-use pvc\err\err\ExceptionFactoryArgumentException;
-use pvc\err\err\ExceptionFactoryMissingLibraryException;
-use pvc\interfaces\err\ExceptionFactoryInterface;
-use pvc\interfaces\err\ExceptionLibraryCodePrefixesInterface;
-use pvc\interfaces\err\ExceptionLibraryDataInterface;
+use pvc\err\err\XFactoryArgumentException;
+use pvc\err\err\XFactoryMissingLibraryException;
+use pvc\interfaces\err\XFactoryInterface;
+use pvc\interfaces\err\XCodePrefixesInterface;
+use pvc\interfaces\err\XDataInterface;
 use ReflectionClass;
 use Throwable;
 
@@ -23,39 +23,39 @@ use Throwable;
  *
  * Class ExceptionFactory
  */
-class ExceptionFactory implements ExceptionFactoryInterface
+class XFactory implements XFactoryInterface
 {
     /**
-     * @var ExceptionLibraryCodePrefixesInterface.  Object which manages library codes and can return one for a given
+     * @var XCodePrefixesInterface.  Object which manages library codes and can return one for a given
      * namespace.
      */
-    protected ExceptionLibraryCodePrefixesInterface $libraryCodePrefixes;
+    protected XCodePrefixesInterface $libraryCodePrefixes;
 
     /**
-     * @var array<ExceptionLibraryDataInterface>
+     * @var array<XDataInterface>
      */
     protected array $exceptionLibraries = [];
 
     /**
-     * @param ExceptionLibraryCodePrefixesInterface $libraryCodePrefixes
+     * @param XCodePrefixesInterface $libraryCodePrefixes
      */
-    public function __construct(ExceptionLibraryCodePrefixesInterface $libraryCodePrefixes)
+    public function __construct(XCodePrefixesInterface $libraryCodePrefixes)
     {
         $this->libraryCodePrefixes = $libraryCodePrefixes;
     }
 
     /**
      * registerExceptionLibraryData
-     * @param ExceptionLibraryDataInterface $libraryData
+     * @param XDataInterface $libraryData
      */
-    public function registerExceptionLibraryData(ExceptionLibraryDataInterface $libraryData): void
+    public function registerExceptionLibraryData(XDataInterface $libraryData): void
     {
         $this->exceptionLibraries[$libraryData->getNamespace()] = $libraryData;
     }
 
     /**
      * getExceptionLibraryData
-     * @return ExceptionLibraryDataInterface[]
+     * @return XDataInterface[]
      */
     public function getExceptionLibraryData() : array
     {
@@ -65,11 +65,11 @@ class ExceptionFactory implements ExceptionFactoryInterface
     /**
      * getLibraryDataFor
      * @param class-string $classString
-     * @return ExceptionLibraryDataInterface
+     * @return XDataInterface
      * @throws Throwable
      * @throws \ReflectionException
      */
-    protected function getLibraryDataFor(string $classString): ExceptionLibraryDataInterface
+    protected function getLibraryDataFor(string $classString): XDataInterface
     {
         /**
          * reflect the class string and get the namespace, which is / will be the key in the array which holds the
@@ -88,7 +88,7 @@ class ExceptionFactory implements ExceptionFactoryInterface
          * if the library is still not found, throw an exception
          */
         if (is_null($library)) {
-            throw $this->createExceptionFactoryException(ExceptionFactoryMissingLibraryException::class, [$namespace]);
+            throw $this->createXFactoryException(XFactoryMissingLibraryException::class, [$namespace]);
         }
         return $library;
     }
@@ -97,15 +97,15 @@ class ExceptionFactory implements ExceptionFactoryInterface
      * discoverLibraryDataFromClassString is a clumsy but effective method that tries to find the
      * ExceptionLibraryData object for a given class string (meaning that the library data for the class string has
      * not yet been loaded).  It does this by searching for a php file that, when reflected, implements
-     * ExceptionLibraryDataInterface.  When it finds it, the class is instantiated and returned.  Returns null if it
+     * XDataInterface.  When it finds it, the class is instantiated and returned.  Returns null if it
      * does not find it, meaning that there is no ExceptionLibraryData object in the library directory that contains
      * the object referred to by the classString argument.
      *
-     * @param string $classString
-     * @return ExceptionLibraryDataInterface|null
+     * @param class-string $classString
+     * @return XDataInterface|null
      * @throws \ReflectionException
      */
-    protected function discoverLibraryDataFromClassString(string $classString): ?ExceptionLibraryDataInterface
+    protected function discoverLibraryDataFromClassString(string $classString): ?XDataInterface
     {
         /**
          * reflect the classString
@@ -113,36 +113,46 @@ class ExceptionFactory implements ExceptionFactoryInterface
         $reflected = new ReflectionClass($classString);
 
         /**
-         * get the filename (including path) from the reflection
+         * get the filename (including path) from the reflection.  false is only returned from getFileName if the
+         * class is part of php core or defined in an extension, so it should be ok to typehint $fileName.
+         * @var string $fileName
          */
         $fileName = $reflected->getFileName();
 
         /**
          * get the directory portion of the filename and scan it for files.
+         * @var string $dir
          */
         $dir = pathinfo($fileName, PATHINFO_DIRNAME);
-        $files = array_diff(scandir($dir), array('.', '..'));
+
+        /**
+         * phpstan does know that scandir cannot return false in this case, so typehint the $files variable
+         * @var array<string> $files
+         */
+        $files = scandir($dir);
+        $files = array_diff($files, array('.', '..'));
 
         /**
          * iterate through the list of files, trying to reflect each one.
          */
         foreach ($files as $file) {
-            /**
-             * if classname is false then it cannot be reflected.  Conversely, if classname is not false, then it is
-             * definitely reflectable, so we don't need to test for reflection failing.
-             */
-            $className = ExceptionLibraryUtils::getClassStringFromFile($dir . DIRECTORY_SEPARATOR .
-                $file);
-            if ($file !== false) {
+            /** @var class-string $className */
+            $className = XLibUtils::getClassStringFromFile($dir . DIRECTORY_SEPARATOR . $file);
+            if ($className !== false) {
                 $reflected = new ReflectionClass($className);
                 /**
                  * if it implements the right interface, return a new instance.
                  */
-                if ($reflected->implementsInterface(ExceptionLibraryDataInterface::class)) {
-                    return new $className();
+                if ($reflected->implementsInterface(XDataInterface::class)) {
+                    /** @var XDataInterface $exceptionLibraryData */
+                    $exceptionLibraryData = new $className();
+                    return $exceptionLibraryData;
                 }
             }
         }
+        /**
+         * if we got to here, we've iterated through the directory without finding a file that has the right interface.
+         */
         return null;
     }
 
@@ -159,8 +169,8 @@ class ExceptionFactory implements ExceptionFactoryInterface
          * validate the class string, throw our own exception if the class string is not reflectable or does not
          * implement \Throwable.
          */
-        if (is_null($reflection = ExceptionLibraryUtils::validateExceptionClassString($classString))) {
-            throw $this->createExceptionFactoryException(ExceptionFactoryArgumentException::class, [$classString]);
+        if (is_null($reflection = XLibUtils::validateExceptionClassString($classString))) {
+            throw $this->createXFactoryException(XFactoryArgumentException::class, [$classString]);
         }
 
         /**
@@ -201,7 +211,13 @@ class ExceptionFactory implements ExceptionFactoryInterface
         return $exception;
     }
 
-    protected function createExceptionFactoryException(string $exceptionClassString, array $params = []):
+    /**
+     * createXFactoryException
+     * @param string $exceptionClassString
+     * @param array<mixed> $params
+     * @return Throwable
+     */
+    protected function createXFactoryException(string $exceptionClassString, array $params = []):
     Throwable
     {
         $code = $this->getCode($exceptionClassString);
@@ -220,8 +236,8 @@ class ExceptionFactory implements ExceptionFactoryInterface
     protected function getCode(string $classString): int
     {
         $codes = [
-            ExceptionFactoryArgumentException::class => 1000,
-            ExceptionFactoryMissingLibraryException::class => 1001,
+            XFactoryArgumentException::class => 1000,
+            XFactoryMissingLibraryException::class => 1001,
         ];
         return $codes[$classString];
     }
@@ -229,8 +245,8 @@ class ExceptionFactory implements ExceptionFactoryInterface
     protected function getMessage(string $classString): string
     {
         $messages = [
-            ExceptionFactoryArgumentException::class => "Reflection of exception class string (%s) failed.  Either the class is not defined or the class does not implement \Throwable.",
-            ExceptionFactoryMissingLibraryException::class => "No exception library found in namespace %s.",
+            XFactoryArgumentException::class => "Reflection of exception class string (%s) failed.  Either the class is not defined or the class does not implement \Throwable.",
+            XFactoryMissingLibraryException::class => "No exception library found in namespace %s.",
         ];
         return $messages[$classString];
     }

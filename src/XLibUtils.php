@@ -18,39 +18,31 @@ use Throwable;
 /**
  * Class ExceptionLibraryDataLocator
  */
-class ExceptionLibraryUtils
+class XLibUtils
 {
 
     /**
      * validateExceptionClassString
-     * @param mixed $classString
-     * @return ?ReflectionClass
+     * @param class-string $classString
+     * @return ?ReflectionClass<Throwable>
      */
-    public static function validateExceptionClassString(mixed $classString): ?ReflectionClass
+    public static function validateExceptionClassString(string $classString): ?ReflectionClass
     {
         try {
             /**
              * this will throw an exception if the string is not reflectable.
+             * @var ReflectionClass<Throwable>
              */
             $reflection = new ReflectionClass($classString);
             /**
-             * phpstan get a little confused here.  It wants you to properly typehint $classString as a class-string
-             * and then when you do that, complains that the catch clause is dead because a class string can always
-             * be reflected......
-             *
-             * @phpstan-ignore-next-line
+             * return null if the class is not throwable
              */
+            return $reflection->implementsInterface(Throwable::class) ? $reflection : null;
+
         } catch (\ReflectionException $e) {
             return null;
         }
 
-        /**
-         * return false if the class is not throwable
-         */
-        if (!$reflection->implementsInterface(Throwable::class)) {
-            return null;
-        }
-        return $reflection;
     }
 
     /**

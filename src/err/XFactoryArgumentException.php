@@ -13,9 +13,9 @@ namespace pvc\err\err;
 use pvc\err\stock\LogicException;
 
 /**
- * Class ExceptionFactoryArgumentException
+ * Class XFactoryArgumentException
  */
-class ExceptionFactoryArgumentException extends LogicException
+class XFactoryArgumentException extends LogicException
 {
 
 }
