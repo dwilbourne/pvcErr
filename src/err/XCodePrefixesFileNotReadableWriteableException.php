@@ -12,9 +12,9 @@ namespace pvc\err\err;
 use pvc\err\stock\LogicException;
 
 /**
- * Class LibraryCodeArrayElementIsInvalidException
+ * Class XCodePrefixesFileNotReadableWriteableException
  */
-class LibraryCodeArrayElementIsInvalidException extends LogicException
+class XCodePrefixesFileNotReadableWriteableException extends LogicException
 {
 
 }

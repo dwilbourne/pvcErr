@@ -4,42 +4,37 @@
  * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
-declare (strict_types=1);
 
+declare(strict_types=1);
 
-namespace pvcTests\err\fixture;
-
+namespace pvcExamples\err\src\client\err;
 
 use pvc\err\XDataAbstract;
-use pvc\interfaces\err\XDataInterface;
 
 /**
- * Class FixtureExceptionData
+ * Class _XData
  */
-class FixtureExceptionData extends XDataAbstract implements XDataInterface
+class _XData extends XDataAbstract
 {
-
     /**
      * getLocalXCodes
-     * @return array<class-string, int>
+     * @return int[]
      */
     public function getLocalXCodes(): array
     {
         return [
-          SampleDuplicateException::class => 1001,
-          SampleException::class => 1002,
+          MyException::class => 1001
         ];
     }
 
     /**
      * getLocalXMessages
-     * @return array<class-string, string>
+     * @return string[]
      */
     public function getLocalXMessages(): array
     {
         return [
-            SampleDuplicateException::class => 'some error message',
-            SampleException::class => 'some error message with parameter %s',
+          MyException::class => 'some exception message with data = %s'
         ];
     }
 

@@ -15,13 +15,14 @@
 	"autoload": {
 		"psr-4": {
 			"pvc\\err\\": "src/",
-			"pvcTests\\err\\": "tests/"
+			"pvcTests\\err\\": "tests/",
+			"pvcExamples\\err\\": "example/"
 		}
 	},
 	"minimum-stability": "dev",
 	"require": {
 		"pvc/interfaces": "*",
-		"php-di/php-di": "*"
+		"nikic/php-parser": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9",
@@ -29,7 +30,7 @@
 		"phpstan/extension-installer": "*",
 		"phpstan/phpstan-phpunit": "*",
 		"mikey179/vfsstream": "*",
-		"nikic/php-parser": "*",
+		"php-di/php-di": "*",
 		"squizlabs/php_codesniffer": "*"
 	}
 }

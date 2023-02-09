@@ -1,10 +1,11 @@
 <?php
 
-declare (strict_types=1);
 /**
  * @package {PROJECT_NAME}
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
+
+declare (strict_types=1);
 
 namespace pvcTests\err;
 
@@ -29,28 +30,28 @@ class XDataAbstractTest extends TestCase
 
     /**
      * testGetLocalCode
-     * @covers \pvc\err\XDataAbstract::getLocalCode
+     * @covers \pvc\err\XDataAbstract::getLocalXCode
      */
     public function testGetLocalCode(): void
     {
         $array = [SampleException::class => 1000, SampleDuplicateException::class => 1001];
-        $this->mock->method('getLocalCodes')->willReturn($array);
-        self::assertEquals(1000, $this->mock->getLocalCode(SampleException::class));
-        self::assertEquals(0, $this->mock->getLocalCode(SampleNonException::class));
+        $this->mock->method('getLocalXCodes')->willReturn($array);
+        self::assertEquals(1000, $this->mock->getLocalXCode(SampleException::class));
+        self::assertEquals(0, $this->mock->getLocalXCode(SampleNonException::class));
     }
 
     /**
      * testGetLocalMessage
-     * @covers \pvc\err\XDataAbstract::getLocalMessage
+     * @covers \pvc\err\XDataAbstract::getLocalXMessage
      */
     public function testGetLocalMessage(): void
     {
         $string_1 = "this is a great string";
         $string_2 = "another hugely popular string";
         $array = [SampleException::class => $string_1, SampleDuplicateException::class => $string_2];
-        $this->mock->method('getLocalMessages')->willReturn($array);
-        self::assertEquals($string_1, $this->mock->getLocalMessage(SampleException::class));
-        self::assertEquals("", $this->mock->getLocalMessage(SampleNonException::class));
+        $this->mock->method('getLocalXMessages')->willReturn($array);
+        self::assertEquals($string_1, $this->mock->getLocalXMessage(SampleException::class));
+        self::assertEquals("", $this->mock->getLocalXMessage(SampleNonException::class));
     }
 
 }

@@ -37,8 +37,8 @@ class PvcXLibIntegrationTest extends TestCase
 
     /**
      * testExceptions
-     * @covers \pvc\err\pvc\_PvcXLibData::getLocalMessages
-     * @covers \pvc\err\pvc\_PvcXLibData::getLocalCodes
+     * @covers \pvc\err\pvc\_PvcXLibData::getLocalXMessages
+     * @covers \pvc\err\pvc\_PvcXLibData::getLocalXCodes
      */
     public function testExceptions(): void
     {

@@ -28,12 +28,12 @@ class XDataTestMaster extends TestCase
 
     /**
      * verifylibrary
-     * @param class-string $libraryDataClassString
+     * @param class-string $xDataClassString
      */
-    public function verifylibrary(string $libraryDataClassString): void
+    public function verifylibrary(string $xDataClassString): void
     {
         /** @var XDataInterface $object */
-        $object = new $libraryDataClassString();;
+        $object = new $xDataClassString();;
         $this->libraryData = $object;
         $this->exceptionClassStrings = $this->getExceptionClassStringsFromDir();
         $this->verifyGetLocalCodesKeysMatchClassStringsFromDir();
@@ -85,19 +85,19 @@ class XDataTestMaster extends TestCase
 
     public function verifyGetLocalCodesKeysMatchClassStringsFromDir(): void
     {
-        $keys = array_keys($this->libraryData->getLocalCodes());
+        $keys = array_keys($this->libraryData->getLocalXCodes());
         self::assertEqualsCanonicalizing($keys, $this->exceptionClassStrings);
     }
 
     public function verifyGetLocalMessagesKeysMatchClassStringsFromDir(): void
     {
-        $keys = array_keys($this->libraryData->getLocalMessages());
+        $keys = array_keys($this->libraryData->getLocalXMessages());
         self::assertEqualsCanonicalizing($keys, $this->exceptionClassStrings);
     }
 
     public function verifyGetLocalCodesArrayHasUniqueIntegerValues(): void
     {
-        $codes = $this->libraryData->getLocalCodes();
+        $codes = $this->libraryData->getLocalXCodes();
 
         /**
          * verify that the count of unique codes equals the total count of codes
@@ -119,7 +119,7 @@ class XDataTestMaster extends TestCase
          * verify $messages is all strings
          * if $codes is empty, $initialValue will be false and then array_reduce returns false.
          */
-        $messages = $this->libraryData->getLocalMessages();
+        $messages = $this->libraryData->getLocalXMessages();
         $initialValue = !empty($messages);
         $callback = function($carry, $x) { return ($carry && is_string($x)); };
         self::assertTrue(array_reduce($messages, $callback, $initialValue));

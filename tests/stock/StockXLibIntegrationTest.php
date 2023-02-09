@@ -77,8 +77,8 @@ class StockXLibIntegrationTest extends TestCase
 
     /**
      * testExceptions
-     * @covers \pvc\err\stock\_StockXLibData::getLocalMessages
-     * @covers \pvc\err\stock\_StockXLibData::getLocalCodes
+     * @covers \pvc\err\stock\_StockXLibData::getLocalXMessages
+     * @covers \pvc\err\stock\_StockXLibData::getLocalXCodes
      */
     public function testExceptions(): void
     {

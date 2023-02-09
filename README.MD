@@ -1,5 +1,7 @@
-The pvcErr package provides an organized approach to constructing and creating exceptions in php.  The pvc libraries 
-use this approach throughout.  In particular, it provides a comprehensive way of dealing with exception codes that 
+The pvcErr package provides an organized (though admittedly unorthodox) approach to constructing and throwing 
+exceptions in php.  The pvc libraries use this approach throughout.  It is based on the factory design pattern.
+
+In particular, it provides a comprehensive way of dealing with exception codes that 
 guarantees uniqueness of codes between packages.  Part of value here is that it is easier (less typing) to search 
 logfiles for codes than it is messages.
 
@@ -31,11 +33,11 @@ packages that need to use a common error code numbering system, you need a mecha
 between the packages.  
 
 pvcErr supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception 
-data class that is used to construct the exceptions in that library.  The exception data class extends 
+data class that is used to construct the exceptions in that library.  The exception data class *must extend* 
 pvc\err\XDataAbstract and must implement the following methods:
 
-	abstract protected function getCodes() : array;
-	abstract protected function getMessages(): array;
+	abstract protected function getLocalXCodes() : array;
+	abstract protected function getLocalXMessages(): array;
     abstract protected function getNamespace(): string;
     abstract protected function getDirectory(): string;
 
@@ -49,7 +51,7 @@ Here is an example of a small exception data class:
 
 class _ExceptionData extends XDataAbstract
 {
-    public function getCodes() : array
+    public function getLocalXCodes() : array
     {
         return [
             InvalidArrayIndexException::class => 1001,
@@ -62,7 +64,7 @@ class _ExceptionData extends XDataAbstract
         ];
     }
 
-    public function getMessages() : array
+    public function getLocalXMessages() : array
     {
         return [
     		InvalidArrayIndexException::class => 'Invalid array index %s.',
@@ -103,20 +105,20 @@ class InvalidArrayIndexException extends LogicException {}
 The final task we need to address is how to insure uniqueness of codes between libraries.  This is accomplished 
 through a single configuration file that handles persistence between requests.  This file can can reside wherever 
 you would like as long as it is readable and *writeable*.  The file is formatted in json and is a simple array that 
-maps namespaces to "library codes".  As you might guess, the namespaces correspond to the namespaces of your 
-exception libraries.  The codes in the array are unique integers.  These integers are "prefixes" which will be 
+maps namespaces to "prefixes".  As you might guess, the namespaces correspond to the namespaces of your 
+exception libraries.  The prefixes in the array are unique integers.  These prefixes will be 
 prepended to the local exception codes defined in your exception library data classes.  This is the mechanism that 
 guarantees uniqueness among exception codes.
 
 It is *not necessary* for you to manually maintain this file.  In fact, you don't need to create it either.  You 
-simply need to provide the filename and path to the constructor argument of the class ExceptionLibraryPrefixes.  
+simply need to provide the filename and path to the constructor argument of the class XCodePrefixes.  
 When you go to throw an exception, the exception factory uses this class to look up the library code for the 
 namespace of the exception being thrown.  It parses the file to see if the exception namespace has already been 
 registered.  If it has, it returns the library code.  If it has not, it registers the new namespace and allocates 
 the namespace a new code and then returns that.  
 
-The default "starting library code" is 1000 and increments the codes by 1 each time a new namespace is registered.  
-If you prefer a different scheme for your codes, see the documentation for the XCodePrefixes class 
+The default "starting prefix" is 1001 and increments the codes by 1 each time a new namespace is registered.  
+If you prefer a different scheme for your prefixes, see the documentation for the XCodePrefixes class 
 for the proper way to implement that.
 
 So in case you are interested, here is an example of what the json configuration file might look like:
@@ -131,36 +133,52 @@ So in case you are interested, here is an example of what the json configuration
     "pvc\\storage\\file" : 1007
 }
 
-The ExceptionLibraryPrefixes class maintains this file on its own: it will create the file, add codes to it as 
+The XCodePrefixes class maintains this file on its own: it will create the file, add codes to it as 
 necessary and write those codes back to disk.
 
-The last class to know about is the ExceptionFactory class.  This is the class you use to actually throw exceptions. 
-It needs to be instantiated in your client class.  The cleanest way to get this class into your client class is via 
-dependency injection.
+The last class to know about is the XFactory class.  This is the class you use to actually throw exceptions. 
+See the Installation Setup and Usage sections below. 
 
-Installation, Setup & Usage
+
+Installation and Dependencies
 
 You can install the pvcErr package through composer.
 
     require "pvc/err"
 
+Note that the pvcErr package requires pvcInterfaces, so you will see that show up in your vendor/pvc directory. It 
+also requires Nikita Popov's PHP Parser because there's a spot in the code where is necessary to parse php files in 
+order to extract the class string from a file.
+
+Setup
+
+1) Decide where you want to keep the exception code prefixes file.  If you are using a framework that has a config 
+directory, that would be a sensible choice, or simply perhaps in the root of your src directory.  
+
+2) This factory-based approach really necessitates using a dependency injection container to handle the creation of 
+   the factory and its injection into your client classes.  In general terms, you set a variable in your di 
+   container to the filepath for your exception code prefixes file (you decided what that was in the previous step). 
+   Then define the creation of the XCodePrefixes class using that variable as an argument. For example, using a 
+   definitions file format for the container:
+
+        'prefixesFilePath' => '/path/to/my/prefixes/json/file',
+        XCodePrefixesInterface::class => get(XCodePrefixes::class),
+        XCodePrefixes::class => create()->constructor(get('prefixesFilePath'),
+        XFactoryInterface::class => get(XFactory::class)
+
+3) If your container supports autowiring, then you don't need to define the creation of the factory since the 
+   constructor.
+ 
+4) The use property injection (or setter injection if you prefer) to put the factory into your client class.
+ 
+        MyClientClass::class => create()->property('xfactory', get(XFactoryInterface::class))
 
 
+Usage
 
-The cleanest way to use the exception factories is to create them in a dependency injection container and then 
-inject them into the classes that need to throw exceptions.  In other words, in each class that throws an exception, 
-create a protected attribute called $exceptionFactory.  That factory should be created in your DI 
-container with a string of the correct namespace and the filepath of your library codes json file as the parameters to 
-the constructor. As part of the DI creating your class, inject the factory.
-
-You use the factory to create an exception using a method call: createPrefixingException(string $classString, array 
+You use the factory to create an exception using a method call: createException(string $classString, array 
 $messageParams = [], Throwable $previous = null).  Because of the setup done through the DI container, your code for 
 throwing an exception looks like:
 
-    throw $this->exceptionFactory->createPrefixingException($classString, $params, $previous).
-
-
-
-
-
-
+    $params = [$value1, $value2, etc);
+    throw $this->exceptionFactory->createException($classString, $params, $previous);

@@ -17,36 +17,36 @@ abstract class XDataAbstract implements XDataInterface
 {
 
     /**
-     * getLocalCodes
+     * @function getLocalXCodes
      * @return array<class-string, int>
      */
-    abstract public function getLocalCodes(): array;
+    abstract public function getLocalXCodes(): array;
 
     /**
-     * getLocalCode
+     * @function getLocalXCode
      * @param class-string $classString
      * @return int
      */
-    public function getLocalCode(string $classString): int
+    public function getLocalXCode(string $classString): int
     {
-        $codes = $this->getLocalCodes();
+        $codes = $this->getLocalXCodes();
         return $codes[$classString] ?? 0;
     }
 
     /**
-     * getLocalMessages
+     * @function getLocalXMessages
      * @return array<class-string, string>
      */
-    abstract public function getLocalMessages(): array;
+    abstract public function getLocalXMessages(): array;
 
     /**
-     * getLocalMessage
+     * @function getLocalXMessage
      * @param class-string $classString
      * @return string
      */
-    public function getLocalMessage(string $classString): string
+    public function getLocalXMessage(string $classString): string
     {
-        $messages = $this->getLocalMessages();
+        $messages = $this->getLocalXMessages();
         return $messages[$classString] ?? '';
     }
 }

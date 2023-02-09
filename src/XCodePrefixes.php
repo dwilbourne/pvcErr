@@ -10,25 +10,22 @@ declare(strict_types=1);
 
 namespace pvc\err;
 
-use PHPStan\Type\IterableType;
-use pvc\err\err\LibraryCodeArrayElementIsInvalidException;
-use pvc\err\err\LibraryCodeFileNotReadableException;
-use pvc\err\err\LibraryCodeFileNotParseableJsonException;
-use pvc\err\err\LibraryCodeFileNotWriteableException;
-use pvc\err\err\LibraryCodeValueAlreadyInUseException;
+use pvc\err\err\XCodePrefixesFileNotReadableWriteableException;
+use pvc\err\err\XCodePrefixesFileNotParseableJsonException;
+use pvc\err\err\XCodePrefixAlreadyInUseException;
 use pvc\interfaces\err\XCodePrefixesInterface;
 use Throwable;
 
 /**
- * Class responsible for library codes
+ * Class responsible for exception code prefixes
  *
  * This object helps ExceptionFactory create globally unique error codes for your
  * exceptions.  See the README.md file for the guide on how to use this class in conjunction with
  * ExceptionFactory.
  *
- * This class keeps an array of exceptionNamespace => libraryCode pairs.  An exceptionNamespace is the namespace of
- * an exception library, which is a directory containing exceptions plus an exception factory which is used to create
- * the exceptions in that library.  The libraryCode is a unique integer value which is used as a prefix to local
+ * This class keeps an array of exceptionNamespace => exceptionPrefix pairs.  An exceptionNamespace is the namespace of
+ * an exception library, which is a directory containing exceptions plus an exception data file which is used to create
+ * the exceptions in that library.  The exceptionPrefix is a unique integer value which is used as a prefix to local
  * exception codes from a particular exception library.  As long as local exception codes are unique within a
  * library, this prefixing mechanism will ensure that full exception codes are globally unique.
  *
@@ -38,76 +35,83 @@ use Throwable;
  * will be created in the same directory in which this class resides with a default filename.  For your application,
  * a config directory or perhaps in the src directory itself would be natural places to keep this file.
  *
- * This class is hardcoded to allocate namespace library codes starting at 1000 in increments of 1.
+ * This class is hardcoded to allocate namespace library codes starting at 1000 in increments of 1.  Modify the class
+ * to suit your needs as you see fit.
  *
- * The getLibraryCodePrefix method takes a class string as an argument.  It will reflect the class string and get the
- * namespace of the class. If there is a key in the library codes array corresponding to the namespace, getlibraryCode
- * just returns the already allocated code.  If getLibraryCodePrefix is called with a class string which resides in a
- * namespace which has not yet been assigned a library code, it assigns the next code, writes the array back to the
- * json file and returns the new code.
+ * The getXCodePrefix method takes a class string as an argument.  It will reflect the class string and get the
+ * namespace of the class. If there is a key in the library codes array corresponding to the namespace, getexceptionPrefix
+ * just returns the already allocated code.  If getXCodePrefix is called with a class string which resides in a
+ * namespace which has not yet been assigned an exception prefix, it assigns the next prefix, writes the array back to
+ * the json file and returns the new prefix.
  *
- * Class LibraryCodes
+ * Class XCodePrefixes
  */
 class XCodePrefixes implements XCodePrefixesInterface
 {
     /**
-     * @var array<string, int> $libraryCodes .  Map of namespaces to exception library codes
+     * @var array<string, int> $xPrefixes .  Map of namespaces to exception library codes
      */
-    protected array $libraryCodes = [];
+    protected array $xPrefixes = [];
 
     /**
-     * @var string $libraryCodesFilePath . Location where you keep your library codes json file.
+     * @var string $xPrefixesFilePath . Location where you keep your prefixes json file.
      */
-    protected string $libraryCodesFilePath;
+    protected string $xPrefixesFilePath;
 
     /**
-     * @var string.  Default library codes file if none is supplied to the class constructor.
+     * @var string.  Default prefixes file if none is supplied to the class constructor.
      */
-    protected string $defaultLibraryCodesFilePath = __DIR__ . "/librarycodes.json";
+    protected string $defaultXPrefixesFilePath = __DIR__ . "/XCodePrefixes.json";
 
     /**
      * @var int
      */
-    protected int $initialLibraryCodeValue = 1001;
+    protected int $initialPrefix = 1001;
 
     /**
-     * @param string|null $libraryCodesFilePath .
+     * @var int
+     */
+    protected int $prefixIncrement = 1;
+
+    /**
+     * @function __construct
+     * @param string|null $prefixesFilePath .
      * @throws Throwable
      */
-    public function __construct(string $libraryCodesFilePath = null)
+    public function __construct(string $prefixesFilePath = null)
     {
         /**
          * use the default filepath if not supplied in the constructor argument
          */
-        $libraryCodesFilePath = $libraryCodesFilePath ?? $this->defaultLibraryCodesFilePath;
+        $prefixesFilePath = $prefixesFilePath ?? $this->defaultXPrefixesFilePath;
 
         /**
-         * parse the namespace / code pairs into a local variable
+         * parse the namespace / prefix pairs into a local variable
          */
-        $codes = $this->parseLibraryCodePrefixesFile($libraryCodesFilePath);
+        $codes = $this->parsePrefixesFile($prefixesFilePath);
 
         /**
-         * add each namespace => library code pair to the array
+         * add each namespace => prefix pair to the array
          */
         foreach ($codes as $namespace => $value) {
-            $this->addLibraryCodePrefix($namespace, $value);
+            $this->addPrefix($namespace, $value);
         }
 
         /**
          * don't set this attribute until the file has been parsed and the types have been verified
          */
-        $this->libraryCodesFilePath = $libraryCodesFilePath;
+        $this->xPrefixesFilePath = $prefixesFilePath;
     }
 
     /**
-     * parse the library codes file into an array which is properly structured and typed.
+     * parse the prefixes file into an array which is properly structured and typed.
      *
-     * @function parseLibraryCodePrefixesFile
+     * @function parsePrefixesFile
      * @param string $file
      * @return array<string, int>
      * @throws \Throwable
      */
-    protected function parseLibraryCodePrefixesFile(string $file): array
+    protected function parsePrefixesFile(string $file): array
     {
         $codes = [];
         /**
@@ -118,7 +122,7 @@ class XCodePrefixes implements XCodePrefixesInterface
         }
 
         if (!is_readable($file)) {
-            throw $this->createPrefixingException(LibraryCodeFileNotReadableException::class, [$file]);
+            throw $this->createPrefixingException(XCodePrefixesFileNotReadableWriteableException::class, [$file]);
         }
 
         /** @var string $fileContents */
@@ -132,7 +136,7 @@ class XCodePrefixes implements XCodePrefixesInterface
         $codes = json_decode($fileContents, $associative);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw $this->createPrefixingException(LibraryCodeFileNotParseableJsonException::class, [$file]);
+            throw $this->createPrefixingException(XCodePrefixesFileNotParseableJsonException::class, [$file]);
         }
 
         return $codes;
@@ -141,71 +145,75 @@ class XCodePrefixes implements XCodePrefixesInterface
     /**
      * adds a namespace => code pair to the library codes repository as long as neither the value is not already in use
      *
-     * @function addLibraryCodePrefix
+     * @function addPrefix
      * @param string $namespace
      * @param int $prefix
      * @throws \Throwable
      */
-    protected function addLibraryCodePrefix(string $namespace, int $prefix): void
+    protected function addPrefix(string $namespace, int $prefix): void
     {
         /**
          * throw an exception if the value is already in use.
          */
-        if ($namespaceAlreadyUsingPrefix = array_search($prefix, $this->libraryCodes)) {
-            throw $this->createPrefixingException(LibraryCodeValueAlreadyInUseException::class, [$prefix,
+        if ($namespaceAlreadyUsingPrefix = array_search($prefix, $this->xPrefixes)) {
+            throw $this->createPrefixingException(XCodePrefixAlreadyInUseException::class, [$prefix,
                 $namespaceAlreadyUsingPrefix]);
         }
-        $this->libraryCodes[$namespace] = $prefix;
+        $this->xPrefixes[$namespace] = $prefix;
     }
 
     /**
-     * @function getLibraryCodePrefixes
+     * gets all the exception code prefixes that have been registered
+     *
+     * @function getXCodePrefixes
      * @return array<string, int>
      */
-    public function getLibraryCodePrefixes(): array
+    public function getXCodePrefixes(): array
     {
-        return $this->libraryCodes;
+        return $this->xPrefixes;
     }
 
     /**
-     * getNextLibraryCodePrefix.  Finds the largest library code in the array and returns one more than that.
+     * Finds the largest prefix in the array and returns one more than that.
+     *
+     * @function getNextXCodePrefix.
      * @return int
      */
-    protected function getNextLibraryCodePrefix(): int
+    protected function getNextXCodePrefix(): int
     {
-        if (empty($this->getLibraryCodePrefixes())) {
-            return $this->initialLibraryCodeValue;
+        if (empty($this->getXCodePrefixes())) {
+            return $this->initialPrefix;
         } else {
-            return (1 + max($this->getLibraryCodePrefixes()));
+            return (max($this->getXCodePrefixes()) + $this->prefixIncrement);
         }
     }
 
     /**
-     * returns the library code for an exception namespace, allocating a new one if necessary.
+     * returns the prefix for an exception namespace, allocating a new one if necessary.
      *
-     * getLibraryCodePrefix
+     * @function getXCodePrefix
      * @param string $namespace
      * @return int
      */
-    public function getLibraryCodePrefix(string $namespace): int
+    public function getXCodePrefix(string $namespace): int
     {
         /**
          * if namespace already has a code then assign that value to $code
          */
-        if (isset($this->libraryCodes[$namespace])) {
-            $code = $this->libraryCodes[$namespace];
+        if (isset($this->xPrefixes[$namespace])) {
+            $code = $this->xPrefixes[$namespace];
         /**
          * otherwise, get the next code, add the namespace / code pair to the array and write the array back to disk.
          */
         } else {
-            $code = $this->getNextLibraryCodePrefix();
-            $this->libraryCodes[$namespace] = $code;
+            $code = $this->getNextXCodePrefix();
+            $this->xPrefixes[$namespace] = $code;
             try {
-                file_put_contents($this->libraryCodesFilePath, json_encode($this->getLibraryCodePrefixes()));
+                file_put_contents($this->xPrefixesFilePath, json_encode($this->getXCodePrefixes()));
             }
             catch (Throwable $e) {
-                throw $this->createPrefixingException(LibraryCodeFileNotWriteableException::class,
-                    [$this->libraryCodesFilePath]);
+                throw $this->createPrefixingException(XCodePrefixesFileNotReadableWriteableException::class,
+                    [$this->xPrefixesFilePath]);
             }
         }
 
@@ -213,7 +221,7 @@ class XCodePrefixes implements XCodePrefixesInterface
     }
 
     /**
-     * createPrefixingException
+     * @function createPrefixingException
      * @param string $exceptionClassString
      * @param array<mixed> $params
      * @return Throwable
@@ -231,10 +239,10 @@ class XCodePrefixes implements XCodePrefixesInterface
 
 
     /**
-     * exception codes and messages for the ExceptionLibraryCodes object. The codes in here presume a "prefix"
+     * exception codes and messages for this class. The codes in here presume a "prefix"
      * of 1000 and this object starts allocating prefixes at 1001.  This object uses a traditional method for
      * throwing exceptions in order to avoid circular dependencies.  In other words, we cannot use an exception
-     * factory here to throw exceptions because the exception factories depend on this object in order to create
+     * factory here to throw exceptions because exception factories depend on this object in order to create
      * exceptions.
      */
 
@@ -246,10 +254,9 @@ class XCodePrefixes implements XCodePrefixesInterface
     protected function getCode(string $classString) : int
     {
         $codes =  [
-            LibraryCodeFileNotReadableException::class => 10001001,
-            LibraryCodeFileNotParseableJsonException::class => 10001002,
-            LibraryCodeValueAlreadyInUseException::class => 10001003,
-            LibraryCodeFileNotWriteableException::class => 10001004,
+            XCodePrefixesFileNotReadableWriteableException::class => 10001001,
+            XCodePrefixesFileNotParseableJsonException::class => 10001002,
+            XCodePrefixAlreadyInUseException::class => 10001003,
         ];
         return $codes[$classString] ?? 0;
     }
@@ -262,12 +269,11 @@ class XCodePrefixes implements XCodePrefixesInterface
     protected function getMessage(string $classString) : string
     {
         $messages = [
-            LibraryCodeFileNotReadableException::class => 'Library code file argument %s is not readable or does not exist.',
-            LibraryCodeFileNotParseableJsonException::class => 'Library code file argument %s is not a parseable json file',
-            LibraryCodeValueAlreadyInUseException::class => 'Library code %s is already in use by namespace %s.',
-            LibraryCodeFileNotWriteableException::class => "Library code file %s is not writeable.",
+            XCodePrefixesFileNotReadableWriteableException::class => 'Prefixes file argument %s is not readable/writeable or does not exist.',
+            XCodePrefixesFileNotParseableJsonException::class => 'Prefixes file argument %s is not a parseable json file',
+            XCodePrefixAlreadyInUseException::class => 'Prefix %s is already in use by namespace %s.',
         ];
-        return $messages[$classString] ?? "";
+        return $messages[$classString] ?? '';
     }
 
 }

@@ -3,6 +3,7 @@
 /**
  * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
+ * @noinspection PhpCSValidationInspection
  */
 
 declare(strict_types=1);
@@ -16,13 +17,13 @@ use pvc\interfaces\err\XDataInterface;
  * Class _PvcExceptionLibrary
  * @package pvcErr
  */
-class _PvcXLibData extends XDataAbstract implements XDataInterface
+class _PvcXData extends XDataAbstract implements XDataInterface
 {
     /**
-     * @function getLocalCodes
+     * @function getLocalXCodes
      * @return array<class-string, int>
      */
-	public function getLocalCodes() : array
+	public function getLocalXCodes() : array
     {
         return [
             InvalidArrayIndexException::class => 1001,
@@ -36,10 +37,10 @@ class _PvcXLibData extends XDataAbstract implements XDataInterface
     }
 
     /**
-     * @function getLocalMessages
+     * @function getLocalXMessages
      * @return array<class-string, string>
      */
-	public function getLocalMessages() : array
+	public function getLocalXMessages() : array
     {
         return [
             InvalidArrayIndexException::class => 'Invalid array index %s.',

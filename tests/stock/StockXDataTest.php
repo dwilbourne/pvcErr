@@ -8,23 +8,23 @@ declare (strict_types=1);
 
 namespace pvcTests\err\stock;
 
-use pvc\err\stock\_StockXLibData;
+use pvc\err\stock\_StockXData;
 use pvcTests\err\XDataTestMaster;
 
 class StockXDataTest extends XDataTestMaster
 {
     /**
      * testPvcExceptionLibrary
-     * @covers \pvc\err\stock\_StockXLibData::getDirectory
-     * @covers \pvc\err\stock\_StockXLibData::getNamespace
-     * @covers \pvc\err\stock\_StockXLibData::getLocalMessages
-     * @covers \pvc\err\stock\_StockXLibData::getLocalCodes
-     * @covers \pvc\err\stock\_StockXLibData::getNamespace
-     * @covers \pvc\err\stock\_StockXLibData::getDirectory
+     * @covers \pvc\err\stock\_StockXData::getDirectory
+     * @covers \pvc\err\stock\_StockXData::getNamespace
+     * @covers \pvc\err\stock\_StockXData::getLocalXMessages
+     * @covers \pvc\err\stock\_StockXData::getLocalXCodes
+     * @covers \pvc\err\stock\_StockXData::getNamespace
+     * @covers \pvc\err\stock\_StockXData::getDirectory
      */
     public function testPvcExceptionLibrary(): void
     {
-        $this->verifylibrary(_StockXLibData::class);
+        $this->verifylibrary(_StockXData::class);
     }
 
 }

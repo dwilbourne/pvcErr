@@ -13,9 +13,9 @@ namespace pvc\err\err;
 use pvc\err\stock\LogicException;
 
 /**
- * Class libraryCodeFileNotWriteableException
+ * Class ExceptionFactoryLocalMessagesException
  */
-class LibraryCodeFileNotWriteableException extends LogicException
+class XFactoryMissingXDataException extends LogicException
 {
 
 }

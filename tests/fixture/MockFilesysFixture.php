@@ -20,7 +20,7 @@ class MockFilesysFixture
     /**
      * @var string
      */
-    protected string $jsonFileName = "libraryCodePrefixes.json";
+    protected string $jsonFileName = "xCodePrefixes.json";
 
     /**
      * @var string

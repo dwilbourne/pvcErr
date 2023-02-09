@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace pvcTests\err;
 
 use PHPUnit\Framework\MockObject\MockObject;
-use pvc\err\err\XFactoryArgumentException;
-use pvc\err\err\XFactoryMissingLibraryException;
+use pvc\err\err\XFactoryClassStringArgumentException;
+use pvc\err\err\XFactoryMissingXDataException;
 use pvc\err\XFactory;
 use PHPUnit\Framework\TestCase;
 use pvc\err\XCodePrefixes;
@@ -64,15 +64,12 @@ class XFactoryTest extends TestCase
      * testCreateExceptionThrowsExceptionIfClassStringIsInvalid
      * @throws \Throwable
      * @covers \pvc\err\XFactory::createException
-     * @covers \pvc\err\XFactory::createXFactoryException
-     * @covers \pvc\err\XFactory::getCode
-     * @covers \pvc\err\XFactory::getMessage
      */
     public function testCreateExceptionThrowsExceptionIfClassStringIsNotReflectable() : void
     {
         /** @var class-string $badClassString */
         $badClassString = 'foo';
-        $this->expectException(XFactoryArgumentException::class);
+        $this->expectException(XFactoryClassStringArgumentException::class);
         $this->factory->createException($badClassString);
     }
 
@@ -81,39 +78,36 @@ class XFactoryTest extends TestCase
      * @throws \Throwable
      * @covers \pvc\err\XFactory::createException
      * @covers \pvc\err\XLibUtils::validateExceptionClassString
-     * @covers \pvc\err\XFactory::createXFactoryException
-     * @covers \pvc\err\XFactory::getCode
-     * @covers \pvc\err\XFactory::getMessage
      */
     public function testCreateExceptionThrowsExceptionIfClassStringDoesNotImplementThrowable() : void
     {
-        $this->expectException(XFactoryArgumentException::class);
+        $this->expectException(XFactoryClassStringArgumentException::class);
         $this->factory->createException(SampleNonException::class);
     }
 
     /**
      * testCreateExceptionRegistersNewLibraryDataObjectOnTheFly
-     * @covers \pvc\err\XFactory::registerExceptionLibraryData()
+     * @covers \pvc\err\XFactory::registerXData()
      * @covers \pvc\err\XFactory::getExceptionLibraryData
      */
     public function testRegisterLibraryDataObject(): void
     {
         self::assertEquals(0, count($this->factory->getExceptionLibraryData()));
         $this->mockExceptionData->method('getNamespace')->willReturn('pvc\err\pvc');
-        $this->factory->registerExceptionLibraryData($this->mockExceptionData);
+        $this->factory->registerXData($this->mockExceptionData);
         self::assertEquals(1, count($this->factory->getExceptionLibraryData()));
         /**
          * re-registering the same object does not add it a second time
          *
          */
-        $this->factory->registerExceptionLibraryData($this->mockExceptionData);
+        $this->factory->registerXData($this->mockExceptionData);
         self::assertEquals(1, count($this->factory->getExceptionLibraryData()));
     }
 
     /**
      * testCreateExceptionDiscoversNewLibraryFromExceptionClassString
      * @throws \Throwable
-     * @covers \pvc\err\XFactory::discoverLibraryDataFromClassString
+     * @covers \pvc\err\XFactory::discoverXDataFromClassString
      */
     public function testCreateExceptionDiscoversNewLibraryFromExceptionClassString() : void
     {
@@ -130,12 +124,12 @@ class XFactoryTest extends TestCase
     /**
      * testCreateExceptionThrowsExceptionWhenThereIsNoExceptionLibraryData
      * @throws \Throwable
-     * @covers \pvc\err\XFactory::getLibraryDataFor
-     * @covers \pvc\err\XFactory::discoverLibraryDataFromClassString
+     * @covers \pvc\err\XFactory::getXDataFor
+     * @covers \pvc\err\XFactory::discoverXDataFromClassString
      */
     public function testCreateExceptionThrowsExceptionWhenThereIsNoExceptionLibraryData(): void
     {
-        $this->expectException(XFactoryMissingLibraryException::class);
+        $this->expectException(XFactoryMissingXDataException::class);
         $this->factory->createException(UnfinishedException::class);
     }
 
@@ -143,7 +137,7 @@ class XFactoryTest extends TestCase
      * testNonScalarParamsConvertedToTypeInMessage
      * @throws \Throwable
      * @covers \pvc\err\XFactory::createException
-     * @covers \pvc\err\XFactory::getLibraryDataFor
+     * @covers \pvc\err\XFactory::getXDataFor
      */
     public function testNonScalarParamsConvertedToTypeInMessage() : void
     {
@@ -155,12 +149,12 @@ class XFactoryTest extends TestCase
          */
         $fixtureNamespace = 'pvcTests\err\fixture';
 
-        $this->mockExceptionData->method('getLocalCode')->willReturn($localCode);
-        $this->mockExceptionData->method('getLocalMessage')->willReturn($localMessage);
+        $this->mockExceptionData->method('getLocalXCode')->willReturn($localCode);
+        $this->mockExceptionData->method('getLocalXMessage')->willReturn($localMessage);
         $this->mockExceptionData->method('getNamespace')->willReturn($fixtureNamespace);
-        $this->factory->registerExceptionLibraryData($this->mockExceptionData);
+        $this->factory->registerXData($this->mockExceptionData);
 
-        $this->mockLibraryCodes->method('getLibraryCodePrefix')->willReturn(2000);
+        $this->mockLibraryCodes->method('getXCodePrefix')->willReturn(2000);
 
         $exception = $this->factory->createException(SampleException::class, [new \stdClass()]);
         self::assertStringContainsString("<object>", $exception->getMessage());
@@ -181,12 +175,12 @@ class XFactoryTest extends TestCase
          */
         $fixtureNamespace = 'pvcTests\err\fixture';
 
-        $this->mockExceptionData->method('getLocalCode')->willReturn($localCode);
-        $this->mockExceptionData->method('getLocalMessage')->willReturn($localMessage);
+        $this->mockExceptionData->method('getLocalXCode')->willReturn($localCode);
+        $this->mockExceptionData->method('getLocalXMessage')->willReturn($localMessage);
         $this->mockExceptionData->method('getNamespace')->willReturn($fixtureNamespace);
-        $this->factory->registerExceptionLibraryData($this->mockExceptionData);
+        $this->factory->registerXData($this->mockExceptionData);
 
-        $this->mockLibraryCodes->method('getLibraryCodePrefix')->willReturn(2000);
+        $this->mockLibraryCodes->method('getXCodePrefix')->willReturn(2000);
 
         $exception = $this->factory->createException(SampleException::class, [new \stdClass()]);
         self::assertEquals(20001000, $exception->getCode());
@@ -203,10 +197,10 @@ class XFactoryTest extends TestCase
         $localMessage = "Invalid value (%s) supplied.";
         $fixtureNamespace = 'pvcTests\err\fixture';
 
-        $this->mockExceptionData->method('getLocalCode')->willReturn($localCode);
-        $this->mockExceptionData->method('getLocalMessage')->willReturn($localMessage);
+        $this->mockExceptionData->method('getLocalXCode')->willReturn($localCode);
+        $this->mockExceptionData->method('getLocalXMessage')->willReturn($localMessage);
         $this->mockExceptionData->method('getNamespace')->willReturn($fixtureNamespace);
-        $this->factory->registerExceptionLibraryData($this->mockExceptionData);
+        $this->factory->registerXData($this->mockExceptionData);
 
         $exception = $this->factory->createException(SampleException::class, [new \stdClass()]);
         self::assertEquals(0, $exception->getCode());

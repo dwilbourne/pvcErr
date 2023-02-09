@@ -12,10 +12,9 @@ namespace pvcTests\err;
 use bovigo\vfs\vfsStreamContent;
 use bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
-use pvc\err\err\LibraryCodeFileNotReadableException;
-use pvc\err\err\LibraryCodeFileNotParseableJsonException;
-use pvc\err\err\LibraryCodeFileNotWriteableException;
-use pvc\err\err\LibraryCodeValueAlreadyInUseException;
+use pvc\err\err\XCodePrefixesFileNotReadableWriteableException;
+use pvc\err\err\XCodePrefixesFileNotParseableJsonException;
+use pvc\err\err\XCodePrefixAlreadyInUseException;
 use pvc\err\XCodePrefixes;
 use pvcTests\err\fixture\MockFilesysFixture;
 
@@ -50,7 +49,7 @@ class XCodePrefixesTest extends TestCase
     /**
      * testFileExistsButIsNotReadable
      * @throws \Throwable
-     * @covers \pvc\err\XCodePrefixes::parseLibraryCodePrefixesFile
+     * @covers \pvc\err\XCodePrefixes::parsePrefixesFile
      * @covers \pvc\err\XCodePrefixes::createPrefixingException
      * @covers \pvc\err\XCodePrefixes::getCode
      * @covers \pvc\err\XCodePrefixes::getMessage
@@ -62,7 +61,7 @@ class XCodePrefixesTest extends TestCase
         /** @var vfsStreamContent $mockFile */
         $mockFile = $filesys->getChild($this->libraryCodesFilename);
         $mockFile->chmod(0000);
-        $this->expectException(LibraryCodeFileNotReadableException::class);
+        $this->expectException(XCodePrefixesFileNotReadableWriteableException::class);
         $libraryCodes = new XCodePrefixes($mockFile->url());
     }
 
@@ -74,18 +73,18 @@ class XCodePrefixesTest extends TestCase
      * calling the constructor with no argument at all.
      *
      * testCreatesDefaultFileIfNoArgumentSuppliedAndDefaultFileDoesNotExist
-     * @covers \pvc\err\XCodePrefixes::parseLibraryCodePrefixesFile
+     * @covers \pvc\err\XCodePrefixes::parsePrefixesFile
      */
     public function testCreatesDefaultFileIfNoArgumentSuppliedAndDefaultFileDoesNotExist(): void
     {
         $this->createLibraryCodes($this->fixture->getLibraryCodesFileDoesNotExistFixture());
-        self::assertIsInt($this->libraryCodes->getLibraryCodePrefix("pvcTests\err\fixture"));
+        self::assertIsInt($this->libraryCodes->getXCodePrefix("pvcTests\err\fixture"));
     }
 
     /**
      * testGetFileContentsReturnsFalseProducesAnException
      * @throws \Throwable
-     * @covers \pvc\err\XCodePrefixes::parseLibraryCodePrefixesFile
+     * @covers \pvc\err\XCodePrefixes::parsePrefixesFile
      */
 
     /*
@@ -99,8 +98,8 @@ class XCodePrefixesTest extends TestCase
     {
         uopz_set_return('file_get_contents', false);
         $this->createMockFile($this->fixture->getLibraryCodesFixture());
-        $this->expectException(LibraryCodeFileNotReadableException::class);
-        $this->libraryCodes = new XCodePrefixes($this->mockFile);
+        $this->expectException(XCodePrefixesFileNotReadableWriteableException::class);
+        $this->xPrefixes = new XCodePrefixes($this->mockFile);
         uopz_unset_return('file_get_contents');
     }
     */
@@ -108,12 +107,12 @@ class XCodePrefixesTest extends TestCase
     /**
      * testFileDoesNotContainParseableJson
      * @throws \Throwable
-     * @covers \pvc\err\XCodePrefixes::parseLibraryCodePrefixesFile
+     * @covers \pvc\err\XCodePrefixes::parsePrefixesFile
      */
     public function testFileDoesNotContainParseableJson() : void
     {
         $this->createMockFile($this->fixture->getLibraryCodesFileDoesNotContainParseableJsonFixture());
-        $this->expectException(LibraryCodeFileNotParseableJsonException::class);
+        $this->expectException(XCodePrefixesFileNotParseableJsonException::class);
         $this->libraryCodes = new XCodePrefixes($this->mockFile);
     }
 
@@ -121,27 +120,27 @@ class XCodePrefixesTest extends TestCase
      * if the library codes array is empty, then the first value return should be the start value, i.e. 1001.
      *
      * testEmptyFileProducesEmptyArrayOfLibraryCodes
-     * @covers \pvc\err\XCodePrefixes::parseLibraryCodePrefixesFile
-     * @covers \pvc\err\XCodePrefixes::getLibraryCodePrefix
-     * @covers \pvc\err\XCodePrefixes::getNextLibraryCodePrefix
+     * @covers \pvc\err\XCodePrefixes::parsePrefixesFile
+     * @covers \pvc\err\XCodePrefixes::getXCodePrefix
+     * @covers \pvc\err\XCodePrefixes::getNextXCodePrefix
      */
     public function testEmptyFileProducesEmptyArrayOfLibraryCodes() : void
     {
         $this->createLibraryCodes($this->fixture->getLibraryCodesFileDoesNotExistFixture());
         $expectedLibraryCode = 1001;
-        $actualLibraryCode = $this->libraryCodes->getLibraryCodePrefix("pvcTests\err\fixture");
+        $actualLibraryCode = $this->libraryCodes->getXCodePrefix("pvcTests\err\fixture");
         self::assertEquals($expectedLibraryCode, $actualLibraryCode);
     }
 
     /**
      * testCodesFileHasDuplicateValues
      * @throws \Throwable
-     * @covers \pvc\err\XCodePrefixes::addLibraryCodePrefix
+     * @covers \pvc\err\XCodePrefixes::addPrefix
      */
     public function testCodesFileHasDuplicateValues() : void
     {
         $this->createMockFile($this->fixture->getLibraryCodesFileHasDuplicateValueFixture());
-        $this->expectException(LibraryCodeValueAlreadyInUseException::class);
+        $this->expectException(XCodePrefixAlreadyInUseException::class);
         $this->libraryCodes = new XCodePrefixes($this->mockFile);
     }
 
@@ -149,31 +148,31 @@ class XCodePrefixesTest extends TestCase
      * testProperCodesFileProducesTwoElementsInLibraryCodesArray
      * @throws \Throwable
      * @covers \pvc\err\XCodePrefixes::__construct
-     * @covers \pvc\err\XCodePrefixes::parseLibraryCodePrefixesFile
-     * @covers \pvc\err\XCodePrefixes::addLibraryCodePrefix
-     * @covers \pvc\err\XCodePrefixes::getLibraryCodePrefixes
+     * @covers \pvc\err\XCodePrefixes::parsePrefixesFile
+     * @covers \pvc\err\XCodePrefixes::addPrefix
+     * @covers \pvc\err\XCodePrefixes::getXCodePrefixes
      */
     public function testProperCodesFileProducesTwoElementsInLibraryCodesArray() : void
     {
         $this->createLibraryCodes($this->fixture->getLibraryCodesFixture());
-        self::assertEquals(2, count($this->libraryCodes->getLibraryCodePrefixes()));
+        self::assertEquals(2, count($this->libraryCodes->getXCodePrefixes()));
     }
 
     /**
      * testGetLibraryCodeAndGetNextLibraryCode
      * @throws \Throwable
-     * @covers \pvc\err\XCodePrefixes::getLibraryCodePrefix
-     * @covers \pvc\err\XCodePrefixes::getNextLibraryCodePrefix
+     * @covers \pvc\err\XCodePrefixes::getXCodePrefix
+     * @covers \pvc\err\XCodePrefixes::getNextXCodePrefix
      */
     public function testGetLibraryCodeAndGetNextLibraryCode() : void
     {
         $this->createLibraryCodes($this->fixture->getLibraryCodesFixture());
 
         /**
-         * verify getLibraryCodePrefix properly returns the code for an existing namespace
+         * verify getXCodePrefix properly returns the code for an existing namespace
          */
         $expectedLibraryCode = 1002;
-        $actualCode = $this->libraryCodes->getLibraryCodePrefix("pvc\\err\\stock");
+        $actualCode = $this->libraryCodes->getXCodePrefix("pvc\\err\\stock");
         self::assertEquals($expectedLibraryCode, $actualCode);
 
         /**
@@ -181,25 +180,25 @@ class XCodePrefixesTest extends TestCase
          * libraryCodesFile and the internal array, so it should be added
          */
         $expectedNextLibraryCode = 1003;
-        $newCode = $this->libraryCodes->getLibraryCodePrefix("pvcTests\\err\\fixture");
+        $newCode = $this->libraryCodes->getXCodePrefix("pvcTests\\err\\fixture");
         self::assertEquals($expectedNextLibraryCode, $newCode);
 
         /**
          * verify that the internal array now has three namespace pairs in it
          */
-        self::assertEquals(3, count($this->libraryCodes->getLibraryCodePrefixes()));
+        self::assertEquals(3, count($this->libraryCodes->getXCodePrefixes()));
 
         /**
          * verify that the information was written back to the library file
          */
         $newLibraryCodes = new XCodePrefixes($this->mockFile);
-        self::assertEquals(3, count($newLibraryCodes->getLibraryCodePrefixes()));
+        self::assertEquals(3, count($newLibraryCodes->getXCodePrefixes()));
     }
 
     /**
      * testGetLibraryCodeFailsIfFileIsNotWriteable
      * @throws \Throwable
-     * @covers \pvc\err\XCodePrefixes::getLibraryCodePrefix
+     * @covers \pvc\err\XCodePrefixes::getXCodePrefix
      */
     public function testGetLibraryCodeFailsIfFileIsNotWriteable(): void
     {
@@ -212,8 +211,8 @@ class XCodePrefixesTest extends TestCase
          * no permissions for anyone, i.e. not writeable
          */
         $mockFile->chmod(0000);
-        $this->expectException(LibraryCodeFileNotWriteableException::class);
+        $this->expectException(XCodePrefixesFileNotReadableWriteableException::class);
 
-        $newCode = $this->libraryCodes->getLibraryCodePrefix("pvcTests\\err\\fixture");
+        $newCode = $this->libraryCodes->getXCodePrefix("pvcTests\\err\\fixture");
     }
 }

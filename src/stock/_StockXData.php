@@ -1,9 +1,9 @@
 <?php
-/** @noinspection PhpCSValidationInspection */
 
 /**
  * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
+ * @noinspection PhpCSValidationInspection
  */
 
 declare(strict_types=1);
@@ -17,11 +17,11 @@ use pvc\interfaces\err\XDataInterface;
  * Class _Pvc_ExceptionFactory
  * @package pvcErr
  */
-class _StockXLibData extends XDataAbstract implements XDataInterface
+class _StockXData extends XDataAbstract implements XDataInterface
 {
 
     /**
-     * getNamespace
+     * @function getNamespace
      * @return string
      */
     public function getNamespace(): string
@@ -30,7 +30,7 @@ class _StockXLibData extends XDataAbstract implements XDataInterface
     }
 
     /**
-     * getDirectory
+     * @function getDirectory
      * @return string
      */
     public function getDirectory(): string
@@ -38,10 +38,10 @@ class _StockXLibData extends XDataAbstract implements XDataInterface
         return __DIR__;
     }
     /**
-     * getLocalCodes
+     * @function getLocalXCodes
      * @return array<class-string, int>
      */
-    public function getLocalCodes(): array
+    public function getLocalXCodes(): array
     {
         return [
             Exception::class => 1001,
@@ -73,10 +73,10 @@ class _StockXLibData extends XDataAbstract implements XDataInterface
     }
 
     /**
-     * getLocalMessages
+     * @function getLocalXMessages
      * @return array<class-string, string>
      */
-    public function getLocalMessages(): array
+    public function getLocalXMessages(): array
     {
         return [
             Exception::class => "An unspecified exception has occurred.",

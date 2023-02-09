@@ -12,9 +12,9 @@ namespace pvc\err\err;
 use pvc\err\stock\LogicException;
 
 /**
- * Class LibraryCodeFileNotParseableJsonException
+ * Class libraryCodeValueAlreadyInUseException
  */
-class LibraryCodeFileNotParseableJsonException extends LogicException
+class XCodePrefixAlreadyInUseException extends LogicException
 {
 
 }

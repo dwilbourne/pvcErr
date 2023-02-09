@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace pvc\err;
 
-use pvc\err\err\XFactoryArgumentException;
-use pvc\err\err\XFactoryMissingLibraryException;
+use pvc\err\err\XFactoryClassStringArgumentException;
+use pvc\err\err\XFactoryMissingXDataException;
 use pvc\interfaces\err\XFactoryInterface;
 use pvc\interfaces\err\XCodePrefixesInterface;
 use pvc\interfaces\err\XDataInterface;
@@ -26,10 +26,10 @@ use Throwable;
 class XFactory implements XFactoryInterface
 {
     /**
-     * @var XCodePrefixesInterface.  Object which manages library codes and can return one for a given
+     * @var XCodePrefixesInterface.  Object which manages exception code prefixes and can return one for a given
      * namespace.
      */
-    protected XCodePrefixesInterface $libraryCodePrefixes;
+    protected XCodePrefixesInterface $xCodePrefixes;
 
     /**
      * @var array<XDataInterface>
@@ -37,20 +37,20 @@ class XFactory implements XFactoryInterface
     protected array $exceptionLibraries = [];
 
     /**
-     * @param XCodePrefixesInterface $libraryCodePrefixes
+     * @param XCodePrefixesInterface $xCodePrefixes
      */
-    public function __construct(XCodePrefixesInterface $libraryCodePrefixes)
+    public function __construct(XCodePrefixesInterface $xCodePrefixes)
     {
-        $this->libraryCodePrefixes = $libraryCodePrefixes;
+        $this->xCodePrefixes = $xCodePrefixes;
     }
 
     /**
-     * registerExceptionLibraryData
-     * @param XDataInterface $libraryData
+     * registerXData
+     * @param XDataInterface $xData
      */
-    public function registerExceptionLibraryData(XDataInterface $libraryData): void
+    public function registerXData(XDataInterface $xData): void
     {
-        $this->exceptionLibraries[$libraryData->getNamespace()] = $libraryData;
+        $this->exceptionLibraries[$xData->getNamespace()] = $xData;
     }
 
     /**
@@ -63,17 +63,17 @@ class XFactory implements XFactoryInterface
     }
 
     /**
-     * getLibraryDataFor
+     * getXDataFor
      * @param class-string $classString
      * @return XDataInterface
      * @throws Throwable
      * @throws \ReflectionException
      */
-    protected function getLibraryDataFor(string $classString): XDataInterface
+    protected function getXDataFor(string $classString): XDataInterface
     {
         /**
          * reflect the class string and get the namespace, which is / will be the key in the array which holds the
-         * ExceptionLibraryData object we will use to get the code and message
+         * exception library data (XData) object we will use to get the code and message
          */
         $reflected = new ReflectionClass($classString);
         $namespace = $reflected->getNamespaceName();
@@ -82,21 +82,21 @@ class XFactory implements XFactoryInterface
          * if the library has already been loaded, it will be in the array, otherwise go and find in the same
          * directory in which the exception lives
          */
-        $library = $this->exceptionLibraries[$namespace] ?? $this->discoverLibraryDataFromClassString($classString);
+        $library = $this->exceptionLibraries[$namespace] ?? $this->discoverXDataFromClassString($classString);
 
         /**
          * if the library is still not found, throw an exception
          */
         if (is_null($library)) {
-            throw $this->createXFactoryException(XFactoryMissingLibraryException::class, [$namespace]);
+            throw $this->createException(XFactoryMissingXDataException::class, [$namespace]);
         }
         return $library;
     }
 
     /**
-     * discoverLibraryDataFromClassString is a clumsy but effective method that tries to find the
+     * discoverXDataFromClassString is a clumsy but effective method that tries to find the
      * ExceptionLibraryData object for a given class string (meaning that the library data for the class string has
-     * not yet been loaded).  It does this by searching for a php file that, when reflected, implements
+     * not yet been loaded/registered).  It does this by searching for a php file that, when reflected, implements
      * XDataInterface.  When it finds it, the class is instantiated and returned.  Returns null if it
      * does not find it, meaning that there is no ExceptionLibraryData object in the library directory that contains
      * the object referred to by the classString argument.
@@ -105,7 +105,7 @@ class XFactory implements XFactoryInterface
      * @return XDataInterface|null
      * @throws \ReflectionException
      */
-    protected function discoverLibraryDataFromClassString(string $classString): ?XDataInterface
+    protected function discoverXDataFromClassString(string $classString): ?XDataInterface
     {
         /**
          * reflect the classString
@@ -144,9 +144,9 @@ class XFactory implements XFactoryInterface
                  * if it implements the right interface, return a new instance.
                  */
                 if ($reflected->implementsInterface(XDataInterface::class)) {
-                    /** @var XDataInterface $exceptionLibraryData */
-                    $exceptionLibraryData = new $className();
-                    return $exceptionLibraryData;
+                    /** @var XDataInterface $xData */
+                    $xData = new $className();
+                    return $xData;
                 }
             }
         }
@@ -170,7 +170,7 @@ class XFactory implements XFactoryInterface
          * implement \Throwable.
          */
         if (is_null($reflection = XLibUtils::validateExceptionClassString($classString))) {
-            throw $this->createXFactoryException(XFactoryArgumentException::class, [$classString]);
+            throw $this->createException(XFactoryClassStringArgumentException::class, [$classString]);
         }
 
         /**
@@ -178,13 +178,13 @@ class XFactory implements XFactoryInterface
          * is the namespace, loadExceptionLibrary take a class string as an argument because via reflection, we can
          * discover the library in that namespace in the event it has not already been loaded.
          */
-        $this->registerExceptionLibraryData($libraryData = $this->getLibraryDataFor($classString));
+        $this->registerXData($libraryData = $this->getXDataFor($classString));
 
         /**
          * get the local code and local message for the exception from the library
          */
-        $message = $libraryData->getLocalMessage($classString);
-        $code = $libraryData->getLocalCode($classString);
+        $message = $libraryData->getLocalXMessage($classString);
+        $code = $libraryData->getLocalXCode($classString);
 
         /**
          * usually params can be automatically converted to strings, but if something weird happens like passing an
@@ -202,52 +202,12 @@ class XFactory implements XFactoryInterface
          * have a local code and we should prefix it with the entry from library codes.
          */
         if ($code != 0) {
-            $prefix = (string) $this->libraryCodePrefixes->getLibraryCodePrefix($reflection->getNamespaceName());
+            $prefix = (string) $this->xCodePrefixes->getXCodePrefix($reflection->getNamespaceName());
             $code = (int)($prefix . $code);
         }
 
         /** @var Throwable $exception */
         $exception = new $classString($message, $code, $prev);
         return $exception;
-    }
-
-    /**
-     * createXFactoryException
-     * @param string $exceptionClassString
-     * @param array<mixed> $params
-     * @return Throwable
-     */
-    protected function createXFactoryException(string $exceptionClassString, array $params = []):
-    Throwable
-    {
-        $code = $this->getCode($exceptionClassString);
-        $message = vsprintf($this->getMessage($exceptionClassString), $params);
-
-        /** @var Throwable $exception */
-        $exception = new $exceptionClassString($message, $code);
-        return $exception;
-    }
-
-    /**
-     * getCode
-     * @param string $classString
-     * @return int
-     */
-    protected function getCode(string $classString): int
-    {
-        $codes = [
-            XFactoryArgumentException::class => 1000,
-            XFactoryMissingLibraryException::class => 1001,
-        ];
-        return $codes[$classString];
-    }
-
-    protected function getMessage(string $classString): string
-    {
-        $messages = [
-            XFactoryArgumentException::class => "Reflection of exception class string (%s) failed.  Either the class is not defined or the class does not implement \Throwable.",
-            XFactoryMissingLibraryException::class => "No exception library found in namespace %s.",
-        ];
-        return $messages[$classString];
     }
 }

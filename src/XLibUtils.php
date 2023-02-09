@@ -16,13 +16,15 @@ use ReflectionClass;
 use Throwable;
 
 /**
- * Class ExceptionLibraryDataLocator
+ * Class XLibUtils
+ *
+ * This class contains a couple of static methods that are used in more than one place in the pvcErr package.
  */
 class XLibUtils
 {
 
     /**
-     * validateExceptionClassString
+     * @function validateExceptionClassString
      * @param class-string $classString
      * @return ?ReflectionClass<Throwable>
      */
@@ -46,9 +48,10 @@ class XLibUtils
     }
 
     /**
-     * getClassStringFromFile uses nikic's PhpParser to parse each file in the exception library (directory) and
+     * This method uses nikic's PhpParser to parse each file in the exception library (directory) and
      * extract the class string or, if the class is not namespaced, the class name.
      *
+     * @function getClassStringFromFile
      * @param string $filename
      * @return string|false
      */
