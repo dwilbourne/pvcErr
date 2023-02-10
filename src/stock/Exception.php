@@ -1,13 +1,16 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
+declare (strict_types=1);
 
-declare(strict_types=1);
 
 namespace pvc\err\stock;
 
-class Exception extends \Exception
-{
-}
+
+/**
+ * Class Exception
+ */
+class Exception extends \Exception {}

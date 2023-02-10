@@ -6,11 +6,12 @@
  */
 declare (strict_types=1);
 
-
-namespace pvc\err\stock;
-
+namespace pvcExamples\err\src;
 
 /**
- * Class LogicException
+ * Class ExampleClass
  */
-class LogicException extends Exception {}
+class ExampleClass
+{
+
+}

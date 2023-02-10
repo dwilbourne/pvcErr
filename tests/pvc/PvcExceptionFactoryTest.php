@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace pvcTests\err\pvc;
 
 use PHPUnit\Framework\TestCase;
-use pvc\err\pvc\_ExceptionFactory;
+use pvc\err\pvc\_Pvc_ExceptionConstants;
 use pvc\err\pvc\InvalidArrayIndexException;
 use pvc\err\pvc\InvalidArrayValueException;
 use pvc\err\pvc\InvalidAttributeNameException;
@@ -32,12 +32,12 @@ class PvcExceptionFactoryTest extends TestCase
 
     /**
      * testExceptions
-     * @covers _ExceptionFactory::createException
+     * @covers _Pvc_ExceptionConstants::createException
      */
     public function testExceptions(): void
     {
         foreach ($this->params as $classString => $paramArray) {
-            $exception = _ExceptionFactory::createException($classString, $paramArray);
+            $exception = _Pvc_ExceptionConstants::createException($classString, $paramArray);
             self::assertTrue(0 < $exception->getCode());
             self::assertNotEmpty($exception->getMessage());
         }
@@ -45,12 +45,12 @@ class PvcExceptionFactoryTest extends TestCase
 
 	/**
 	 * testAwkwardParam
-	 * @covers _ExceptionFactory::createException
+	 * @covers _Pvc_ExceptionConstants::createException
 	 */
     public function testAwkwardParam(): void
     {
         $this->params[InvalidArrayIndexException::class] = new \stdClass();
-        $exception = _ExceptionFactory::createException(
+        $exception = _Pvc_ExceptionConstants::createException(
             InvalidArrayIndexException::class,
             [$this->params[InvalidArrayIndexException::class]]
         );
