@@ -9,10 +9,18 @@ declare(strict_types=1);
 
 namespace pvc\err;
 
+use pvc\interfaces\err\XDataInterface;
 use pvcExamples\err\src\err\ExampleXData;
 
 trait ExceptionTrait
 {
+    protected XDataInterface $xData;
+
+    protected function getXData() : XDataInterface
+    {
+        return ($this->xData ?: XLibUtils::discoverXDataFromClassString(get_class));
+    }
+
     /**
      * @function getMessage
      * @param array $params
@@ -46,7 +54,7 @@ trait ExceptionTrait
     public function getCode(): int
     {
         $localCode = ExampleXData::LOCALCODES[get_class()];
-        $globalPrefix = ExceptionCodePrefixes::PREFIXES[__NAMESPACE__];
+        $globalPrefix = XCodePrefixes::PREFIXES[__NAMESPACE__];
         return (int) ($globalPrefix . $localCode);
     }
 }

@@ -1,6 +1,6 @@
 {
 	"name": "pvc/err",
-	"description": "pvc error and exception library",
+	"description": "pvc exception library",
 	"type": "project",
 	"authors": [
 		{
@@ -21,7 +21,8 @@
 	},
 	"minimum-stability": "dev",
 	"require": {
-		"pvc/interfaces": "*"
+		"pvc/interfaces": "*",
+		"nikic/php-parser": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "*",
