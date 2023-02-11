@@ -16,8 +16,9 @@ use pvc\err\stock\LogicException;
  */
 class MyException extends LogicException
 {
-    public function __construct(string $param, $previous = null)
+
+    public function __construct(string $index1, string $param2, $previous = null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($this->createMessage($this->createParamArray()), $this->createCode(), $previous);
     }
 }

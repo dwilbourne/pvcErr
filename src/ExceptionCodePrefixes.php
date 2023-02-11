@@ -11,7 +11,7 @@ namespace pvc\err;
 /**
  * Class ErrConfig
  */
-class XCodePrefixes
+class ExceptionCodePrefixes
 {
     public const PREFIXES = [
         "pvcExamples\err\err" => 1001,

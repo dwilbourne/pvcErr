@@ -12,16 +12,16 @@ use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\ParserFactory;
 use pvc\interfaces\err\XDataInterface;
-use pvcTests\err\PhpParserNodeVisitorClassName;
+use pvc\err\PhpParserNodeVisitorClassName;
 use ReflectionClass;
 use Throwable;
 
 /**
- * Class XLibUtils
+ * Class ExceptionLibUtils
  *
  * This class contains a couple of static methods that are used in more than one place in the pvcErr package.
  */
-class XLibUtils
+class ExceptionLibUtils
 {
 
     /**
@@ -149,7 +149,7 @@ class XLibUtils
          */
         foreach ($files as $file) {
             /** @var class-string $className */
-            $className = XLibUtils::getClassStringFromFile($dir . DIRECTORY_SEPARATOR . $file);
+            $className = ExceptionLibUtils::getClassStringFromFile($dir . DIRECTORY_SEPARATOR . $file);
             if ($className !== false) {
                 $reflected = new ReflectionClass($className);
                 /**

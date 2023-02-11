@@ -6,7 +6,7 @@ declare(strict_types=1);
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
-namespace pvcTests\err\pvc;
+namespace pvc\err\pvc;
 
 use PHPUnit\Framework\TestCase;
 use pvc\err\pvc\_Pvc_ExceptionConstants;
