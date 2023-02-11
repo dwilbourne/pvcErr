@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -14,6 +15,7 @@ use pvc\err\stock\LogicException;
  * InvalidArrayIndexException should be thrown when someone tries to access an array element using an invalid index
  *
  * Class InvalidArrayIndexException
+ * @package pvcErr
  */
 class InvalidArrayIndexException extends LogicException
 {

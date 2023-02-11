@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -12,6 +13,7 @@ use pvc\err\stock\RuntimeException;
 
 /**
  * Class InvalidPHPVersionException
+ * @package pvcErr
  */
 class InvalidPHPVersionException extends RuntimeException
 {

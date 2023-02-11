@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -11,10 +12,12 @@ namespace pvc\err\pvc;
 use pvc\err\stock\LogicException;
 
 /**
- * Class InvalidAttributeNameException
- *
  * InvalidAttributeNameException should be thrown when someone tries to set an object attribute to a
  * value with in incorrect type
+ *
+ * Class InvalidAttributeNameException
+ *
+ * @package pvcErr
  */
 class InvalidAttributeNameException extends LogicException
 {
