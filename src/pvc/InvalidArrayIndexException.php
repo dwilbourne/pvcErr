@@ -10,13 +10,16 @@ declare(strict_types=1);
 namespace pvc\err\pvc;
 
 use pvc\err\stock\LogicException;
+use Throwable;
 
 /**
- * InvalidArrayIndexException should be thrown when someone tries to access an array element using an invalid index
- *
- * Class InvalidArrayIndexException
- * @package pvcErr
+ * InvalidArrayIndexException should be thrown when someone tries to access an array element using an invalid index,
+ * e.g. not a string or an int
  */
 class InvalidArrayIndexException extends LogicException
 {
+    public function __construct(string $index, Throwable $prev = null)
+    {
+        parent::__construct($index, $prev);
+    }
 }

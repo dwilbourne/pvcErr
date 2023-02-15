@@ -10,13 +10,15 @@ declare(strict_types=1);
 namespace pvc\err\pvc;
 
 use pvc\err\stock\LogicException;
+use Throwable;
 
 /**
- *
  * InvalidAttributeException should be thrown when someone tries to access an invalid attribute within an object
- * @package pvcErr
- *
  */
 class PregMatchFailureException extends LogicException
 {
+    public function __construct(string $regex, string $subject, Throwable $previous = null)
+    {
+        parent::__construct($regex, $subject, $previous);
+    }
 }

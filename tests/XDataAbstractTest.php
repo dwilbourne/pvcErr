@@ -5,16 +5,16 @@
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace pvcTests\err;
 
 use PHPUnit\Framework\MockObject\MockObject;
-use pvc\err\XDataAbstract;
 use PHPUnit\Framework\TestCase;
-use pvcTests\err\fixture\SampleDuplicateException;
-use pvcTests\err\fixture\SampleException;
-use pvcTests\err\fixture\SampleNonException;
+use pvc\err\XDataAbstract;
+use pvcTests\err\fixtureForXDataTests\SampleException;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionDuplicate;
+use pvcTests\err\fixtureForXDataTests\SampleNonException;
 
 class XDataAbstractTest extends TestCase
 {
@@ -32,9 +32,9 @@ class XDataAbstractTest extends TestCase
      * testGetLocalCode
      * @covers \pvc\err\XDataAbstract::getLocalXCode
      */
-    public function testGetLocalCode(): void
+    public function testGetLocalXCode(): void
     {
-        $array = [SampleException::class => 1000, SampleDuplicateException::class => 1001];
+        $array = [SampleException::class => 1000, SampleExceptionDuplicate::class => 1001];
         $this->mock->method('getLocalXCodes')->willReturn($array);
         self::assertEquals(1000, $this->mock->getLocalXCode(SampleException::class));
         self::assertEquals(0, $this->mock->getLocalXCode(SampleNonException::class));
@@ -42,16 +42,45 @@ class XDataAbstractTest extends TestCase
 
     /**
      * testGetLocalMessage
-     * @covers \pvc\err\XDataAbstract::getLocalXMessage
+     * @covers \pvc\err\XDataAbstract::getXMessageTemplate
      */
-    public function testGetLocalMessage(): void
+    public function testGetXMessageTemplate(): void
     {
-        $string_1 = "this is a great string";
-        $string_2 = "another hugely popular string";
-        $array = [SampleException::class => $string_1, SampleDuplicateException::class => $string_2];
-        $this->mock->method('getLocalXMessages')->willReturn($array);
-        self::assertEquals($string_1, $this->mock->getLocalXMessage(SampleException::class));
-        self::assertEquals("", $this->mock->getLocalXMessage(SampleNonException::class));
+        $string_1 = 'this is a great string';
+        $string_2 = 'another hugely popular string';
+        $array = [SampleException::class => $string_1, SampleExceptionDuplicate::class => $string_2];
+        $this->mock->method('getXMessageTemplates')->willReturn($array);
+        self::assertEquals($string_1, $this->mock->getXMessageTemplate(SampleException::class));
+        self::assertEquals('', $this->mock->getXMessageTemplate(SampleNonException::class));
     }
 
+    /**
+     * @function dataProvider
+     * @return array<string, array<string|int>>
+     */
+    protected function dataProvider(): array
+    {
+        return [
+            'messageWithNoParameters' => ['This is a test message', 0],
+            'messageWithOneParameter' => ['Your function parameter ${param} is invalid.', 1],
+            'messageWithTwoParameters' => ['preg match failed.  regex = ${regex}, subject = ${subject}', 2],
+            'messageWithThreeParameters' => [
+                'preg replace failed.  regex = ${regex}, subject = ${subject}, replace = ${replace}',
+                3
+            ],
+            'messageWithMalformedParameter' => ['Your function parameter ${param is invalid.', 0],
+        ];
+    }
+
+    /**
+     * @function testCountXMessageVariables
+     * @param string $message
+     * @param int $expectNumParameters
+     * @covers       \pvc\err\XDataAbstract::countXMessageVariables
+     * @dataProvider dataProvider
+     */
+    public function testCountXMessageVariables(string $message, int $expectNumParameters): void
+    {
+        self::assertEquals($expectNumParameters, $this->mock->countXMessageVariables($message));
+    }
 }

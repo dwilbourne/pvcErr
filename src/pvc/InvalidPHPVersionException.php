@@ -10,11 +10,15 @@ declare(strict_types=1);
 namespace pvc\err\pvc;
 
 use pvc\err\stock\RuntimeException;
+use Throwable;
 
 /**
  * Class InvalidPHPVersionException
- * @package pvcErr
  */
 class InvalidPHPVersionException extends RuntimeException
 {
+    public function __construct(string $currentVersion, string $minVersion, Throwable $previous = null)
+    {
+        parent::__construct($currentVersion, $minVersion, $previous = null);
+    }
 }

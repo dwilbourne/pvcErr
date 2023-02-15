@@ -1,15 +1,31 @@
-The pvcErr package provides an organized (though admittedly unorthodox) approach to constructing and throwing 
-exceptions in php.  The pvc libraries use this approach throughout.  It is based on the factory design pattern.
+# PvcException
 
-In particular, it provides a comprehensive way of dealing with exception codes that 
-guarantees uniqueness of codes between packages.  Part of value here is that it is easier (less typing) to search 
-logfiles for codes than it is messages.
+The pvcException package provides an organized (though admittedly unorthodox) approach to constructing and throwing
+exceptions in php. The pvc libraries use this approach throughout. If you decide you like this approach, the
+library is constructed with a lightweight hook that allows you to use the same conventions and the pvcException code in
+your own project.
+
+### Design Points
+
+* It provides a comprehensive way of dealing with exception codes that guarantees uniqueness of codes between packages.
+  Part of value here is that it is easier (less typing) to search logfiles for codes than it is messages.
+
+
+* It provides a set of conventions that makes maintaining exception codes and messages easy.
+
+
+* It implements named parameter substitution into exception message templates. For example, a message template could
+  look like this:  "Invalid filename: ${filename}", as opposed to the order-dependent sprintf format "Invalid filename:
+  %s".
+
+### Discussion
 
 The signature for creating an exception in php provides the exception constructor with a text string ("message"),
-an integer code ("code"), and the previous exception/error that was thrown ("prev").  One's first natural 
-inclination is to define new exceptions by extending one of the stock php exceptions (for example, LogicException), 
-and define the class with its own message and code.  Something like the following:
+an integer code ("code"), and the previous exception/error that was thrown ("prev"). One's first natural
+inclination is to define new exceptions by extending one of the stock php exceptions (for example, LogicException),
+and define the class with its own message and code. Something like the following:
 
+```angular2html
 class myException extends LogicException {
 
     public function __construct(int $x, Throwable $prev) 
@@ -20,35 +36,39 @@ class myException extends LogicException {
         parent::__construct($message, $code, $prev);
     }
 }
+```
 
 This approach is easy to understand but difficult to manage when you start defining a largish number of exceptions.  
-For one, it's hard to keep your code numbering system straight.  What was the code you used in the last exception 
-that you wrote a couple of days ago?  Another challenge is to keep the same style of messages consistent from 
-exception to exception.  What is the language style like?  Do you want short messages, long messages?  What 
+For one, it's hard to keep your code numbering system straight. What was the code you used in the last exception
+that you wrote a couple of days ago? Another challenge is to keep the same style of messages consistent from
+exception to exception. What is the language style like? Do you want short messages, long messages? What
 conventions do you use for substituting data values into the message string?
 
-Another complexity of managing codes comes up in the context of managing multiple libraries of exceptions.  I tend 
-to put all of my exceptions into a single directory for a given set of classes.  But if you are constructing multiple 
-packages that need to use a common error code numbering system, you need a mechanism to insure global uniqueness 
-between the packages.  
+Another complexity of managing codes comes up in the context of managing multiple libraries of exceptions. I tend
+to put all of my exceptions into a single directory for a given set of classes. But if you are constructing a
+larger application with multiple directories of exceptions or creating multiple
+packages that need to use a common error code numbering system, you need a mechanism to insure global uniqueness
+between the directories and packages.
 
-pvcErr supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception 
-data class that is used to construct the exceptions in that library.  The exception data class *must extend* 
+pvcException supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception
+data class (XData) that is used to construct the exceptions in that library. This exception data class *must extend*
 pvc\err\XDataAbstract and must implement the following methods:
 
+```angular2html
 	abstract protected function getLocalXCodes() : array;
-	abstract protected function getLocalXMessages(): array;
-    abstract protected function getNamespace(): string;
-    abstract protected function getDirectory(): string;
+	abstract protected function getXMessageTemplates(): array;
+```
 
+(The naming convention of 'XCode' or 'XMessage' is simply shorter than typing 'ExceptionCode' or 'ExceptionMessage').
 
-The keys in the arrays returned by getCodes and getMessages should be the fully qualified class strings of the 
-exceptions in the library.  This convention  allows you to take advantage of autocompletion in your IDE.  It also 
-allows the code to verify that all the exceptions in the library have codes and messages, that the codes are unique, 
+The keys in the arrays returned by getXCodes and getXMessageTemplates should be the fully qualified class strings of
+the exceptions in the library. This convention allows you to take advantage of autocompletion in your IDE. It also
+allows the code to verify that all the exceptions in the library have codes and messages, that the codes are unique,
 that there are no "extra exceptions" that have no data, etc.
 
 Here is an example of a small exception data class:
 
+```angular2html
 class _ExceptionData extends XDataAbstract
 {
     public function getLocalXCodes() : array
@@ -56,129 +76,130 @@ class _ExceptionData extends XDataAbstract
         return [
             InvalidArrayIndexException::class => 1001,
             InvalidArrayValueException::class => 1002,
-            InvalidAttributeNameException::class => 1003,
-            InvalidFilenameException::class => 1004,
-            InvalidPHPVersionException::class => 1005,
-            PregMatchFailureException::class => 1006,
-            PregReplaceFailureException::class => 1007,
+            InvalidFilenameException::class => 1003,
+            InvalidPHPVersionException::class => 1004,
+            PregMatchFailureException::class => 1005,
+            PregReplaceFailureException::class => 1006,
         ];
     }
 
-    public function getLocalXMessages() : array
+	public function getXMessageTemplates() : array
     {
         return [
-    		InvalidArrayIndexException::class => 'Invalid array index %s.',
-	    	InvalidArrayValueException::class => 'Invalid array value %s.',
-		    InvalidAttributeNameException::class => 'Attribute %s does not exist or is not directly accessible.',
-    		InvalidFilenameException::class => 'filename %s is not valid.',
-	    	InvalidPHPVersionException::class => 'Invalid PHP version - must be at least %s',
-		    PregMatchFailureException::class => 'preg_match failed: regex=%s; subject=%s;',
-    		PregReplaceFailureException::class => 'preg_replace failed: regex=%s; subject=%s; replacement=%s',
-	    ];
-    }
-
-    protected function getNamespace() : string
-    {
-		return  __NAMESPACE__;	
-    }
-
-    protected function getDirectory() : string
-    {
-		return  __DIR__;	
+            InvalidArrayIndexException::class => 'Invalid array index ${index}.',
+            InvalidArrayValueException::class => 'Invalid array value ${value}.',
+            InvalidFilenameException::class => 'filename ${$filename} is not valid.',
+            InvalidPHPVersionException::class => 'Invalid PHP version ${currentVersion} - must be at least ${minVersion}',
+            PregMatchFailureException::class => 'preg_match failed: regex=${regex}; subject=${subject};',
+            PregReplaceFailureException::class => 'preg_replace failed: regex=${regex}; subject=${subject}; replacement=${replacement}',
+        ];
     }
 }
+```
 
-By keeping all the codes and all the message texts in one file, it is far easier to keep local codes and message 
-conventions consistent in the library.  You can name the exception data class file anything you want.  I typically 
-use a filename that starts with an underscore ("_") so that the file system automatically sorts it to appear at the 
-top of the directory which is holding my exceptions.  As an example, I have a library data class called 
-"_TreeExceptionData", which is a library for all the exceptions that can be thrown in the course of creating and 
+Keeping all the codes and all the message templates in one file makes it far easier to keep local codes and message
+conventions consistent in the library. You can name the exception data class file anything you want. I typically
+use a filename that starts with an underscore ("_") so that the file system automatically sorts it to appear at the
+top of the directory which is holding my exceptions. As an example, I have a library data class called
+"_TreeExceptionData", which is a library for all the exceptions that can be thrown in the course of creating and
 manipulating an abstract tree structure.
 
-Creating the classes for your exceptions is now quite simple.  In the same directory in which your exception data 
-class lives, you create "empty exceptions" that extend base exceptions but have no body. For example, here's an 
-example of an exception that goes with the example above:
+Creating the classes for your exceptions is now quite simple. In the same directory in which your exception data
+class lives, you create "empty exceptions" that extend base exceptions and have a very small footprint. You DO want to
+provide the construction signature and pass the parameters to the parent class(es). Again, taking advantage of
+autocompletion in your IDE, this simplifies things when you go to throw an exception in your code. The IDE will
+prompt you for the parameters, so you don't have to refer to your exception data file to figure out the name of the
+parameters.
 
-class InvalidArrayIndexException extends LogicException {}
+Speaking of parameters, as you can see from the example above, the code uses a template format of "${paramname}",
+where paramname is the name of a parameter in the constructor of the exception. Like all of PHP, the names are
+case-sensitive. Make sure that the dummy variable(s) in the exception constructor match the identifier within the
+braces of your template variables.
 
+The parameters to your exceptions should be scalar and convertible to strings (so typed as strings or int is a good
+rule of thumb). It will convert booleans to either 'true' or 'false'. If you create a parameter with something more
+complex, like an object, the library will simply substitute the *type* of the thing you passed as a parameter into
+the message.
 
-The final task we need to address is how to insure uniqueness of codes between libraries.  This is accomplished 
-through a single configuration file that handles persistence between requests.  This file can can reside wherever 
-you would like as long as it is readable and *writeable*.  The file is formatted in json and is a simple array that 
-maps namespaces to "prefixes".  As you might guess, the namespaces correspond to the namespaces of your 
-exception libraries.  The prefixes in the array are unique integers.  These prefixes will be 
-prepended to the local exception codes defined in your exception library data classes.  This is the mechanism that 
-guarantees uniqueness among exception codes.
+For example, here's an exception that goes with the example above:
 
-It is *not necessary* for you to manually maintain this file.  In fact, you don't need to create it either.  You 
-simply need to provide the filename and path to the constructor argument of the class XCodePrefixes.  
-When you go to throw an exception, the exception factory uses this class to look up the library code for the 
-namespace of the exception being thrown.  It parses the file to see if the exception namespace has already been 
-registered.  If it has, it returns the library code.  If it has not, it registers the new namespace and allocates 
-the namespace a new code and then returns that.  
-
-The default "starting prefix" is 1001 and increments the codes by 1 each time a new namespace is registered.  
-If you prefer a different scheme for your prefixes, see the documentation for the XCodePrefixes class 
-for the proper way to implement that.
-
-So in case you are interested, here is an example of what the json configuration file might look like:
-
+```angular2html
+class InvalidArrayIndexException extends LogicException 
 {
-    "pvc\\Err\\pvc" : 1001,
-    "pvc\\Err\\stock" : 1002,
-    "pvc\\struct\\list" : 1003,
-    "pvc\\struct\\range" : 1004,
-    "pvc\\struct\\tree" : 1005,
-    "pvc\\exif" : 1006,
-    "pvc\\storage\\file" : 1007
+    public function __construct(string $index, Throwable $previous = null)
+    {
+        parent::__construct($index, $previous);
+    }
 }
+```
 
-The XCodePrefixes class maintains this file on its own: it will create the file, add codes to it as 
-necessary and write those codes back to disk.
+Throwing the exception is as simple as
 
-The last class to know about is the XFactory class.  This is the class you use to actually throw exceptions. 
-See the Installation Setup and Usage sections below. 
+```angular2html
+            throw new InvalidArrayIndexException("badIndexValue");
+```
 
+The final task we need to address is how to insure uniqueness of codes between libraries. The basic thought process
+is that we create a map between namespaces (e.g. libraries) and integer values. Of course, the namespaces
+correspond to the namespaces of your exception libraries. The prefixes in the array are unique integers. These
+prefixes will be prepended to the local exception codes defined in your exception library data classes. This is the
+mechanism that guarantees uniqueness among exception codes.
 
-Installation and Dependencies
+In terms of implementation, there are actually two mechanisms that work in parallel. Internally, pvcExceptions uses
+a static class to store the namespaces and integers. If you install this package and look in the vendor directory
+under pvc\err\src, you will see XCodePrefixes.php.
 
-You can install the pvcErr package through composer.
+But in order to make the package usable for others, the code looks for an environment variable named "XCodePrefixes".
+If such a variable exists, then the value of the variable should be the filepath of *your* exception code prefixes.  
+In order that I could create this library with no other dependencies, this file must be in php format. Yaml and XML
+formats would require a dependency on a parser. Json would be a possibility since php can natively parse json, but
+in the interests of keeping things as simple as possible......
 
+Your exception data file should return an array whose form is described above:  a series of elements that maps
+namespaces to integers. For example:
+
+```angular2html
+<?php
+
+return [
+    'my\\namespace' => 1000,
+    'another\\namespace' => 1001,
+]
+```
+
+pvc reserves the "exception code address space" below 1000. Your exception libraries can use any prefix integers you
+want so long as they are greater than 999. Using integers less than 1000 will result in an error (well... technically
+an exception :)
+
+### Installation and Dependencies
+
+You can install the pvcException package through composer.
+
+```angular2html
     require "pvc/err"
+```
 
-Note that the pvcErr package requires pvcInterfaces, so you will see that show up in your vendor/pvc directory. It 
-also requires Nikita Popov's PHP Parser because there's a spot in the code where is necessary to parse php files in 
+Note that the pvcException package requires pvcInterfaces, so you will see that show up in your vendor/pvc directory. It
+also requires Nikita Popov's PHP Parser because there's a spot in the code where is necessary to parse php files in
 order to extract the class string from a file.
 
-Setup
+### Setup
 
-1) Decide where you want to keep the exception code prefixes file.  If you are using a framework that has a config 
-directory, that would be a sensible choice, or simply perhaps in the root of your src directory.  
+1. Decide where you want to keep your exception code prefixes file. If you are using a framework that has a config
+   directory, that would be a sensible choice, or simply perhaps in the root of your src directory.
 
-2) This factory-based approach really necessitates using a dependency injection container to handle the creation of 
-   the factory and its injection into your client classes.  In general terms, you set a variable in your di 
-   container to the filepath for your exception code prefixes file (you decided what that was in the previous step). 
-   Then define the creation of the XCodePrefixes class using that variable as an argument. For example, using a 
-   definitions file format for the container:
+2. as part of bootstrapping your application, use putenv() to set "XCodePrefixes" to the filepath chosen in step 1.
 
-        'prefixesFilePath' => '/path/to/my/prefixes/json/file',
-        XCodePrefixesInterface::class => get(XCodePrefixes::class),
-        XCodePrefixes::class => create()->constructor(get('prefixesFilePath'),
-        XFactoryInterface::class => get(XFactory::class)
+Update this file as often as you create a new exception library. Recall that creating an exception library
+consists of
 
-3) If your container supports autowiring, then you don't need to define the creation of the factory since the 
-   constructor.
- 
-4) The use property injection (or setter injection if you prefer) to put the factory into your client class.
- 
-        MyClientClass::class => create()->property('xfactory', get(XFactoryInterface::class))
+* creating the directory in which the exceptions live
+* creating a class inside that directory which extends pvc's XDataAbstract class and stores "local" codes and messages.
+* create exceptions where the constructor consists of the parameter(s) to the message followed by any previous exception
+  you are adding to the exception stack.
 
+### Usage
 
-Usage
-
-You use the factory to create an exception using a method call: createException(string $classString, array 
-$messageParams = [], Throwable $previous = null).  Because of the setup done through the DI container, your code for 
-throwing an exception looks like:
-
-    $params = [$value1, $value2, etc);
-    throw $this->exceptionFactory->createException($classString, $params, $previous);
+```angular2html
+    throw new MyException($param1, $param2, $previous);
+```

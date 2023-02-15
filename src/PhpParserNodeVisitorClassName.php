@@ -9,11 +9,16 @@ namespace pvc\err;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 
 /**
- * Class NodeVisitorClassName
+ * PhpParserNodeVisitorClassName gets the class name from an Abstract Syntax Tree and then stops the traversal.  This
+ * is really really bad at the moment:  the success of the enterNode method setting the className is contingent on
+ * running a NameResolver through the node prior to this visitor.  I need to write a decorator for NameResolver that
+ * has a method to get the namespacedName property of the node......
+ *
  * @package tests\php_parser
  */
 class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
@@ -21,7 +26,9 @@ class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
     /**
      * @var string
      */
-    protected string $className;
+    protected string $className = '';
+
+    protected string $namespaceName = '';
 
     /**
      * enterNode inspects the current node and if it is an instance of Class_, returns the class string/class name
@@ -30,17 +37,16 @@ class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
      */
     public function enterNode(Node $node): ?int
     {
-        if ($node instanceof Class_) {
-            /**
-             * if there's namespacing in the file, get the full namespaced class name (i.e. class string).  If there
-             * is no namespacing, then the namespacedName property will be null and use the class name ($node->name).
-             *  Phpstan wants to make sure $node->name is a string, so we coalesce it.
-             */
-            $this->className = $node->namespacedName ? $node->namespacedName->toString() : ($node->name ?? '');
+        if ($node instanceof Namespace_) {
+            /** phpstan complains if we don't test for null */
+            $this->namespaceName = ($node->name ? $node->name->toString() : '');
+        }
 
-            /**
-             * return value STOP_TRAVERSAL stops the node traverser from going any further
-             */
+        if ($node instanceof Class_) {
+            /** phpstan complains if we don't test for null */
+            $this->className = ($node->name ? $node->name->toString() : '');
+
+            /** return value STOP_TRAVERSAL stops the node traverser from going any further */
             return NodeTraverser::STOP_TRAVERSAL;
         }
         /**
@@ -52,5 +58,10 @@ class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
     public function getClassname(): string
     {
         return $this->className;
+    }
+
+    public function getNamespaceName(): string
+    {
+        return $this->namespaceName;
     }
 }
