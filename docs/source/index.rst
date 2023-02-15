@@ -127,7 +127,7 @@ braces of your template variables.
 
 The parameters to your exceptions should be scalar and convertible to strings (so typed as strings or int is a good
 rule of thumb).  It will convert booleans to either 'true' or 'false'.  If you create a parameter with something more
-complex, like an object, the library will simply substitute the *type* of the thing you passed as a parameter into
+complex, like an object, the library will simply substitute the\ *type*\ of the thing you passed as a parameter into
 the message.
 
 For example, here's an exception that goes with the example above::
