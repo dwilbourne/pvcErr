@@ -8,5 +8,5 @@ declare(strict_types=1);
  */
 
 return [
-  'pvcTests\err\stock' => 10000,
+    'pvcTests\err\stock' => 10000,
 ];

@@ -32,6 +32,52 @@ class XDataTestMaster extends TestCase
         return $result;
     }
 
+    public function verifyKeysMatchClassStringsFromDir(XDataInterface $xData): bool
+    {
+        $codesArray = $xData->getLocalXCodes();
+        $messagesArray = $xData->getXMessageTemplates();
+        $exceptionClassStrings = $this->getExceptionClassStrings($xData);
+        $keysForCodes = array_keys($codesArray);
+        $keysForMessages = array_keys($messagesArray);
+
+        $result = true;
+
+        $keysForCodesThatHaveNoExceptionDefined = array_diff($keysForCodes, $exceptionClassStrings);
+        if (!empty($keysForCodesThatHaveNoExceptionDefined)) {
+            foreach ($keysForCodesThatHaveNoExceptionDefined as $key) {
+                echo sprintf("codes key %s has no corresponding exception defined.\n", $key);
+            }
+            $result = false;
+        }
+
+
+        $keysForMessagesThatHaveNoExceptionDefined = array_diff($keysForMessages, $exceptionClassStrings);
+        if (!empty($keysForMessagesThatHaveNoExceptionDefined)) {
+            foreach ($keysForMessagesThatHaveNoExceptionDefined as $key) {
+                echo sprintf("messages key %s has no corresponding exception defined.\n", $key);
+            }
+            $result = false;
+        }
+
+        $exceptionsWithNoCodeDefined = array_diff($exceptionClassStrings, $keysForCodes);
+        if (!empty($exceptionsWithNoCodeDefined)) {
+            foreach ($exceptionsWithNoCodeDefined as $key) {
+                echo sprintf("exception %s has no corresponding code defined.\n", $key);
+            }
+            $result = false;
+        }
+
+        $exceptionsWithNoMessageDefined = array_diff($exceptionClassStrings, $keysForMessages);
+        if (!empty($exceptionsWithNoMessageDefined)) {
+            foreach ($exceptionsWithNoMessageDefined as $key) {
+                echo sprintf("exception %s has no corresponding message defined.\n", $key);
+            }
+            $result = false;
+        }
+
+        return $result;
+    }
+
     /**
      * getExceptionClassStringsFromDir
      * @return array<int, class-string>
@@ -87,104 +133,6 @@ class XDataTestMaster extends TestCase
         return $classStrings;
     }
 
-    public function verifyKeysMatchClassStringsFromDir(XDataInterface $xData): bool
-    {
-        $codesArray = $xData->getLocalXCodes();
-        $messagesArray = $xData->getXMessageTemplates();
-        $exceptionClassStrings = $this->getExceptionClassStrings($xData);
-        $keysForCodes = array_keys($codesArray);
-        $keysForMessages = array_keys($messagesArray);
-
-        $result = true;
-
-        $keysForCodesThatHaveNoExceptionDefined = array_diff($keysForCodes, $exceptionClassStrings);
-        if (!empty($keysForCodesThatHaveNoExceptionDefined)) {
-            foreach ($keysForCodesThatHaveNoExceptionDefined as $key) {
-                echo sprintf("codes key %s has no corresponding exception defined.\n", $key);
-            }
-            $result = false;
-        }
-
-
-        $keysForMessagesThatHaveNoExceptionDefined = array_diff($keysForMessages, $exceptionClassStrings);
-        if (!empty($keysForMessagesThatHaveNoExceptionDefined)) {
-            foreach ($keysForMessagesThatHaveNoExceptionDefined as $key) {
-                echo sprintf("messages key %s has no corresponding exception defined.\n", $key);
-            }
-            $result = false;
-        }
-
-        $exceptionsWithNoCodeDefined = array_diff($exceptionClassStrings, $keysForCodes);
-        if (!empty($exceptionsWithNoCodeDefined)) {
-            foreach ($exceptionsWithNoCodeDefined as $key) {
-                echo sprintf("exception %s has no corresponding code defined.\n", $key);
-            }
-            $result = false;
-        }
-
-        $exceptionsWithNoMessageDefined = array_diff($exceptionClassStrings, $keysForMessages);
-        if (!empty($exceptionsWithNoMessageDefined)) {
-            foreach ($exceptionsWithNoMessageDefined as $key) {
-                echo sprintf("exception %s has no corresponding message defined.\n", $key);
-            }
-            $result = false;
-        }
-
-        return $result;
-    }
-
-    public function verifyGetLocalCodesArrayHasUniqueIntegerValues(XDataInterface $xData): bool
-    {
-        $codesArray = $xData->getLocalXCodes();
-        $result = true;
-        /**
-         * verify that the count of unique codes equals the total count of codes
-         */
-        if (count(array_unique($codesArray)) != count($codesArray)) {
-            echo sprintf("not all exception codes are unique.\n");
-            $result = false;
-        }
-
-        /**
-         * verify $codes is all integers.
-         * if $codes is empty, $initialValue will be false and then array_reduce returns false.
-         */
-        $initialValue = !empty($codesArray);
-        $callback = function ($carry, $x) {
-            return ($carry && is_int($x));
-        };
-        if (false == (array_reduce($codesArray, $callback, $initialValue))) {
-            echo sprintf("not all exception codes are integers.\n");
-            $result = false;
-        }
-        return $result;
-    }
-
-    public function verifyGetLocalMessagesArrayHasStringsForValues(XDataInterface $xData): bool
-    {
-        $messagesArray = $xData->getXMessageTemplates();
-        $result = true;
-        /**
-         * verify $messages is all strings
-         * if messages array is empty, $initialValue will be false and then array_reduce returns false.
-         */
-        $initialValue = !empty($messagesArray);
-        $callback = function ($carry, $x) {
-            return ($carry && is_string($x));
-        };
-        if (false == (array_reduce($messagesArray, $callback, $initialValue))) {
-            echo sprintf("not all exception messages are strings.\n");
-            $result = false;
-        }
-        return $result;
-    }
-
-    /**
-     * this method is borrowed from the pvc\err\pvc\Exception class.  Originally, I even
-     * had a separate utilities class which provided the code that could be shared.  But in the interests of
-     * keeping the publicly available methods as few as possible, I chose to duplicate the code here....
-     */
-
     /**
      * This method uses nikic's PhpParser to parse each file in the exception library (directory) and
      * extract the class string or, if the class is not namespaced, the class name.
@@ -235,5 +183,57 @@ class XDataTestMaster extends TestCase
             }
         }
         return $classString;
+    }
+
+    public function verifyGetLocalCodesArrayHasUniqueIntegerValues(XDataInterface $xData): bool
+    {
+        $codesArray = $xData->getLocalXCodes();
+        $result = true;
+        /**
+         * verify that the count of unique codes equals the total count of codes
+         */
+        if (count(array_unique($codesArray)) != count($codesArray)) {
+            echo sprintf("not all exception codes are unique.\n");
+            $result = false;
+        }
+
+        /**
+         * verify $codes is all integers.
+         * if $codes is empty, $initialValue will be false and then array_reduce returns false.
+         */
+        $initialValue = !empty($codesArray);
+        $callback = function ($carry, $x) {
+            return ($carry && is_int($x));
+        };
+        if (false == (array_reduce($codesArray, $callback, $initialValue))) {
+            echo sprintf("not all exception codes are integers.\n");
+            $result = false;
+        }
+        return $result;
+    }
+
+    /**
+     * this method is borrowed from the pvc\err\pvc\Exception class.  Originally, I even
+     * had a separate utilities class which provided the code that could be shared.  But in the interests of
+     * keeping the publicly available methods as few as possible, I chose to duplicate the code here....
+     */
+
+    public function verifyGetLocalMessagesArrayHasStringsForValues(XDataInterface $xData): bool
+    {
+        $messagesArray = $xData->getXMessageTemplates();
+        $result = true;
+        /**
+         * verify $messages is all strings
+         * if messages array is empty, $initialValue will be false and then array_reduce returns false.
+         */
+        $initialValue = !empty($messagesArray);
+        $callback = function ($carry, $x) {
+            return ($carry && is_string($x));
+        };
+        if (false == (array_reduce($messagesArray, $callback, $initialValue))) {
+            echo sprintf("not all exception messages are strings.\n");
+            $result = false;
+        }
+        return $result;
     }
 }

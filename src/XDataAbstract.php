@@ -34,12 +34,6 @@ abstract class XDataAbstract implements XDataInterface
     abstract public function getLocalXCodes(): array;
 
     /**
-     * @function getXMessageTemplates
-     * @return array<class-string, string>
-     */
-    abstract public function getXMessageTemplates(): array;
-
-    /**
      * @function getXMessageTemplate
      * @param class-string $classString
      * @return string
@@ -49,6 +43,12 @@ abstract class XDataAbstract implements XDataInterface
         $messages = $this->getXMessageTemplates();
         return $messages[$classString] ?? '';
     }
+
+    /**
+     * @function getXMessageTemplates
+     * @return array<class-string, string>
+     */
+    abstract public function getXMessageTemplates(): array;
 
     /**
      * @function countXMessageVariables

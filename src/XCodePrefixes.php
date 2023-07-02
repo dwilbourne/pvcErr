@@ -44,6 +44,16 @@ class XCodePrefixes implements XCodePrefixesInterface
     }
 
     /**
+     * combines pvc's exception prefixes with external application's prefixes.
+     * @function getXCodePrefixes
+     * @return array<string, int>
+     */
+    public static function getXCodePrefixes(): array
+    {
+        return array_merge(self::getPvcXCodePrefixes(), self::getExternalXCodePrefixes());
+    }
+
+    /**
      * @function getPvcXCodePrefixes
      * @return int[]
      */
@@ -79,15 +89,5 @@ class XCodePrefixes implements XCodePrefixesInterface
             }
         }
         return $prefixes;
-    }
-
-    /**
-     * combines pvc's exception prefixes with external application's prefixes.
-     * @function getXCodePrefixes
-     * @return array<string, int>
-     */
-    public static function getXCodePrefixes(): array
-    {
-        return array_merge(self::getPvcXCodePrefixes(), self::getExternalXCodePrefixes());
     }
 }

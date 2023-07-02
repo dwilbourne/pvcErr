@@ -10,6 +10,7 @@ namespace pvcTests\err;
 
 use PHPUnit\Framework\TestCase;
 use pvc\err\XDataTestMaster;
+use pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData;
 
 class XDataTestMasterTest extends TestCase
 {
@@ -30,7 +31,7 @@ class XDataTestMasterTest extends TestCase
      */
     public function testGetExceptionClassStrings(): void
     {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData();
+        $xData = new _pvcXData();
         /**
          * There are 10 files in the fixture dir, 6 of which are exceptions
          */
@@ -132,7 +133,7 @@ class XDataTestMasterTest extends TestCase
      */
     public function testVerifyLibrary(): void
     {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData();
+        $xData = new _pvcXData();
         self::assertTrue($this->xDataTestMaster->verifylibrary($xData));
     }
 }

@@ -55,6 +55,18 @@ class XDataAbstractTest extends TestCase
     }
 
     /**
+     * @function testCountXMessageVariables
+     * @param string $message
+     * @param int $expectNumParameters
+     * @covers       \pvc\err\XDataAbstract::countXMessageVariables
+     * @dataProvider dataProvider
+     */
+    public function testCountXMessageVariables(string $message, int $expectNumParameters): void
+    {
+        self::assertEquals($expectNumParameters, $this->mock->countXMessageVariables($message));
+    }
+
+    /**
      * @function dataProvider
      * @return array<string, array<string|int>>
      */
@@ -70,17 +82,5 @@ class XDataAbstractTest extends TestCase
             ],
             'messageWithMalformedParameter' => ['Your function parameter ${param is invalid.', 0],
         ];
-    }
-
-    /**
-     * @function testCountXMessageVariables
-     * @param string $message
-     * @param int $expectNumParameters
-     * @covers       \pvc\err\XDataAbstract::countXMessageVariables
-     * @dataProvider dataProvider
-     */
-    public function testCountXMessageVariables(string $message, int $expectNumParameters): void
-    {
-        self::assertEquals($expectNumParameters, $this->mock->countXMessageVariables($message));
     }
 }

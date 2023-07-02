@@ -20,8 +20,6 @@ use ReflectionException;
 use ReflectionMethod;
 use Throwable;
 
-use function PHPUnit\Framework\assertIsString;
-
 /**
  * Class Exception
  */
@@ -30,45 +28,43 @@ class Exception extends \Exception
     protected ?Throwable $previous = null;
 
     /**
-     * This method uses nikic's PhpParser to parse each file in the exception library (directory) and
-     * extract the class string or, if the class is not namespaced, the class name.
-     *
-     * This is implemented with a "node visitor".  The PhpParserNodeVisitorClassName object gets the class name
-     * and namespacing within the file.  The other significant feature of the PhpParserNodeVisitorClassName object
-     * is that it stops traversal of the tree (AST) as soon as the class name is obtained.
-     *
-     * @function getClassStringFromFileContents
-     * @param string $fileContents
-     * @return string
+     * @param mixed ...$allParams
+     * @throws ReflectionException
      */
-    protected function getClassStringFromFileContents(string $fileContents): string
+    public function __construct(...$allParams)
     {
         /**
-         * create the parser and parse the file.  Result is an array of nodes, which is the AST
+         * initialize some things that we need to create the message and the code
          */
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
-        /** @var Node[] $nodes */
-        $nodes = $parser->parse($fileContents);
+        $myClassString = get_class($this);
+        $reflected = new ReflectionClass($myClassString);
+        $xData = $this->getXDataFromClassString($myClassString);
 
         /**
-         * PhpParser object which traverses the AST.  Add a visitor to the traverser.  This visitor
-         * gets namespace and class name strings and stops traversal of the AST after it finds a class name.
+         * of course this should never happen if the library has been tested.......
          */
-        $traverser = new NodeTraverser();
-        $classVisitor = new PhpParserNodeVisitorClassName();
-        $traverser->addVisitor($classVisitor);
-        $traverser->traverse($nodes);
-
-        /**
-         * two parts to the class string: the namespace and the class name.  Concatenate the two properly depending
-         * on whether there was a class declaration present.
-         */
-        if ($classString = $classVisitor->getClassname()) {
-            if ($namespaceName = $classVisitor->getNamespaceName()) {
-                $classString = $namespaceName . '\\' . $classString;
-            }
+        if (is_null($xData)) {
+            $msg = 'No exception data file found for exception $myClassString!';
+            $code = 0;
+            throw new \Exception($msg, $code);
         }
-        return $classString;
+
+        /**
+         * exception code is code prefix concatenated to local code.
+         */
+        $localCode = $xData->getLocalXCode($myClassString);
+        $globalPrefix = XCodePrefixes::getXCodePrefix($reflected->getNamespaceName());
+        $code = (int)($globalPrefix . $localCode);
+
+        /**
+         * get the message template and variables and do the string substitution
+         */
+        $messageTemplate = $xData->getXMessageTemplate($myClassString);
+        /** parsing the parameters sets $this->previous as a by-product */
+        $messageParams = $this->parseParams($allParams, $xData->countXMessageVariables($messageTemplate));
+        $message = strtr($messageTemplate, $messageParams);
+
+        parent::__construct($message, $code, $this->previous);
     }
 
     /**
@@ -142,6 +138,48 @@ class Exception extends \Exception
     }
 
     /**
+     * This method uses nikic's PhpParser to parse each file in the exception library (directory) and
+     * extract the class string or, if the class is not namespaced, the class name.
+     *
+     * This is implemented with a "node visitor".  The PhpParserNodeVisitorClassName object gets the class name
+     * and namespacing within the file.  The other significant feature of the PhpParserNodeVisitorClassName object
+     * is that it stops traversal of the tree (AST) as soon as the class name is obtained.
+     *
+     * @function getClassStringFromFileContents
+     * @param string $fileContents
+     * @return string
+     */
+    protected function getClassStringFromFileContents(string $fileContents): string
+    {
+        /**
+         * create the parser and parse the file.  Result is an array of nodes, which is the AST
+         */
+        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        /** @var Node[] $nodes */
+        $nodes = $parser->parse($fileContents);
+
+        /**
+         * PhpParser object which traverses the AST.  Add a visitor to the traverser.  This visitor
+         * gets namespace and class name strings and stops traversal of the AST after it finds a class name.
+         */
+        $traverser = new NodeTraverser();
+        $classVisitor = new PhpParserNodeVisitorClassName();
+        $traverser->addVisitor($classVisitor);
+        $traverser->traverse($nodes);
+
+        /**
+         * two parts to the class string: the namespace and the class name.  Concatenate the two properly depending
+         * on whether there was a class declaration present.
+         */
+        if ($classString = $classVisitor->getClassname()) {
+            if ($namespaceName = $classVisitor->getNamespaceName()) {
+                $classString = $namespaceName . '\\' . $classString;
+            }
+        }
+        return $classString;
+    }
+
+    /**
      * @function parseParams
      * @param array<mixed> $paramValues
      * @param int $countOfMessageVariables
@@ -192,7 +230,7 @@ class Exception extends \Exception
                 $result = $value;
                 break;
             case 'integer':
-                /** @var integer $value */
+                /** @var int $value */
                 $result = (string)$value;
                 break;
             case 'boolean':
@@ -204,45 +242,5 @@ class Exception extends \Exception
         }
         /** @phpstan-ignore-next-line */
         return $result;
-    }
-
-    /**
-     * @param mixed ...$allParams
-     * @throws ReflectionException
-     */
-    public function __construct(...$allParams)
-    {
-        /**
-         * initialize some things that we need to create the message and the code
-         */
-        $myClassString = get_class($this);
-        $reflected = new ReflectionClass($myClassString);
-        $xData = $this->getXDataFromClassString($myClassString);
-
-        /**
-         * of course this should never happen if the library has been tested.......
-         */
-        if (is_null($xData)) {
-            $msg = 'No exception data file found for exception $myClassString!';
-            $code = 0;
-            throw new \Exception($msg, $code);
-        }
-
-        /**
-         * exception code is code prefix concatenated to local code.
-         */
-        $localCode = $xData->getLocalXCode($myClassString);
-        $globalPrefix = XCodePrefixes::getXCodePrefix($reflected->getNamespaceName());
-        $code = (int)($globalPrefix . $localCode);
-
-        /**
-         * get the message template and variables and do the string substitution
-         */
-        $messageTemplate = $xData->getXMessageTemplate($myClassString);
-        /** parsing the parameters sets $this->previous as a by-product */
-        $messageParams = $this->parseParams($allParams, $xData->countXMessageVariables($messageTemplate));
-        $message = strtr($messageTemplate, $messageParams);
-
-        parent::__construct($message, $code, $this->previous);
     }
 }

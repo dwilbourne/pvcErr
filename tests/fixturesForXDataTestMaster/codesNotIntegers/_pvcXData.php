@@ -26,7 +26,7 @@ class _pvcXData extends XDataAbstract implements XDataInterface
     public function getLocalXCodes(): array
     {
         return [
-            InvalidArrayIndexException::class => "foo",
+            InvalidArrayIndexException::class => 'foo',
             InvalidArrayValueException::class => 1002,
             InvalidFilenameException::class => 1.57,
         ];
