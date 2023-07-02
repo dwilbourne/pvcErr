@@ -103,11 +103,3 @@ class PvcXLibIntegrationTest extends TestCase
         );
     }
 }
-
-tion(
-    $regex,
-    $subject,
-    $replace
-))
-    }
-}

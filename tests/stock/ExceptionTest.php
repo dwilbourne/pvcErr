@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
+
+declare(strict_types=1);
 
 namespace pvcTests\err\stock;
 
@@ -26,7 +26,7 @@ class ExceptionTest extends TestCase
          * need to manually require this file since it is not namespaced, is not PSR-0 / PSR-4 compliant, and
          * therefore will not autoload.  Change the path as necessary to suit yourself for these tests.
          */
-        require_once "I:\\www\\pvcException\\tests\\fixtureForXDataTests\\ClassWithNoNamespace.php";
+        require_once "I:\\www\\pvcErr\\tests\\fixtureForXDataTests\\ClassWithNoNamespace.php";
     }
 
     /**

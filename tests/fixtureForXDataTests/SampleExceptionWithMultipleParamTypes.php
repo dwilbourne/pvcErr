@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace pvcTests\err\fixtureForXDataTests;
 
 use pvc\err\stock\LogicException;
+use \Throwable;
 
 /**
  * Class SampleExceptionWithMultipleParamTypes

@@ -1,19 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
-namespace pvcTests\err;
+declare(strict_types=1);
+
+namespace pvc\err;
 
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
 use PHPUnit\Framework\TestCase;
-use pvc\err\PhpParserNodeVisitorClassName;
 use pvc\interfaces\err\XDataInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -22,54 +21,37 @@ use Throwable;
 class XDataTestMaster extends TestCase
 {
     /**
-     * @var array<int, class-string>
-     */
-    private array $exceptionClassStrings;
-
-    /**
-     * @var XDataInterface
-     */
-    private XDataInterface $xData;
-
-
-    /**
      * verifylibrary
-     * @param class-string $xDataClassString
+     * @param XDataInterface $xData
      */
-    public function verifylibrary(string $xDataClassString): void
+    public function verifylibrary(XDataInterface $xData): bool
     {
-        /**
-         * doing this in two steps so we can typehint object, otherwise phpstan complains
-         * @var XDataInterface $object
-         */
-        $object = new $xDataClassString();
-        $this->xData = $object;
-        $this->exceptionClassStrings = $this->getExceptionClassStringsFromXDataDir();
-        $this->verifyGetLocalCodesKeysMatchClassStringsFromDir();
-        $this->verifyGetLocalMessagesKeysMatchClassStringsFromDir();
-        $this->verifyGetLocalCodesArrayHasUniqueIntegerValues();
-        $this->verifyGetLocalMessagesArrayHasStringsForValues();
+        $result = $this->verifyKeysMatchClassStringsFromDir($xData);
+        $result = $result && $this->verifyGetLocalCodesArrayHasUniqueIntegerValues($xData);
+        $result = $result && $this->verifyGetLocalMessagesArrayHasStringsForValues($xData);
+        return $result;
     }
 
     /**
      * getExceptionClassStringsFromDir
      * @return array<int, class-string>
      */
-    protected function getExceptionClassStringsFromXDataDir(): array
+    public function getExceptionClassStrings(XDataInterface $xData): array
     {
         /**
          * reflect XData and get the directory portion of the file name
          */
-        $reflectedXData = new ReflectionClass($this->xData);
+        $reflectedXData = new ReflectionClass($xData);
         $filePath = $reflectedXData->getFileName() ?: '';
         $dir = pathinfo($filePath, PATHINFO_DIRNAME);
 
         /**
-         * put all the files from the directory into an array, removing any directory entries
+         * put all the files from the directory into an array, removing any directory entries.  Typehint files so
+         * phpstan does not complain. scandir returns false if its argument is not a directory, but in this case that
+         * cannot be true because the directory is pulled via pathinfo.
          */
-        if (false === ($files = scandir($dir))) {
-            return [];
-        }
+        /** @var array<int, string> $files */
+        $files = scandir($dir);
         foreach ($files as $index => $file) {
             if (is_dir($file)) {
                 unset($files[$index]);
@@ -105,50 +87,96 @@ class XDataTestMaster extends TestCase
         return $classStrings;
     }
 
-    public function verifyGetLocalCodesKeysMatchClassStringsFromDir(): void
+    public function verifyKeysMatchClassStringsFromDir(XDataInterface $xData): bool
     {
-        $keys = array_keys($this->xData->getLocalXCodes());
-        self::assertEqualsCanonicalizing($keys, $this->exceptionClassStrings);
+        $codesArray = $xData->getLocalXCodes();
+        $messagesArray = $xData->getXMessageTemplates();
+        $exceptionClassStrings = $this->getExceptionClassStrings($xData);
+        $keysForCodes = array_keys($codesArray);
+        $keysForMessages = array_keys($messagesArray);
+
+        $result = true;
+
+        $keysForCodesThatHaveNoExceptionDefined = array_diff($keysForCodes, $exceptionClassStrings);
+        if (!empty($keysForCodesThatHaveNoExceptionDefined)) {
+            foreach ($keysForCodesThatHaveNoExceptionDefined as $key) {
+                echo sprintf("codes key %s has no corresponding exception defined.\n", $key);
+            }
+            $result = false;
+        }
+
+
+        $keysForMessagesThatHaveNoExceptionDefined = array_diff($keysForMessages, $exceptionClassStrings);
+        if (!empty($keysForMessagesThatHaveNoExceptionDefined)) {
+            foreach ($keysForMessagesThatHaveNoExceptionDefined as $key) {
+                echo sprintf("messages key %s has no corresponding exception defined.\n", $key);
+            }
+            $result = false;
+        }
+
+        $exceptionsWithNoCodeDefined = array_diff($exceptionClassStrings, $keysForCodes);
+        if (!empty($exceptionsWithNoCodeDefined)) {
+            foreach ($exceptionsWithNoCodeDefined as $key) {
+                echo sprintf("exception %s has no corresponding code defined.\n", $key);
+            }
+            $result = false;
+        }
+
+        $exceptionsWithNoMessageDefined = array_diff($exceptionClassStrings, $keysForMessages);
+        if (!empty($exceptionsWithNoMessageDefined)) {
+            foreach ($exceptionsWithNoMessageDefined as $key) {
+                echo sprintf("exception %s has no corresponding message defined.\n", $key);
+            }
+            $result = false;
+        }
+
+        return $result;
     }
 
-    public function verifyGetLocalMessagesKeysMatchClassStringsFromDir(): void
+    public function verifyGetLocalCodesArrayHasUniqueIntegerValues(XDataInterface $xData): bool
     {
-        $keys = array_keys($this->xData->getXMessageTemplates());
-        self::assertEqualsCanonicalizing($keys, $this->exceptionClassStrings);
-    }
-
-    public function verifyGetLocalCodesArrayHasUniqueIntegerValues(): void
-    {
-        $codes = $this->xData->getLocalXCodes();
-
+        $codesArray = $xData->getLocalXCodes();
+        $result = true;
         /**
          * verify that the count of unique codes equals the total count of codes
          */
-        self::assertEquals(count(array_unique($codes)), count($codes));
+        if (count(array_unique($codesArray)) != count($codesArray)) {
+            echo sprintf("not all exception codes are unique.\n");
+            $result = false;
+        }
 
         /**
          * verify $codes is all integers.
          * if $codes is empty, $initialValue will be false and then array_reduce returns false.
          */
-        $initialValue = !empty($codes);
+        $initialValue = !empty($codesArray);
         $callback = function ($carry, $x) {
             return ($carry && is_int($x));
         };
-        self::assertTrue(array_reduce($codes, $callback, $initialValue));
+        if (false == (array_reduce($codesArray, $callback, $initialValue))) {
+            echo sprintf("not all exception codes are integers.\n");
+            $result = false;
+        }
+        return $result;
     }
 
-    public function verifyGetLocalMessagesArrayHasStringsForValues(): void
+    public function verifyGetLocalMessagesArrayHasStringsForValues(XDataInterface $xData): bool
     {
+        $messagesArray = $xData->getXMessageTemplates();
+        $result = true;
         /**
          * verify $messages is all strings
-         * if $codes is empty, $initialValue will be false and then array_reduce returns false.
+         * if messages array is empty, $initialValue will be false and then array_reduce returns false.
          */
-        $messages = $this->xData->getXMessageTemplates();
-        $initialValue = !empty($messages);
+        $initialValue = !empty($messagesArray);
         $callback = function ($carry, $x) {
             return ($carry && is_string($x));
         };
-        self::assertTrue(array_reduce($messages, $callback, $initialValue));
+        if (false == (array_reduce($messagesArray, $callback, $initialValue))) {
+            echo sprintf("not all exception messages are strings.\n");
+            $result = false;
+        }
+        return $result;
     }
 
     /**
@@ -174,10 +202,12 @@ class XDataTestMaster extends TestCase
      */
     protected function getClassStringFromFile(string $filename): string
     {
+        /**
+         * file_get_contents returns false if $filename does not exist so typehint it in this case because arguments
+         * here come from a call to scandir.
+         */
+        /** @var string $code */
         $code = file_get_contents($filename);
-        if ($code === false) {
-            return '';
-        }
 
         /**
          * create the parser and parse the file.  Result is an array of nodes, which is the AST

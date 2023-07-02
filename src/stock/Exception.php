@@ -20,6 +20,8 @@ use ReflectionException;
 use ReflectionMethod;
 use Throwable;
 
+use function PHPUnit\Framework\assertIsString;
+
 /**
  * Class Exception
  */
@@ -180,7 +182,7 @@ class Exception extends \Exception
 
     /**
      * @function sanitizeParameterValue
-     * @param $value
+     * @param mixed $value
      * @return string
      */
     protected function sanitizeParameterValue($value): string
@@ -190,6 +192,7 @@ class Exception extends \Exception
                 $result = $value;
                 break;
             case 'integer':
+                /** @var integer $value */
                 $result = (string)$value;
                 break;
             case 'boolean':
@@ -199,6 +202,7 @@ class Exception extends \Exception
                 $result = $type;
                 break;
         }
+        /** @phpstan-ignore-next-line */
         return $result;
     }
 
