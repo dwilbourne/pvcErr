@@ -1,12 +1,4 @@
 
-.. toctree::
-   :maxdepth: 2
-
-    discussion
-    install
-    setup
-    usage
-
 ===============
 pvcErr Overview
 ===============
@@ -26,3 +18,12 @@ Design Points
 * It provides a set of conventions that makes maintaining exception codes and messages easy.
   
 * It implements named parameter substitution into exception message templates. For example, a message template could look like this "Invalid filename: ${filename}", as opposed to the order-dependent sprintf format "Invalid filename:%s".
+
+.. toctree::
+   :maxdepth: 2
+
+    discussion
+    install
+    setup
+    usage
+
