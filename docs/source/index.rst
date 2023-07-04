@@ -1,6 +1,7 @@
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
    :caption: Contents:
 
    discussion
