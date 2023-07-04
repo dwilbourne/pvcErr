@@ -19,6 +19,9 @@ Design Points
   
 * It implements named parameter substitution into exception message templates. For example, a message template could look like this "Invalid filename: ${filename}", as opposed to the order-dependent sprintf format "Invalid filename:%s".
 
+Table of Contents
+#################
+
 .. toctree::
    :maxdepth: 2
 
