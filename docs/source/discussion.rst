@@ -1,6 +1,6 @@
-##########
+
 Discussion
-##########
+==========
 
 The standard signature for creating an exception in php provides the exception constructor with a text string
 ("message"), an integer code ("code"), and the previous exception/error that was thrown ("prev").  One's first natural

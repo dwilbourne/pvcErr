@@ -1,6 +1,6 @@
-#####
+
 Setup
-#####
+=====
 
 1. Decide where you want to keep your exception code prefixes file.  If you are using a framework that has a config
 directory, that would be a sensible choice, or simply perhaps in the root of your src directory.

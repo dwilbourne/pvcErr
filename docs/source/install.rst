@@ -1,7 +1,7 @@
 
-#############################
+
 Installation and Dependencies
-#############################
+=============================
 
 You can install the pvcException package through composer.::
 

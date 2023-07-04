@@ -1,6 +1,6 @@
-#####
+
 Usage
-#####
+=====
 
 Because messages and codes are all handled separately, throwing an exception is now only concerned with information that
  is relevant in the execution context, i.e. the parameters to the message and any previous Throwable that has occurred.
