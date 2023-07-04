@@ -31,8 +31,8 @@ Design Points
 Discussion
 ##########
 
-The signature for creating an exception in php provides the exception constructor with a text string ("message"),
-an integer code ("code"), and the previous exception/error that was thrown ("prev").  One's first natural
+The standard signature for creating an exception in php provides the exception constructor with a text string
+("message"), an integer code ("code"), and the previous exception/error that was thrown ("prev").  One's first natural
 inclination is to define new exceptions by extending one of the stock php exceptions (for example, LogicException),
 and define the class with its own message and code.  Something like the following::
 
@@ -57,7 +57,7 @@ Another complexity of managing codes comes up in the context of managing multipl
 to put all of my exceptions into a single directory for a given set of classes.  But if you are constructing a
 larger application with multiple directories of exceptions or creating multiple
 packages that need to use a common error code numbering system, you need a mechanism to insure global uniqueness
-between the directories and packages.
+between the exception libraries of different packages.
 
 pvcException supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception
 data class (XData) that is used to construct the exceptions in that library.  This exception data class *must extend*
@@ -123,7 +123,7 @@ parameters.
 Speaking of parameters, as you can see from the example above, the code uses a template format of "${paramname}",
 where paramname is the name of a parameter in the constructor of the exception.  Like all of PHP, the names are
 case-sensitive.  Make sure that the dummy variable(s) in the exception constructor match the identifier within the
-braces of your template variables.
+braces of your template variables in your exception data file.
 
 The parameters to your exceptions should be scalar and convertible to strings (so typed as strings or int is a good
 rule of thumb).  It will convert booleans to either 'true' or 'false'.  If you create a parameter with something more
@@ -157,7 +157,8 @@ correspond to the namespaces of your exception libraries.  The prefixes in the a
 prefixes will be prepended to the local exception codes defined in your exception library data classes.  This is the
 mechanism that guarantees uniqueness among exception codes.
 
-In terms of implementation, there are actually two mechanisms that work in parallel.  Internally, pvcExceptions uses
+In terms of implementation, there are actually two mechanisms that work in parallel.  Internally, i.e.
+only as pertains to exceptions defined in the pvc libraries, I use
 a static class to store the namespaces and integers.  If you install this package and look in the vendor directory
 under pvc\err\src, you will see XCodePrefixes.php.
 
@@ -202,7 +203,8 @@ order to extract the class string from a file.
 Setup
 #####
 
-1. Decide where you want to keep your exception code prefixes file.  If you are using a framework that has a config  directory, that would be a sensible choice, or simply perhaps in the root of your src directory.
+1. Decide where you want to keep your exception code prefixes file.  If you are using a framework that has a config
+directory, that would be a sensible choice, or simply perhaps in the root of your src directory.
 
 2. as part of bootstrapping your application, use putenv() to set "XCodePrefixes" to the filepath chosen in step 1.
 
@@ -210,14 +212,14 @@ Update this file as often as you create a new exception library.  Recall that cr
 consists of
 
 * creating the directory in which the exceptions live
-* creating a class inside that directory which extends pvc's XDataAbstract class and stores "local" codes and messages.
+* creating a class inside that directory which extends pvc's XDataAbstract class and stores messages and "local" codes.
 * create exceptions where the constructor consists of the parameter(s) to the message followed by any previous exception you are adding to the exception stack.
 
 #####
 Usage
 #####
 
-This is ow to throw the exception::
+This is how to throw the exception::
 
     throw new MyException($param1, $param2, $previous);
 
