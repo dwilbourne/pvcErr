@@ -1,17 +1,13 @@
-.. pvcErr documentation master file, created by
-sphinx-quickstart on Wed Feb 15 11:51:11 2023.
-You can adapt this file completely to your liking, but it should at least
-contain the root `toctree` directive.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
 
-pvcException
+pvcErr
 ============
 
-The pvcException package provides an organized (though admittedly unorthodox) approach to constructing and throwing
+The pvcErr package provides an organized (though admittedly unorthodox) approach to constructing and throwing
 exceptions in php.  The pvc libraries use this approach throughout.  If you decide you like this approach, the
 library is constructed with a lightweight hook that allows you to use the same conventions and the pvcException code in
 your own project.
@@ -57,7 +53,7 @@ Another complexity of managing codes comes up in the context of managing multipl
 to put all of my exceptions into a single directory for a given set of classes.  But if you are constructing a
 larger application with multiple directories of exceptions or creating multiple
 packages that need to use a common error code numbering system, you need a mechanism to insure global uniqueness
-between the exception libraries of different packages.
+between different exception libraries.
 
 pvcException supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception
 data class (XData) that is used to construct the exceptions in that library.  This exception data class *must extend*
@@ -109,9 +105,9 @@ Here is an example of a small exception data class::
 Keeping all the codes and all the message templates in one file makes it far easier to keep local codes and message
 conventions consistent in the library.  You can name the exception data class file anything you want.  I typically
 use a filename that starts with an underscore ("_") so that the file system automatically sorts it to appear at the
-top of the directory which is holding my exceptions.  As an example, I have a library data class called
-"_TreeExceptionData", which is a library for all the exceptions that can be thrown in the course of creating and
-manipulating an abstract tree structure.
+top of the directory which is holding my exceptions.  As an example, I have an exception library for the exceptions
+that can be thrown in a pvc library for handling tree data structures.  The exception data file is called
+"_TreeExceptionData".
 
 Creating the classes for your exceptions is now quite simple.  In the same directory in which your exception data
 class lives, you create "empty exceptions" that extend base exceptions and have a very small footprint. You DO want to
@@ -211,7 +207,7 @@ directory, that would be a sensible choice, or simply perhaps in the root of you
 Update this file as often as you create a new exception library.  Recall that creating an exception library
 consists of
 
-* creating the directory in which the exceptions live
+* creating the directory in which the exceptions live.
 * creating a class inside that directory which extends pvc's XDataAbstract class and stores messages and "local" codes.
 * create exceptions where the constructor consists of the parameter(s) to the message followed by any previous exception you are adding to the exception stack.
 
