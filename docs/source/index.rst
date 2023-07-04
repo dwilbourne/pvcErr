@@ -1,9 +1,8 @@
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
-   :caption: Contents:
 
+   index
    discussion
    install
    setup
