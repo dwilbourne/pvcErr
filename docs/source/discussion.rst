@@ -38,7 +38,7 @@ The Answer
 
 pvcException supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception
 data class (XData) that is used to construct the exceptions in that library.  This exception data class *must extend*
-pvc\err\XDataAbstract and must implement the following methods::
+pvc\\err\\XDataAbstract and must implement the following methods::
 
 
   abstract protected function getLocalXCodes() : array;
