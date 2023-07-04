@@ -142,8 +142,9 @@ So when you go to throw this exception, what happens?
 
 As you can see, this exception extends LogicException, which is a "pvc branded" exception (hence the "use" statemment
 in the code block above).  LogicException extends Exception, which is the top level exception of pvc exceptions.
-pvc\err\Exception holds the code that is used to construct the exception code and message.  Any exceptions that you
-write must extend pvc\err\Exception in some way.  In general, I want to be able to distinguish between Runtime exceptions and
+pvc\\err\\Exception holds the code that is used to construct the exception code and message.  Any exceptions that you
+write must extend pvc\\err\\Exception in some way.  In general, I want to be able to distinguish between Runtime
+exceptions and
 Logic exceptions, so all of the exceptions in the pvc libraries extend one of those two and they are included in this package.
 Of course you can create additional categorizations if you choose (PDO exception, stream exception, etc).
 
@@ -156,7 +157,7 @@ mechanism that guarantees uniqueness among exception codes.
 In terms of implementation, there are actually two mechanisms that work in parallel.  Internally, i.e.
 only as pertains to exceptions defined in the pvc libraries, I use
 a static class to store the namespaces and integers.  If you install this package and look in the vendor directory
-under pvc\err\src, you will see XCodePrefixes.php.
+under pvc\\err\\src, you will see XCodePrefixes.php.
 
 But in order to make the package usable for others, the code looks for an environment variable named "XCodePrefixes".
 If such a variable exists, then the value of the variable should be the filepath of *your* exception code prefixes.
