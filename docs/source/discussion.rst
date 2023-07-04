@@ -2,6 +2,9 @@
 Discussion
 ==========
 
+The Problem
+###########
+
 The standard signature for creating an exception in php provides the exception constructor with a text string
 ("message"), an integer code ("code"), and the previous exception/error that was thrown ("prev").  One's first natural
 inclination is to define new exceptions by extending one of the stock php exceptions (for example, LogicException),
@@ -29,6 +32,9 @@ to put all of my exceptions into a single directory for a given set of classes. 
 larger application with multiple directories of exceptions or creating multiple
 packages that need to use a common error code numbering system, you need a mechanism to insure global uniqueness
 between different exception libraries.
+
+The Answer
+##########
 
 pvcException supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception
 data class (XData) that is used to construct the exceptions in that library.  This exception data class *must extend*
@@ -84,12 +90,12 @@ top of the directory which is holding my exceptions.  As an example, I have an e
 that can be thrown in a pvc library for handling tree data structures.  The exception data file is called
 "_TreeExceptionData".
 
-Creating the classes for your exceptions is now quite simple.  In the same directory in which your exception data
-class lives, you create "empty exceptions" that extend base exceptions and have a very small footprint. You DO want to
-provide the construction signature and pass the parameters to the parent class(es).  Again, taking advantage of
-autocompletion in your IDE, this simplifies things when you go to throw an exception in your code.  The IDE will
-prompt you for the parameters, so you don't have to refer to your exception data file to figure out the name of the
-parameters.
+Creating the classes for your exceptions is now quite simple.  It is no longer necessary to bury a code and message
+inside each exception.  Each exception has one line of code which calls the parent constructor and passes the message
+parameters and $prev parameter up the inheritance chain.
+
+Message Parameters
+##################
 
 Speaking of parameters, as you can see from the example above, the code uses a template format of "${paramname}",
 where paramname is the name of a parameter in the constructor of the exception.  Like all of PHP, the names are
@@ -123,6 +129,10 @@ exceptions and
 Logic exceptions, so all of the exceptions in the pvc libraries extend one of those two and they are included in this package.
 Of course you can create additional categorizations if you choose (PDO exception, stream exception, etc).
 
+Exception Code Prefixes
+#######################
+
+So far, we've made it easy to ensure that the codes within an exception library are unique.
 The final task we need to address is how to insure uniqueness of codes between libraries.  The basic thought process
 is that we create a map between namespaces (e.g. libraries) and integer values. Of course, the namespaces
 correspond to the namespaces of your exception libraries.  The prefixes in the array are unique integers.  These

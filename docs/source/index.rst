@@ -6,6 +6,7 @@
    install
    setup
    usage
+   testing
 
 ===============
 pvcErr Overview
