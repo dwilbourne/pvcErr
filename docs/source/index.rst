@@ -2,7 +2,6 @@
 .. toctree::
    :hidden:
 
-   index
    discussion
    install
    setup
