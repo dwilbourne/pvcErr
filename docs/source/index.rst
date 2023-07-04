@@ -7,9 +7,9 @@
     setup
     usage
 
-
-pvcErr
-============
+===============
+pvcErr Overview
+===============
 
 The pvcErr package provides an organized (though admittedly unorthodox) approach to constructing and throwing
 exceptions in php.  The pvc libraries use this approach throughout.  If you decide you like this approach, the
