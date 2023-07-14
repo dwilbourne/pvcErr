@@ -38,7 +38,6 @@ class XDataTestMasterTest extends TestCase
     /**
      * testGetExceptionClassStrings
      * @covers \pvc\err\XDataTestMaster::getExceptionClassStrings
-     * @covers \pvc\err\XDataTestMaster::getClassStringFromFile
      */
     public function testGetExceptionClassStrings(): void
     {
