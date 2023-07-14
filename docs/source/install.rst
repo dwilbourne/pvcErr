@@ -1,9 +1,8 @@
-
 =============================
 Installation and Dependencies
 =============================
 
-You can install the pvcException package through composer.::
+You can install the pvcErr package through composer.::
 
 
     require "pvc/err"

@@ -86,7 +86,7 @@ Here is an example of a small exception data class::
 Keeping all the codes and all the message templates in one file makes it far easier to keep local codes and message
 conventions consistent in the library.  You can name the exception data class file anything you want.  I typically
 use a filename that starts with an underscore ("_") so that the file system automatically sorts it to appear at the
-top of the directory which is holding my exceptions, even if PHPStorm complains about it stylistically.  As an
+top of the directory which is holding my exceptions, even if phpcs complains about it stylistically.  As an
 example, I have an exception library for the exceptions that can be thrown in a pvc library for handling tree data
 structures.  The exception data file is called "_TreeExceptionData".
 
@@ -104,7 +104,7 @@ braces of your template variables in your exception data file (the automated tes
 
 The parameters to your exceptions should be scalar and convertible to strings (so typed as strings or int is a good
 rule of thumb).  It will convert booleans to either 'true' or 'false'.  If you create a parameter with something more
-complex, like an object, the library will simply substitute the\ *type*\ of the thing you passed as a parameter into
+complex, like an object, the library will simply substitute the *type* of the thing you passed as a parameter into
 the message.
 
 For example, here's an exception that goes with the example above::
