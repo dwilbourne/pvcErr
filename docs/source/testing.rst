@@ -14,13 +14,42 @@ composer.json file (like it wasn't there already, right?).
 
 There is a method in XDataTestMaster called verifyLibrary.  It makes sure the exceptions in your XData file match the
 exceptions that actually exist in the library, makes sure your exception codes are unique integers, etc.  The
-parameter to verifylibrary is the instantiated XData object for your library.
+parameter to verifyLibrary is the instantiated XData object for your library.
 
-Here's an example of the method definition::
+Here's an example of the single test written to test all the exceptions in the pvcRegex library::
 
-    public function testPvcRegexExceptionLibrary(): void
+    <?php
+
+    /**
+    * @author: Doug Wilbourne (dougwilbourne@gmail.com)
+    */
+
+    declare (strict_types=1);
+
+    namespace pvcTests\regex\err;
+
+    use pvc\err\XDataTestMaster;
+    use pvc\regex\err\_RegexXData;
+
+    /**
+    * Class _RegexXDataTest
+    */
+    class _RegexXDataTest  extends XDataTestMaster
     {
-        $xData = new _RegexXData();
-        self::assertTrue($this->verifylibrary($xData));
+        /**
+         * @function testPvcRegexExceptionLibrary
+         * @covers \pvc\regex\err\_RegexXData::getXMessageTemplates
+         * @covers \pvc\regex\err\_RegexXData::getLocalXCodes
+         * @covers \pvc\regex\err\RegexBadPatternException::__construct
+         * @covers \pvc\regex\err\RegexInvalidDelimiterException::__construct
+         * @covers \pvc\regex\err\RegexInvalidMatchIndexException::__construct
+         */
+        public function testPvcRegexExceptionLibrary(): void
+        {
+            $xData = new _RegexXData();
+            self::assertTrue($this->verifyLibrary($xData));
+        }
     }
 
+The tedious part is listing the @covers annotation for each exception in the library, and the rest of it is pretty
+fast to generate (by a lot when compared to writing a separate test for each exception class).

@@ -10,18 +10,29 @@ namespace pvcTests\err;
 
 use PHPUnit\Framework\TestCase;
 use pvc\err\XDataTestMaster;
+use pvcTests\err\fixtureForXDataTests\SampleException;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithBadPrevParamDefault;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithBadPrevParameter;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithNonOptionalPrevParameter;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithoutPrevParameter;
 use pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionParameter;
 
 class XDataTestMasterTest extends TestCase
 {
+    /**
+     * @var XDataTestMaster
+     */
     protected XDataTestMaster $xDataTestMaster;
 
-    protected string $fixtureDir;
-
+    /**
+     * setUp
+     */
     public function setUp(): void
     {
         $this->xDataTestMaster = new XDataTestMaster();
-        $this->fixtureDir = __DIR__ . DIRECTORY_SEPARATOR . 'fixturesForXDataTestMaster';
     }
 
     /**
@@ -128,12 +139,193 @@ class XDataTestMasterTest extends TestCase
     }
 
     /**
+     * messageDataProvider
+     * @return array<string, array<string>>
+     */
+    public function messageDataProvider(): array
+    {
+        return [
+            ['This message has no parameters', []],
+            ['There is a limit of ${limit} attempts before lockout.', ['limit']],
+            ['This message also has ${no parameters} because of the whitespace', []],
+            ['This ${message} as ${two} parameters', ['message', 'two']],
+        ];
+    }
+
+    /**
+     * testParseVariableNamesFromMessage
+     * @param string $message
+     * @param array $expectedParamArray
+     * @dataProvider messageDataProvider
+     * @covers       \pvc\err\XDataTestMaster::parseVariableNamesFromMessage
+     */
+    public function testParseVariableNamesFromMessage(string $message, array $expectedParamArray): void
+    {
+        self::assertEqualsCanonicalizing(
+            $expectedParamArray,
+            $this->xDataTestMaster->parseVariableNamesFromMessage($message)
+        );
+    }
+
+    /**
+     * dataProviderForParameterIsThrowable
+     * @return array[]
+     */
+    public function dataProviderForParameterIsThrowable(): array
+    {
+        return [
+            [SampleException::class, true],
+            [SampleExceptionWithoutPrevParameter::class, false],
+        ];
+    }
+
+    /**
+     * testParameterIsThrowable
+     * @param string $classString
+     * @param bool $expectedResult
+     * @throws ReflectionException
+     * @dataProvider dataProviderForParameterIsThrowable
+     * @covers       \pvc\err\XDataTestMaster::parameterIsThrowable
+     */
+    public function testParameterIsThrowable(string $classString, bool $expectedResult): void
+    {
+        $reflection = new ReflectionClass($classString);
+        $params = $reflection->getConstructor()->getParameters();
+        $lastParam = $params[count($params) - 1];
+        self::assertEquals($expectedResult, $this->xDataTestMaster->parameterIsThrowable($lastParam));
+    }
+
+    /**
+     * dataProviderForParameterHasDefaultValueOfNull
+     * @return array[]
+     */
+    public function dataProviderForParameterHasDefaultValueOfNull(): array
+    {
+        return [
+            [SampleExceptionWithNonOptionalPrevParameter::class, false],
+            [SampleExceptionWithBadPrevParameter::class, false],
+            [SampleException::class, true],
+        ];
+    }
+
+    /**
+     * testParameterHasDefaultValueOfNull
+     * @param ReflectionParameter $param
+     * @param $expectedResult
+     * @throws ReflectionException
+     * @dataProvider dataProviderForParameterHasDefaultValueOfNull
+     * @covers       \pvc\err\XDataTestMaster::parameterHasDefaultValueOfNull
+     */
+    public function testParameterHasDefaultValueOfNull(string $classString, $expectedResult): void
+    {
+        $reflection = new ReflectionClass($classString);
+        $params = $reflection->getConstructor()->getParameters();
+        $lastParam = $params[count($params) - 1];
+        self::assertEquals($expectedResult, $this->xDataTestMaster->parameterHasDefaultValueOfNull($lastParam));
+    }
+
+    /**
+     * dataProviderForCreateDummyParamValueBasedOnType
+     * @return array
+     */
+    public function dataProviderForCreateDummyParamValueBasedOnType(): array
+    {
+        return [
+            ['string', 'foo'],
+            ['integer', 5],
+            ['bool', true],
+            ['other', '{other}'],
+        ];
+    }
+
+    /**
+     * testCreateDummyParamValueBasedOnType
+     * @param string $dataType
+     * @param $expectedValue
+     * @dataProvider dataProviderForCreateDummyParamValueBasedOnType
+     * @covers       \pvc\err\XDataTestMaster::createDummyParamValueBasedOnType
+     */
+    public function testCreateDummyParamValueBasedOnType(string $dataType, $expectedValue): void
+    {
+        self::assertEquals($expectedValue, $this->xDataTestMaster->createDummyParamValueBasedOnType($dataType));
+    }
+
+    /**
+     * dataProviderForVerifyExceptionAndMessageParameters
+     * @return array[]
+     */
+    public function dataProviderForVerifyExceptionAndMessageParameters(): array
+    {
+        return [
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData',
+                null,
+                true
+            ],
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoParameters\_pvcXData',
+                '/has no parameters/',
+                false
+            ],
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoThrowableParameter\_pvcXData',
+                '/is not Throwable/',
+                false
+            ],
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoDefaultForPrev\_pvcXData',
+                '/does not have a default value of null/',
+                false
+            ],
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\exceptionParamsNotMatchMsgParams\_pvcXData',
+                '/do not match the variable names/',
+                false
+            ],
+        ];
+    }
+
+    /**
+     * testVerifyExceptionParametersAndMessageParameters
+     * @throws ReflectionException
+     * @dataProvider dataProviderForVerifyExceptionAndMessageParameters
+     * @covers       \pvc\err\XDataTestMaster::verifyExceptionParametersAndMessageParametersMatch
+     */
+    public function testVerifyExceptionAndMessageParameters(
+        string $xDataClassString,
+        ?string $outputRegex,
+        bool $expectedResult
+    ): void {
+        $xData = new $xDataClassString();
+
+        if ($outputRegex) {
+            self::expectOutputRegex($outputRegex);
+        }
+
+        self::assertEquals(
+            $expectedResult,
+            $this->xDataTestMaster->verifyExceptionParametersAndMessageParametersMatch($xData)
+        );
+    }
+
+    /**
+     * testVerifyExceptionsCanBeInstantiated
+     * @throws ReflectionException
+     * @covers \pvc\err\XDataTestMaster::verifyExceptionsCanBeInstantiated
+     */
+    public function testVerifyExceptionsCanBeInstantiated(): void
+    {
+        $xData = new _pvcXData();
+        self::assertTrue($this->xDataTestMaster->verifyExceptionsCanBeInstantiated($xData));
+    }
+
+    /**
      * testVerifyLibrary
-     * @covers \pvc\err\XDataTestMaster::verifylibrary
+     * @covers \pvc\err\XDataTestMaster::verifyLibrary
      */
     public function testVerifyLibrary(): void
     {
         $xData = new _pvcXData();
-        self::assertTrue($this->xDataTestMaster->verifylibrary($xData));
+        self::assertTrue($this->xDataTestMaster->verifyLibrary($xData));
     }
 }

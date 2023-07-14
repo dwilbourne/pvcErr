@@ -65,10 +65,10 @@ class XCodePrefixesTest extends TestCase
     }
 
     /**
-     * @function testgetExternalXCodePrefixesIgnoresEnvVariableIfVariableValueIsInvalid
+     * @function testGetExternalXCodePrefixesIgnoresEnvVariableIfVariableValueIsInvalid
      * @covers \pvc\err\XCodePrefixes::getExternalXCodePrefixes
      */
-    public function testgetExternalXCodePrefixesIgnoresEnvVariableIfVariableValueIsInvalid(): void
+    public function testGetExternalXCodePrefixesIgnoresEnvVariableIfVariableValueIsInvalid(): void
     {
         /**
          * environment variable name is correct but path is nonsense
@@ -80,10 +80,10 @@ class XCodePrefixesTest extends TestCase
     }
 
     /**
-     * @function testgetExternalXCodePrefixesIgnoresBadFileContents
+     * @function testGetExternalXCodePrefixesIgnoresBadFileContents
      * @covers \pvc\err\XCodePrefixes::getExternalXCodePrefixes
      */
-    public function testgetExternalXCodePrefixesIgnoresBadFileContents(): void
+    public function testGetExternalXCodePrefixesIgnoresBadFileContents(): void
     {
         /**
          * environment variable name points to unparseable php file
@@ -96,10 +96,10 @@ class XCodePrefixesTest extends TestCase
     }
 
     /**
-     * @function testgetExternalXCodePrefixesGetsArrayContents
+     * @function testGetExternalXCodePrefixesGetsArrayContents
      * @covers \pvc\err\XCodePrefixes::getExternalXCodePrefixes
      */
-    public function testgetExternalXCodePrefixesGetsArrayContents(): void
+    public function testGetExternalXCodePrefixesGetsArrayContents(): void
     {
         $goodFileName = $this->fixtureDir . DIRECTORY_SEPARATOR . 'XCodePrefixes.php';
         putenv("XCodePrefixes=$goodFileName");

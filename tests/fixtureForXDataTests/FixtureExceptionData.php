@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
+ * @noinspection PhpCSValidationInspection
  */
 
 declare(strict_types=1);

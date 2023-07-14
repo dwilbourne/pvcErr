@@ -119,14 +119,22 @@ class Exception extends \Exception
                 $className = self::getClassStringFromFileContents($fileContents);
 
                 if ($className) {
-                    $reflected = new ReflectionClass($className);
                     /**
-                     * if it implements the right interface, return a new instance.
+                     * it is possible that $classname might not be reflectable if the namespacing is messed up or
+                     * missing.  Since it won't autoload, just wrap the thing in a try / catch and fall through if
+                     * the reflection fails.
                      */
-                    if ($reflected->implementsInterface(XDataInterface::class)) {
-                        /** @var XDataInterface $xData */
-                        $xData = new $className();
-                        return $xData;
+                    try {
+                        $reflected = new ReflectionClass($className);
+                        /**
+                         * if it implements the right interface, return a new instance.
+                         */
+                        if ($reflected->implementsInterface(XDataInterface::class)) {
+                            /** @var XDataInterface $xData */
+                            $xData = new $className();
+                            return $xData;
+                        }
+                    } catch (Throwable $e) {
                     }
                 }
             }
@@ -149,7 +157,7 @@ class Exception extends \Exception
      * @param string $fileContents
      * @return string
      */
-    protected function getClassStringFromFileContents(string $fileContents): string
+    public static function getClassStringFromFileContents(string $fileContents): string
     {
         /**
          * create the parser and parse the file.  Result is an array of nodes, which is the AST

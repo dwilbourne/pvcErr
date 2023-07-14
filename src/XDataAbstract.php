@@ -54,6 +54,7 @@ abstract class XDataAbstract implements XDataInterface
      * @function countXMessageVariables
      * @param string $messageTemplate
      * @return int<0, max>
+     * @noinspection GrazieInspection
      */
     public function countXMessageVariables(string $messageTemplate): int
     {
@@ -70,7 +71,7 @@ abstract class XDataAbstract implements XDataInterface
          */
         $regex = '/\$\{[^}]+\}/';
         /**
-         * phpstan thinls preg_match_all can return false so use intval to coalesce it to 0.
+         * phpstan thinks preg_match_all can return false so use intval to coalesce it to 0.
          */
         return intval(preg_match_all($regex, $messageTemplate));
     }

@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\err\pvc;
+namespace pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoParameters;
 
 use pvc\err\XDataAbstract;
 use pvc\interfaces\err\XDataInterface;
@@ -27,11 +27,6 @@ class _pvcXData extends XDataAbstract implements XDataInterface
     {
         return [
             InvalidArrayIndexException::class => 1001,
-            InvalidArrayValueException::class => 1002,
-            InvalidFilenameException::class => 1003,
-            InvalidPHPVersionException::class => 1004,
-            PregMatchFailureException::class => 1005,
-            PregReplaceFailureException::class => 1006,
         ];
     }
 
@@ -43,11 +38,6 @@ class _pvcXData extends XDataAbstract implements XDataInterface
     {
         return [
             InvalidArrayIndexException::class => 'Invalid array index ${index}.',
-            InvalidArrayValueException::class => 'Invalid array value ${value}.',
-            InvalidFilenameException::class => 'filename ${badFileName} is not valid.',
-            InvalidPHPVersionException::class => 'Invalid PHP version ${currentVersion} - must be at least ${minVersion}',
-            PregMatchFailureException::class => 'preg_match failed: regex=${regex}; subject=${subject};',
-            PregReplaceFailureException::class => 'preg_replace failed: regex=${regex}; subject=${subject}; replacement=${replacement}',
         ];
     }
 }

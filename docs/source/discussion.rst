@@ -36,7 +36,7 @@ between different exception libraries.
 The Answer
 ##########
 
-pvcException supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception
+pvcErr supposes that a "library" of exceptions is a *directory* that contains exception classes plus an exception
 data class (XData) that is used to construct the exceptions in that library.  This exception data class *must extend*
 pvc\\err\\XDataAbstract and must implement the following methods::
 
@@ -49,8 +49,8 @@ pvc\\err\\XDataAbstract and must implement the following methods::
 
 The keys in the arrays returned by getXCodes and getXMessageTemplates should be the fully qualified class strings of
 the exceptions in the library.  This convention  allows you to take advantage of autocompletion in your IDE.  It also
-allows the code to verify that all the exceptions in the library have codes and messages, that the codes are unique,
-that there are no "extra exceptions" that have no data, etc.
+allows the testing code to verify that all the exceptions in the library have codes and messages, that the codes are
+unique, that there are no "extra exceptions" that have no data, etc.
 
 Here is an example of a small exception data class::
 
@@ -86,9 +86,9 @@ Here is an example of a small exception data class::
 Keeping all the codes and all the message templates in one file makes it far easier to keep local codes and message
 conventions consistent in the library.  You can name the exception data class file anything you want.  I typically
 use a filename that starts with an underscore ("_") so that the file system automatically sorts it to appear at the
-top of the directory which is holding my exceptions.  As an example, I have an exception library for the exceptions
-that can be thrown in a pvc library for handling tree data structures.  The exception data file is called
-"_TreeExceptionData".
+top of the directory which is holding my exceptions, even if PHPStorm complains about it stylistically.  As an
+example, I have an exception library for the exceptions that can be thrown in a pvc library for handling tree data
+structures.  The exception data file is called "_TreeExceptionData".
 
 Creating the classes for your exceptions is now quite simple.  It is no longer necessary to bury a code and message
 inside each exception.  Each exception has one line of code which calls the parent constructor and passes the message
@@ -100,7 +100,7 @@ Message Parameters
 Speaking of parameters, as you can see from the example above, the code uses a template format of "${paramname}",
 where paramname is the name of a parameter in the constructor of the exception.  Like all of PHP, the names are
 case-sensitive.  Make sure that the dummy variable(s) in the exception constructor match the identifier within the
-braces of your template variables in your exception data file.
+braces of your template variables in your exception data file (the automated tests check for this anyway).
 
 The parameters to your exceptions should be scalar and convertible to strings (so typed as strings or int is a good
 rule of thumb).  It will convert booleans to either 'true' or 'false'.  If you create a parameter with something more
@@ -119,15 +119,25 @@ For example, here's an exception that goes with the example above::
     }
   }
 
+There are a couple of rules about declaring parameters in the exceptions.  The rules are
+
+* there must be at least one parameter
+* parameters must be typed - no 'variadic' parameters.  The days of loose data typing should be behind us.
+* except for the $prev parameter, the name of each parameter must match a variable name in the message
+* the last parameter must be typed \Throwable and must have a default of null.
+
+These rules are embedded in the automatic testing of your exception library (see the Testing section for more info).
+If you break one of these parameter rules, the automatically generated tests will fail.
+
 So when you go to throw this exception, what happens?
 
 As you can see, this exception extends LogicException, which is a "pvc branded" exception (hence the "use" statemment
 in the code block above).  LogicException extends Exception, which is the top level exception of pvc exceptions.
 pvc\\err\\Exception holds the code that is used to construct the exception code and message.  Any exceptions that you
 write must extend pvc\\err\\Exception in some way.  In general, I want to be able to distinguish between Runtime
-exceptions and
-Logic exceptions, so all of the exceptions in the pvc libraries extend one of those two and they are included in this package.
-Of course you can create additional categorizations if you choose (PDO exception, stream exception, etc).
+exceptions and Logic exceptions, so all of the exceptions in the pvc libraries extend one of those two and they
+are included in this package. Of course you can create additional categorizations if you choose (PDO exception,
+stream exception, etc).
 
 Exception Code Prefixes
 #######################

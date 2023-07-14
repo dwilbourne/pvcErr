@@ -8,7 +8,7 @@
 declare(strict_types=1);
 
 /**
- * Class ClassWithnoNamespace
+ * Class ClassWithNoNamespace
  */
 class ClassWithNoNamespace
 {

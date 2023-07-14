@@ -14,12 +14,11 @@ use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 
 /**
- * PhpParserNodeVisitorClassName gets the class name from an Abstract Syntax Tree and then stops the traversal.  This
- * is really really bad at the moment:  the success of the enterNode method setting the className is contingent on
- * running a NameResolver through the node prior to this visitor.  I need to write a decorator for NameResolver that
- * has a method to get the namespacedName property of the node......
+ * PhpParserNodeVisitorClassName gets the class name from an Abstract Syntax Tree and then stops the traversal.
  *
- * @package tests\php_parser
+ * The success of the enterNode method setting the className is contingent on
+ * running a NameResolver through the node prior to this visitor.  Need to write a decorator for NameResolver that
+ * has a method to get the namespacedName property of the node......
  */
 class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
 {

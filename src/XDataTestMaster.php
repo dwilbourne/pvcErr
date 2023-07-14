@@ -9,26 +9,30 @@ declare(strict_types=1);
 
 namespace pvc\err;
 
-use PhpParser\Node;
-use PhpParser\NodeTraverser;
-use PhpParser\ParserFactory;
 use PHPUnit\Framework\TestCase;
+use pvc\err\stock\Exception;
 use pvc\interfaces\err\XDataInterface;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionParameter;
 use Throwable;
 
+/**
+ * Class XDataTestMaster
+ */
 class XDataTestMaster extends TestCase
 {
     /**
-     * verifylibrary
+     * verifyLibrary
      * @param XDataInterface $xData
      */
-    public function verifylibrary(XDataInterface $xData): bool
+    public function verifyLibrary(XDataInterface $xData): bool
     {
         $result = $this->verifyKeysMatchClassStringsFromDir($xData);
         $result = $result && $this->verifyGetLocalCodesArrayHasUniqueIntegerValues($xData);
         $result = $result && $this->verifyGetLocalMessagesArrayHasStringsForValues($xData);
+        $result = $result && $this->verifyExceptionParametersAndMessageParametersMatch($xData);
+        $result = $result && $this->verifyExceptionsCanBeInstantiated($xData);
         return $result;
     }
 
@@ -114,7 +118,8 @@ class XDataTestMaster extends TestCase
              * get the class string by parsing the file
              * @var class-string $classString
              */
-            $classString = $this->getClassStringFromFile($dir . DIRECTORY_SEPARATOR . $file);
+            $fileContents = file_get_contents($dir . DIRECTORY_SEPARATOR . $file);
+            $classString = Exception::getClassStringFromFileContents($fileContents);
 
             /**
              * validate the class string:  must be reflectable (i.e. an object) and must implement Throwable.  If
@@ -134,57 +139,10 @@ class XDataTestMaster extends TestCase
     }
 
     /**
-     * This method uses nikic's PhpParser to parse each file in the exception library (directory) and
-     * extract the class string or, if the class is not namespaced, the class name.
-     *
-     * This is implemented with two "node
-     * visitors".  There's one that comes with the parser package called NameResolver, which obtains the fully
-     * namespaced name of the class if it lives in a namespace.  But unfortunately it gets null if the class does not
-     * live in a namespace. The PhpParserNodeVisitorClassName object gets the class name (no namespacing) in all
-     * cases.  But the other significant feature of the PhpParserNodeVisitorClassName object is that it stops
-     * traversal of the tree as soon as the class name is obtained, which should save a few CPU cycles....
-     *
-     * @function getClassStringFromFileContents
-     * @param string $filename
-     * @return string
+     * verifyGetLocalCodesArrayHasUniqueIntegerValues
+     * @param XDataInterface $xData
+     * @return bool
      */
-    protected function getClassStringFromFile(string $filename): string
-    {
-        /**
-         * file_get_contents returns false if $filename does not exist so typehint it in this case because arguments
-         * here come from a call to scandir.
-         */
-        /** @var string $code */
-        $code = file_get_contents($filename);
-
-        /**
-         * create the parser and parse the file.  Result is an array of nodes, which is the AST
-         */
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
-        /** @var Node[] $nodes */
-        $nodes = $parser->parse($code);
-
-        /**
-         * PhpParser object which traverses the AST.  Add a visitor to the traverser.  This visitor
-         * gets namespace and class name strings and stops traversal of the AST after it finds a class name.
-         */
-        $traverser = new NodeTraverser();
-        $classVisitor = new PhpParserNodeVisitorClassName();
-        $traverser->addVisitor($classVisitor);
-        $traverser->traverse($nodes);
-
-        /**
-         * two parts to the class string: the namespace and the class name.  Concatenate the two properly depending
-         * on whether there was a class declaration present.
-         */
-        if ($classString = $classVisitor->getClassname()) {
-            if ($namespaceName = $classVisitor->getNamespaceName()) {
-                $classString = $namespaceName . '\\' . $classString;
-            }
-        }
-        return $classString;
-    }
-
     public function verifyGetLocalCodesArrayHasUniqueIntegerValues(XDataInterface $xData): bool
     {
         $codesArray = $xData->getLocalXCodes();
@@ -235,5 +193,166 @@ class XDataTestMaster extends TestCase
             $result = false;
         }
         return $result;
+    }
+
+    /**
+     * verifyExceptionParametersAndMessageParametersMatch
+     * @param XDataInterface $xData
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function verifyExceptionParametersAndMessageParametersMatch(XDataInterface $xData): bool
+    {
+        $result = true;
+        foreach ($this->getExceptionClassStrings($xData) as $classString) {
+            $reflected = new ReflectionClass($classString);
+            $reflectionParams = $reflected->getConstructor()->getParameters();
+            $countOfParams = count($reflectionParams);
+            /**
+             * all exceptions must have at least one parameter
+             */
+            if ($countOfParams == 0) {
+                echo sprintf("%s has no parameters and must have at least a \$prev parameter.\n", $classString);
+                $result = false;
+                /**
+                 * need to break from the loop because the rest of these tests depend on there being at least one
+                 * parameter
+                 */
+                break;
+            }
+            /**
+             * ensure that last param is Throwable
+             */
+            $lastParam = $reflectionParams[$countOfParams - 1];
+            if (!$this->parameterIsThrowable($lastParam)) {
+                echo sprintf("The last parameter (e.g. \$prev) of %s is not Throwable.\n", $classString);
+                $result = false;
+            }
+            /**
+             * ensure that the last parameter has a default of null
+             */
+            if (!$this->parameterHasDefaultValueOfNull($lastParam)) {
+                $format = "The last parameter (e.g. \$prev) of %s does not have a default value of null.\n";
+                echo sprintf($format, $classString);
+                $result = false;
+            }
+
+            /**
+             * bump the last parameter ($prev) off the array.
+             */
+            array_pop($reflectionParams);
+
+            /**
+             * verify that the parameter names all match the variable names in the messages.  Variable names in the
+             * messages do NOT have to be in the same order as they appear in the constructor declaration for the
+             * exception.
+             */
+            $paramNames = [];
+            foreach ($reflectionParams as $param) {
+                $paramNames[] = $param->getName();
+            }
+
+            $messageVariableNames = $this->parseVariableNamesFromMessage($xData->getXMessageTemplate($classString));
+
+            sort($paramNames);
+            sort($messageVariableNames);
+
+            if ($paramNames != $messageVariableNames) {
+                $format = "The parameters of %s do not match the variable names in the corresponding message.\n";
+                echo sprintf($format, $classString);
+                $result = false;
+            }
+        }
+        /** end of foreach loop through the class strings */
+        return $result;
+    }
+
+    /**
+     * verifyExceptionsCanBeInstantiated
+     * @param XDataInterface $xData
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function verifyExceptionsCanBeInstantiated(XDataInterface $xData): bool
+    {
+        $result = true;
+        foreach ($this->getExceptionClassStrings($xData) as $classString) {
+            $reflected = new ReflectionClass($classString);
+            $reflectionParams = $reflected->getConstructor()->getParameters();
+
+            /**
+             * create array of dummy parameters, so we can instantiate the class.  Do not create a dummy parameter
+             * for the $prev parameter, which has been tested separately, and we know is both Throwable and has a
+             * default of null
+             */
+            array_pop($reflectionParams);
+            $paramValues = [];
+            foreach ($reflectionParams as $param) {
+                $paramValues[] = $this->createDummyParamValueBasedOnType($param->getType()->getName());
+            }
+
+            /**
+             * verify that we can instantiate the exception class so the constructor is exercised.  Then we can
+             * claim 100% line coverage in the testing
+             */
+            $instance = $reflected->newInstanceArgs($paramValues);
+            $result = $result && ($instance instanceof $classString);
+        }
+        return $result;
+    }
+
+    public function parseVariableNamesFromMessage(string $message): array
+    {
+        /**
+         * looking for any group of non-whitespace characters starting with '${' and ending with '}'.  The capturing
+         * subpattern puts the subpattern matches into the $matches[1]
+         */
+        $pattern = '/\$\{(\S*)}/';
+        $result = preg_match_all($pattern, $message, $matches);
+        /**
+         * preg_match_all returns false on failure, or the number of matches it found (could be zero).  So, if it
+         * found a non-zero number of matches, return the captured subpatterns (everything in the matches array
+         * except the first element) or else return an empty array.
+         */
+        return $result ? $matches[1] : [];
+    }
+
+    /**
+     * parameterIsThrowable
+     * @param ReflectionParameter $param
+     * @return bool
+     */
+    public function parameterIsThrowable(ReflectionParameter $param): bool
+    {
+        return ($param->getType()->getName() == 'Throwable');
+    }
+
+    /**
+     * parameterHasDefaultValueOfNull
+     * @param ReflectionParameter $param
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function parameterHasDefaultValueOfNull(ReflectionParameter $param): bool
+    {
+        return ($param->isOptional() && (null == $param->getDefaultValue()));
+    }
+
+    public function createDummyParamValueBasedOnType($paramType)
+    {
+        switch ($paramType) {
+            case 'string':
+                return 'foo';
+                break;
+            case 'integer':
+                return 5;
+                break;
+            case 'bool':
+                return true;
+                break;
+            default:
+                return '{' . $paramType . '}';
+                break;
+        }
     }
 }

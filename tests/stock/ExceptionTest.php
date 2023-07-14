@@ -20,15 +20,6 @@ use stdClass;
 
 class ExceptionTest extends TestCase
 {
-    public function setUp(): void
-    {
-        /**
-         * need to manually require this file since it is not namespaced, is not PSR-0 / PSR-4 compliant, and
-         * therefore will not autoload.  Change the path as necessary to suit yourself for these tests.
-         */
-        require_once "I:\\www\\pvcErr\\tests\\fixtureForXDataTests\\ClassWithNoNamespace.php";
-    }
-
     /**
      * @function testExceptionWithoutExceptionDataThrowsException
      * @covers \pvc\err\stock\Exception::getClassStringFromFileContents
@@ -96,7 +87,11 @@ class ExceptionTest extends TestCase
         $param3 = false;
         $param4 = new stdClass();
         $e = new SampleExceptionWithMultipleParamTypes($param1, $param2, $param3, $param4);
-        $expectedMessage = 'string parameter = some string, int parameter = 42, bool parameter = false, object parameter = object.';
-        self::assertEquals($expectedMessage, $e->getMessage());
+        $expectedMsg = '';
+        $expectedMsg .= 'string parameter = some string, ';
+        $expectedMsg .= 'int parameter = 42, ';
+        $expectedMsg .= 'bool parameter = false, ';
+        $expectedMsg .= 'object parameter = object.';
+        self::assertEquals($expectedMsg, $e->getMessage());
     }
 }
