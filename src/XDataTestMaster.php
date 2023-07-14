@@ -359,7 +359,11 @@ class XDataTestMaster extends TestCase
             case 'string':
                 return 'foo';
                 break;
+            /**
+             * evidently, the type can be either int or integer.........
+             */
             case 'integer':
+            case 'int':
                 return 5;
                 break;
             case 'bool':
@@ -397,10 +401,7 @@ class XDataTestMaster extends TestCase
          * if it's an intersection or union type, pick the first element in the array
          */
         $typesArray = $paramType->getTypes();
-        $type0 = $typesArray[0];
-        $type1 = $typesArray[1];
-        $name0 = $type0->getName();
-        $name1 = $type1->getName();
-        return $type0->getName();
+        $type = $typesArray[0];
+        return $type->getName();
     }
 }
