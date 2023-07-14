@@ -288,7 +288,8 @@ class XDataTestMaster extends TestCase
             array_pop($reflectionParams);
             $paramValues = [];
             foreach ($reflectionParams as $param) {
-                $paramValues[] = $this->createDummyParamValueBasedOnType($param->getType()->getName());
+                $typeName = $this->getReflectionTypeName($param->getType());
+                $paramValues[] = $this->createDummyParamValueBasedOnType($typeName);
             }
 
             /**
@@ -338,7 +339,21 @@ class XDataTestMaster extends TestCase
         return ($param->isOptional() && (null == $param->getDefaultValue()));
     }
 
-    public function createDummyParamValueBasedOnType($paramType)
+    /**
+     * createDummyParamValueBasedOnType
+     * @param \ReflectionType $paramType
+     * @return int|string|true
+     *
+     * In the event that the method parameter is untyped, $paramType will be null.
+     *
+     * Of not null, ReflectionType is actually an instance of one of three kinds of subtypes: ReflectionNamedType,
+     * ReflectionUnionType, and ReflectionIntersectionType, which is in keeping with the addition of union and
+     * intersection data types in parameter declarations.  For union and intersection, we get an array of
+     * reflection types via the getTypes method.  In both cases we can simply use the first member of the
+     * array as a suitable candidate.  Because PHP does not support abstract data types per se, we do not need to
+     * recurse.  We know that the types inside the array must be bool|int|float|string|array|resource|object.
+     */
+    public function createDummyParamValueBasedOnType(string $paramType)
     {
         switch ($paramType) {
             case 'string':
@@ -354,5 +369,38 @@ class XDataTestMaster extends TestCase
                 return '{' . $paramType . '}';
                 break;
         }
+    }
+
+    /**
+     * getReflectionNamedType
+     * @param \ReflectionType|null $paramType
+     * @return string
+     * returns a base datatype suitable for creating a dummy parameter value
+     */
+    public function getReflectionTypeName(?\ReflectionType $paramType): string
+    {
+        /**
+         * if the parameter is untyped, put in a string.
+         */
+        if (is_null($paramType)) {
+            return 'string';
+        }
+
+        /**
+         * if it's a named type, return the name
+         */
+        if ($paramType instanceof \ReflectionNamedType) {
+            return $paramType->getName();
+        }
+
+        /**
+         * if it's an intersection or union type, pick the first element in the array
+         */
+        $typesArray = $paramType->getTypes();
+        $type0 = $typesArray[0];
+        $type1 = $typesArray[1];
+        $name0 = $type0->getName();
+        $name1 = $type1->getName();
+        return $type0->getName();
     }
 }

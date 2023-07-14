@@ -210,12 +210,12 @@ class XDataTestMasterTest extends TestCase
     /**
      * testParameterHasDefaultValueOfNull
      * @param ReflectionParameter $param
-     * @param $expectedResult
+     * @param bool $expectedResult
      * @throws ReflectionException
      * @dataProvider dataProviderForParameterHasDefaultValueOfNull
      * @covers       \pvc\err\XDataTestMaster::parameterHasDefaultValueOfNull
      */
-    public function testParameterHasDefaultValueOfNull(string $classString, $expectedResult): void
+    public function testParameterHasDefaultValueOfNull(string $classString, bool $expectedResult): void
     {
         $reflection = new ReflectionClass($classString);
         $params = $reflection->getConstructor()->getParameters();
@@ -242,12 +242,73 @@ class XDataTestMasterTest extends TestCase
      * @param string $dataType
      * @param $expectedValue
      * @dataProvider dataProviderForCreateDummyParamValueBasedOnType
-     * @covers       \pvc\err\XDataTestMaster::createDummyParamValueBasedOnType
+     * @covers \pvc\err\XDataTestMaster::createDummyParamValueBasedOnType
      */
     public function testCreateDummyParamValueBasedOnType(string $dataType, $expectedValue): void
     {
         self::assertEquals($expectedValue, $this->xDataTestMaster->createDummyParamValueBasedOnType($dataType));
     }
+
+    public function functionWithUntypedParameter($param)
+    {
+        return $param;
+    }
+
+    /**
+     * testGetReflectionTypeNameReturnsStringWithVariadicParameter
+     * @covers \pvc\err\XDataTestMaster::getReflectionTypeName
+     */
+    public function testGetReflectionTypeNameReturnsStringWithVariadicParameter(): void
+    {
+        $reflectedMethod = new \ReflectionMethod($this, 'functionWithUntypedParameter');
+        $params = $reflectedMethod->getParameters();
+        $param = $params[0];
+        self::assertEquals('string', $this->xDataTestMaster->getReflectionTypeName(null));
+    }
+
+    public function functionWithNamedTypeParameter(int $someNumber)
+    {
+        return $someNumber;
+    }
+
+    /**
+     * testGetReflectionTypeNameReturnsNameWithReflectionNameTypeParameter
+     * @throws ReflectionException
+     * @covers \pvc\err\XDataTestMaster::getReflectionTypeName
+     */
+    public function testGetReflectionTypeNameReturnsNameWithReflectionNameTypeParameter(): void
+    {
+        $reflectedMethod = new \ReflectionMethod($this, 'functionWithNamedTypeParameter');
+        $params = $reflectedMethod->getParameters();
+        $param = $params[0];
+        self::assertEquals('int', $this->xDataTestMaster->getReflectionTypeName($param->getType()));
+    }
+
+    public function functionWithUnionTypeParameter(bool|string $param): bool|string
+    {
+        return $param;
+    }
+
+    /**
+     * testGetReflectionTypeNamePicksFirstTypeInTypeArray
+     * @throws ReflectionException
+     * @covers \pvc\err\XDataTestMaster::getReflectionTypeName
+     */
+    public function testGetReflectionTypeNameReturnsSingleNamedTypeForUnionTypeParameter(): void
+    {
+        $reflectedMethod = new \ReflectionMethod($this, 'functionWithUnionTypeParameter');
+        $params = $reflectedMethod->getParameters();
+        /**
+         * the order of the elements in the array is not deterministic, e.g. the types could be ['bool', 'string'] or
+         * they could be ['string', bool'].
+         */
+        $param = $params[0];
+        self::assertTrue(in_array(
+            $this->xDataTestMaster->getReflectionTypeName($param->getType()),
+            ['bool', 'string']
+        ));
+    }
+
 
     /**
      * dataProviderForVerifyExceptionAndMessageParameters
