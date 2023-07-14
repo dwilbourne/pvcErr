@@ -122,7 +122,7 @@ For example, here's an exception that goes with the example above::
 There are a couple of rules about declaring parameters in the exceptions.  The rules are
 
 * there must be at least one parameter
-* parameters must be typed - no 'variadic' parameters.  The days of loose data typing should be behind us.
+* parameters must be typed.  The days of loose data typing should be behind us.
 * except for the $prev parameter, the name of each parameter must match a variable name in the message
 * the last parameter must be typed \Throwable and must have a default of null.
 

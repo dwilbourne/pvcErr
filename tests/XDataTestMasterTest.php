@@ -255,10 +255,10 @@ class XDataTestMasterTest extends TestCase
     }
 
     /**
-     * testGetReflectionTypeNameReturnsStringWithVariadicParameter
+     * testGetReflectionTypeNameReturnsStringWithUntypedParameter
      * @covers \pvc\err\XDataTestMaster::getReflectionTypeName
      */
-    public function testGetReflectionTypeNameReturnsStringWithVariadicParameter(): void
+    public function testGetReflectionTypeNameReturnsStringWithUntypedParameter(): void
     {
         $reflectedMethod = new \ReflectionMethod($this, 'functionWithUntypedParameter');
         $params = $reflectedMethod->getParameters();
