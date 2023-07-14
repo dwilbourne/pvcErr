@@ -11,10 +11,11 @@ namespace pvcTests\err;
 use PHPUnit\Framework\TestCase;
 use pvc\err\XDataTestMaster;
 use pvcTests\err\fixtureForXDataTests\SampleException;
-use pvcTests\err\fixtureForXDataTests\SampleExceptionWithBadPrevParamDefault;
-use pvcTests\err\fixtureForXDataTests\SampleExceptionWithBadPrevParameter;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithBadPrevParameterType;
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithNonOptionalPrevParameter;
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithoutPrevParameter;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithUnionTypedPrevParameter;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithUntypedPrevParameter;
 use pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData;
 use ReflectionClass;
 use ReflectionException;
@@ -175,6 +176,9 @@ class XDataTestMasterTest extends TestCase
         return [
             [SampleException::class, true],
             [SampleExceptionWithoutPrevParameter::class, false],
+            [SampleExceptionWithBadPrevParameterType::class, false],
+            [SampleExceptionWithUntypedPrevParameter::class, false],
+            [SampleExceptionWithUnionTypedPrevParameter::class, false],
         ];
     }
 
@@ -202,7 +206,7 @@ class XDataTestMasterTest extends TestCase
     {
         return [
             [SampleExceptionWithNonOptionalPrevParameter::class, false],
-            [SampleExceptionWithBadPrevParameter::class, false],
+            [SampleExceptionWithBadPrevParameterType::class, false],
             [SampleException::class, true],
         ];
     }

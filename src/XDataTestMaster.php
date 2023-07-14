@@ -14,6 +14,7 @@ use pvc\err\stock\Exception;
 use pvc\interfaces\err\XDataInterface;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionNamedType;
 use ReflectionParameter;
 use Throwable;
 
@@ -325,7 +326,19 @@ class XDataTestMaster extends TestCase
      */
     public function parameterIsThrowable(ReflectionParameter $param): bool
     {
-        return ($param->getType()->getName() == 'Throwable');
+
+        $reflectionType = $param->getType();
+
+        /**
+         * with PHP 8+ ReflectionType has 3 subtypes in order to accommodate intersection and union types.  Because
+         * we are looking for Throwable only (e.g. a named type, not an intersection or a union), we can test for
+         * ReflectionNamedType.
+         */
+        if (is_null($reflectionType) || (false == ($reflectionType instanceof ReflectionNamedType))) {
+            return false;
+        }
+
+        return ($reflectionType->getName() == 'Throwable');
     }
 
     /**
