@@ -13,7 +13,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use pvc\err\XDataAbstract;
 use pvcTests\err\fixtureForXDataTests\SampleException;
-use pvcTests\err\fixtureForXDataTests\SampleExceptionDuplicate;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithNoConstructor;
 use pvcTests\err\fixtureForXDataTests\SampleNonException;
 
 class XDataAbstractTest extends TestCase
@@ -34,7 +34,7 @@ class XDataAbstractTest extends TestCase
      */
     public function testGetLocalXCode(): void
     {
-        $array = [SampleException::class => 1000, SampleExceptionDuplicate::class => 1001];
+        $array = [SampleException::class => 1000, SampleExceptionWithNoConstructor::class => 1001];
         $this->mock->method('getLocalXCodes')->willReturn($array);
         self::assertEquals(1000, $this->mock->getLocalXCode(SampleException::class));
         self::assertEquals(0, $this->mock->getLocalXCode(SampleNonException::class));
@@ -48,7 +48,7 @@ class XDataAbstractTest extends TestCase
     {
         $string_1 = 'this is a great string';
         $string_2 = 'another hugely popular string';
-        $array = [SampleException::class => $string_1, SampleExceptionDuplicate::class => $string_2];
+        $array = [SampleException::class => $string_1, SampleExceptionWithNoConstructor::class => $string_2];
         $this->mock->method('getXMessageTemplates')->willReturn($array);
         self::assertEquals($string_1, $this->mock->getXMessageTemplate(SampleException::class));
         self::assertEquals('', $this->mock->getXMessageTemplate(SampleNonException::class));

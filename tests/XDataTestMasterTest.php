@@ -17,6 +17,12 @@ use pvcTests\err\fixtureForXDataTests\SampleExceptionWithoutPrevParameter;
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithUnionTypedPrevParameter;
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithUntypedPrevParameter;
 use pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData;
+use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionDoesNotExtendPvcStockException;
+use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionWithImplicitConstructor;
+use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionWithNoConstructor;
+use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionWithNoDefaultForPrev;
+use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionWithNoParameters;
+use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionWithNoThrowableParameter;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
@@ -38,7 +44,7 @@ class XDataTestMasterTest extends TestCase
 
     /**
      * testGetExceptionClassStrings
-     * @covers \pvc\err\XDataTestMaster::getExceptionClassStrings
+     * @covers \pvc\err\XDataTestMaster::getThrowableClassStrings
      */
     public function testGetExceptionClassStrings(): void
     {
@@ -46,63 +52,82 @@ class XDataTestMasterTest extends TestCase
         /**
          * There are 10 files in the fixture dir, 6 of which are exceptions
          */
-        self::assertEquals(6, count($this->xDataTestMaster->getExceptionClassStrings($xData)));
+        self::assertEquals(6, count($this->xDataTestMaster->getThrowableClassStrings($xData)));
     }
 
     /**
      * testGetExceptionClassStringsReturnsEmptyArrayOnEmptyDirectory
-     * @covers \pvc\err\XDataTestMaster::getExceptionClassStrings
+     * @covers \pvc\err\XDataTestMaster::getThrowableClassStrings
      */
     public function testGetExceptionClassStringsReturnsEmptyArrayOnEmptyDirectory(): void
     {
         $xData = new \pvcTests\err\fixturesForXDataTestMaster\noExceptionsDefined\_pvcXData();
-        $exceptionClassStrings = $this->xDataTestMaster->getExceptionClassStrings($xData);
-        self::assertIsArray($exceptionClassStrings);
-        self::assertEquals(0, count($exceptionClassStrings));
+        $throwableClassStrings = $this->xDataTestMaster->getThrowableClassStrings($xData);
+        self::assertIsArray($throwableClassStrings);
+        self::assertEquals(0, count($throwableClassStrings));
     }
 
     /**
-     * testVerifyKeysMatchClassStringsFromDirFailsWithMoreCodesThanExceptions
-     * @covers \pvc\err\XDataTestMaster::verifyKeysMatchClassStringsFromDir
+     * dataProviderForVerifyKeysMatchClassStrings
+     * @return array[]
      */
-    public function testVerifyKeysMatchClassStringsFromDirFailsWithMoreCodesThanExceptions(): void
+    public function dataProviderForVerifyKeysMatchClassStrings(): array
     {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\moreCodesThanExceptions\_pvcXData();
-        self::expectOutputRegex('/codes*/');
-        self::assertFalse($this->xDataTestMaster->verifyKeysMatchClassStringsFromDir($xData));
+        return [
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\moreCodesThanExceptions',
+                '/codes*/',
+                false
+            ],
+
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\moreExceptionsThanCodes',
+                '/exception*/',
+                false
+            ],
+
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\moreExceptionsThanMessages',
+                '/exception*/',
+                false
+            ],
+
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\moreMessagesThanExceptions',
+                '/messages*/',
+                false
+            ],
+
+            [
+                '\pvcTests\err\fixturesForXDataTestMaster\allGood',
+                '',
+                true
+            ]
+        ];
     }
 
     /**
-     * testVerifyKeysMatchClassStringsFromDirFailsWithMoreExceptionsThanCodes
-     * @covers \pvc\err\XDataTestMaster::verifyKeysMatchClassStringsFromDir
+     * testVerifyKeysMatchClassStringsFromDir
+     * @dataProvider dataProviderForVerifyKeysMatchClassStrings
+     * @covers       \pvc\err\XDataTestMaster::verifyXDataKeysMatchClassStringsFromDir
      */
-    public function testVerifyKeysMatchClassStringsFromDirFailsWithMoreExceptionsThanCodes(): void
+    public function testVerifyKeysMatchClassStringsFromDir(string $dir, string $regex, bool $expectedResult): void
     {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\moreExceptionsThanCodes\_pvcXData();
-        self::expectOutputRegex('/exception*/');
-        self::assertFalse($this->xDataTestMaster->verifyKeysMatchClassStringsFromDir($xData));
-    }
+        $xDataClassString = $dir . DIRECTORY_SEPARATOR . '_pvcXData';
+        $xData = new $xDataClassString();
+        $throwableClassStrings = $this->xDataTestMaster->getThrowableClassStrings($xData);
 
-    /**
-     * testVerifyKeysMatchClassStringsFromDirFailsWithMoreExceptionsThanMessages
-     * @covers \pvc\err\XDataTestMaster::verifyKeysMatchClassStringsFromDir
-     */
-    public function testVerifyKeysMatchClassStringsFromDirFailsWithMoreExceptionsThanMessages(): void
-    {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\moreExceptionsThanMessages\_pvcXData();
-        self::expectOutputRegex('/exception*/');
-        self::assertFalse($this->xDataTestMaster->verifyKeysMatchClassStringsFromDir($xData));
-    }
+        if (!empty($regex)) {
+            self::expectOutputRegex($regex);
+        }
 
-    /**
-     * testVerifyKeysMatchClassStringsFromDirFailsWithMoreMessagesThanExceptions
-     * @covers \pvc\err\XDataTestMaster::verifyKeysMatchClassStringsFromDir
-     */
-    public function testVerifyKeysMatchClassStringsFromDirFailsWithMoreMessagesThanExceptions(): void
-    {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\moreMessagesThanExceptions\_pvcXData();
-        self::expectOutputRegex('/messages*/');
-        self::assertFalse($this->xDataTestMaster->verifyKeysMatchClassStringsFromDir($xData));
+        self::assertEquals(
+            $expectedResult,
+            $this->xDataTestMaster->verifyXDataKeysMatchClassStringsFromDir(
+                $xData,
+                $throwableClassStrings
+            )
+        );
     }
 
     /**
@@ -111,7 +136,7 @@ class XDataTestMasterTest extends TestCase
      */
     public function testVerifyGetLocalCodesArrayHasIntegerValues(): void
     {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\codesNotIntegers\_pvcXData();
+        $xData = new fixturesForXDataTestMaster\xDataFixtures\XDataCodesNotIntegers();
         self::expectOutputRegex('/not all exception codes are integers*/');
         self::assertFalse($this->xDataTestMaster->verifyGetLocalCodesArrayHasUniqueIntegerValues($xData));
     }
@@ -122,7 +147,7 @@ class XDataTestMasterTest extends TestCase
      */
     public function testVerifyGetLocalCodesArrayHasUniqueValues(): void
     {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\codesNotUnique\_pvcXData();
+        $xData = new fixturesForXDataTestMaster\xDataFixtures\XDataCodesNotUnique();
         self::expectOutputRegex('/not all exception codes are unique*/');
         self::assertFalse($this->xDataTestMaster->verifyGetLocalCodesArrayHasUniqueIntegerValues($xData));
     }
@@ -133,9 +158,33 @@ class XDataTestMasterTest extends TestCase
      */
     public function testVerifyGetMessagesArrayHasStringValues(): void
     {
-        $xData = new \pvcTests\err\fixturesForXDataTestMaster\messagesNotStrings\_pvcXData();
+        $xData = new fixturesForXDataTestMaster\xDataFixtures\XDataMessagesNotStrings();
         self::expectOutputRegex('/not all exception messages are strings.*/');
         self::assertFalse($this->xDataTestMaster->verifyGetLocalMessagesArrayHasStringsForValues($xData));
+    }
+
+    /**
+     * dataProviderForTestExceptionHasConstructor
+     * @return array[]
+     */
+    public function dataProviderForTestExceptionHasExplicitConstructor(): array
+    {
+        return [
+            [ExceptionWithNoDefaultForPrev::class, true],
+            [ExceptionWithImplicitConstructor::class, false],
+            [ExceptionWithNoConstructor::class, false]
+        ];
+    }
+
+    /**
+     * testExceptionHasExplicitConstructor
+     * @dataProvider dataProviderForTestExceptionHasExplicitConstructor
+     * @covers       \pvc\err\XDataTestMaster::exceptionHasExplicitConstructor
+     */
+    public function testExceptionHasExplicitConstructor(string $classString, bool $expectedResult): void
+    {
+        $reflection = new ReflectionClass(($classString));
+        self::assertEquals($expectedResult, $this->xDataTestMaster->exceptionHasExplicitConstructor($reflection));
     }
 
     /**
@@ -183,14 +232,14 @@ class XDataTestMasterTest extends TestCase
     }
 
     /**
-     * testParameterIsThrowable
+     * testPrevParameterIsThrowable
      * @param string $classString
      * @param bool $expectedResult
      * @throws ReflectionException
      * @dataProvider dataProviderForParameterIsThrowable
      * @covers       \pvc\err\XDataTestMaster::parameterIsThrowable
      */
-    public function testParameterIsThrowable(string $classString, bool $expectedResult): void
+    public function testPrevParameterIsThrowable(string $classString, bool $expectedResult): void
     {
         $reflection = new ReflectionClass($classString);
         $params = $reflection->getConstructor()->getParameters();
@@ -212,14 +261,14 @@ class XDataTestMasterTest extends TestCase
     }
 
     /**
-     * testParameterHasDefaultValueOfNull
+     * testPrevParameterHasDefaultValueOfNull
      * @param ReflectionParameter $param
      * @param bool $expectedResult
      * @throws ReflectionException
      * @dataProvider dataProviderForParameterHasDefaultValueOfNull
      * @covers       \pvc\err\XDataTestMaster::parameterHasDefaultValueOfNull
      */
-    public function testParameterHasDefaultValueOfNull(string $classString, bool $expectedResult): void
+    public function testPrevParameterHasDefaultValueOfNull(string $classString, bool $expectedResult): void
     {
         $reflection = new ReflectionClass($classString);
         $params = $reflection->getConstructor()->getParameters();
@@ -294,7 +343,7 @@ class XDataTestMasterTest extends TestCase
     }
 
     /**
-     * testGetReflectionTypeNamePicksFirstTypeInTypeArray
+     * testGetReflectionTypeNameReturnsSingleNamedTypeForUnionTypeParameter
      * @throws ReflectionException
      * @covers \pvc\err\XDataTestMaster::getReflectionTypeName
      */
@@ -315,52 +364,60 @@ class XDataTestMasterTest extends TestCase
 
 
     /**
-     * dataProviderForVerifyExceptionAndMessageParameters
+     * dataProviderForVerifyExceptionConstructorIsCorrect
      * @return array[]
      */
-    public function dataProviderForVerifyExceptionAndMessageParameters(): array
+    public function dataProviderForVerifyExceptionConstructorIsCorrect(): array
     {
         return [
             [
-                '\pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData',
+                ExceptionWithImplicitConstructor::class,
                 null,
-                true
+                true,
+                'failed to assert that ExceptionWithImplicitConstructor is OK.'
             ],
+
             [
-                '\pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoParameters\_pvcXData',
+                ExceptionWithNoParameters::class,
                 '/has no parameters/',
-                false
+                false,
+                'failed to assert that ExceptionWithNoParameters is not constructed correctly.'
             ],
+
             [
-                '\pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoThrowableParameter\_pvcXData',
+                ExceptionWithNoThrowableParameter::class,
                 '/is not Throwable/',
-                false
+                false,
+                'failed to assert that ExceptionWithNoThrowableParameter is not constructed correctly.'
             ],
+
             [
-                '\pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoDefaultForPrev\_pvcXData',
+                ExceptionWithNoDefaultForPrev::class,
                 '/does not have a default value of null/',
-                false
-            ],
-            [
-                '\pvcTests\err\fixturesForXDataTestMaster\exceptionParamsNotMatchMsgParams\_pvcXData',
-                '/do not match the variable names/',
-                false
+                false,
+                'failed to assert that ExceptionWithNoDefaultForPrev is not constructed correctly.'
             ],
         ];
     }
 
     /**
-     * testVerifyExceptionParametersAndMessageParameters
+     * testVerifyExceptionConstructorIsCorrect
      * @throws ReflectionException
-     * @dataProvider dataProviderForVerifyExceptionAndMessageParameters
-     * @covers       \pvc\err\XDataTestMaster::verifyExceptionParametersAndMessageParametersMatch
+     * @dataProvider dataProviderForVerifyExceptionConstructorIsCorrect
+     * @covers       \pvc\err\XDataTestMaster::verifyExceptionConstructorIsCorrect
      */
-    public function testVerifyExceptionAndMessageParameters(
-        string $xDataClassString,
+    public function testVerifyExceptionConstructorIsCorrect(
+        string $exceptionClassString,
         ?string $outputRegex,
-        bool $expectedResult
+        bool $expectedResult,
+        string $msg
     ): void {
+        $xDataDir = '\pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures';
+        $xDataClassString = $xDataDir . '\_XData';
         $xData = new $xDataClassString();
+
+        $message = $xData->getXMessageTemplate($exceptionClassString);
+        $messageParams = $this->xDataTestMaster->parseVariableNamesFromMessage($message);
 
         if ($outputRegex) {
             self::expectOutputRegex($outputRegex);
@@ -368,19 +425,119 @@ class XDataTestMasterTest extends TestCase
 
         self::assertEquals(
             $expectedResult,
-            $this->xDataTestMaster->verifyExceptionParametersAndMessageParametersMatch($xData)
+            $this->xDataTestMaster->verifyExceptionConstructorIsCorrect($exceptionClassString, $messageParams),
+            $msg
         );
+    }
+
+    /**
+     * dataProviderForTestVerifyExceptionAndMessageParametersMatch
+     * @return array
+     */
+    public function dataProviderForTestVerifyExceptionAndMessageParametersMatch(): array
+    {
+        $msg1 = 'verifyExceptionAndMessageParameters failed to assert false when exception had no explicit ';
+        $msg1 .= ' constructor and there were message variables.';
+
+        $msg2 = 'verifyExceptionAndMessageParameters failed to assert true when exception had no explicit ';
+        $msg2 .= 'constructor and there were message variables.';
+
+        $msg3 = 'verifyExceptionAndMessageParameters failed to assert true when exception has explicit ';
+        $msg3 .= 'constructor and constructor parameters match message variables.';
+
+        $msg4 = 'verifyExceptionAndMessageParameters failed to assert false when exception has explicit ';
+        $msg4 .= 'constructor and constructor parameters do not match message variables.';
+
+        return [
+
+            /**
+             * no explicit constructor and has a message variable
+             */
+            [
+                ExceptionWithImplicitConstructor::class,
+                ['index'],
+                false,
+                $msg1
+            ],
+
+            /**
+             * no constructor and has no message variable
+             */
+            [
+                ExceptionWithNoConstructor::class,
+                [],
+                true,
+                $msg2
+            ],
+
+            /**
+             * has constructor with parameters and with message variables
+             */
+            [
+                SampleException::class,
+                ['bar', 'foo',],
+                true,
+                $msg3
+            ],
+
+            /**
+             * has constructor with parameters and there are no message variables
+             */
+            [
+                SampleException::class,
+                [],
+                false,
+                $msg4
+            ],
+        ];
+    }
+
+    /**
+     * testVerifyExceptionAndMessageParametersMatch
+     * @param string $classString
+     * @param array $messageVariables
+     * @param bool $expectedResult
+     * @param string $msg
+     * @throws ReflectionException
+     * @dataProvider dataProviderForTestVerifyExceptionAndMessageParametersMatch
+     * @covers       \pvc\err\XDataTestMaster::verifyExceptionAndMessageParametersMatch()
+     */
+    public function testVerifyExceptionAndMessageParametersMatch(
+        string $classString,
+        array $messageVariables,
+        bool $expectedResult,
+        string $msg
+    ): void {
+        self::assertEquals(
+            $expectedResult,
+            $this->xDataTestMaster->verifyExceptionAndMessageParametersMatch($classString, $messageVariables),
+            $msg
+        );
+    }
+
+    /**
+     * testVerifyExtendsPvcStockException
+     * @throws ReflectionException
+     * @covers \pvc\err\XDataTestMaster::verifyExceptionExtendsPvcStockException()
+     */
+    public function testVerifyExtendsPvcStockException(): void
+    {
+        $classString = ExceptionDoesNotExtendPvcStockException::class;
+        self::assertFalse($this->xDataTestMaster->verifyExceptionExtendsPvcStockException($classString));
+
+        $classString = ExceptionWithNoDefaultForPrev::class;
+        self::asserttrue($this->xDataTestMaster->verifyExceptionExtendsPvcStockException($classString));
     }
 
     /**
      * testVerifyExceptionsCanBeInstantiated
      * @throws ReflectionException
-     * @covers \pvc\err\XDataTestMaster::verifyExceptionsCanBeInstantiated
+     * @covers \pvc\err\XDataTestMaster::verifyExceptionCanBeInstantiated
      */
     public function testVerifyExceptionsCanBeInstantiated(): void
     {
-        $xData = new _pvcXData();
-        self::assertTrue($this->xDataTestMaster->verifyExceptionsCanBeInstantiated($xData));
+        $classString = '\pvcTests\err\fixturesForXDataTestMaster\allGood\InvalidFilenameException';
+        self::assertTrue($this->xDataTestMaster->verifyExceptionCanBeInstantiated($classString));
     }
 
     /**

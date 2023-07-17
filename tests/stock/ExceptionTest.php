@@ -12,8 +12,8 @@ namespace pvcTests\err\stock;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use pvcTests\err\fixtureForXDataTests\SampleException;
-use pvcTests\err\fixtureForXDataTests\SampleExceptionDuplicate;
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithMultipleParamTypes;
+use pvcTests\err\fixtureForXDataTests\SampleExceptionWithNoConstructor;
 use pvcTests\err\fixtureForXDataTestsButMissingXData\UnfinishedException;
 use ReflectionException;
 use stdClass;
@@ -52,13 +52,24 @@ class ExceptionTest extends TestCase
     }
 
     /**
+     * testGetClassStringFromFileContentsReturnsFalseForFileWithNoClassDeclaration
+     * @covers \pvc\err\stock\Exception::getClassStringFromFileContents
+     */
+    public function testGetClassStringFromFileContentsReturnsFalseForFileWithNoClassDeclaration(): void
+    {
+        $fixture = __DIR__ . '/fixture/NotAClass.php';
+        $msg = 'failed to assert that getClassStringFromFileContents returns false for file with no class declaration.';
+        self::assertFalse(\pvc\err\stock\Exception::getClassStringFromFileContents(file_get_contents($fixture)), $msg);
+    }
+
+    /**
      * @function testExceptionGetsArgsCorrectWithPreviousExplicitlySet
      * @throws ReflectionException
      * @covers \pvc\err\stock\Exception::parseParams
      */
     public function testExceptionGetsArgsCorrectWithPreviousExplicitlySet(): void
     {
-        $previousException = new SampleExceptionDuplicate();
+        $previousException = new SampleExceptionWithNoConstructor();
         $e = new SampleException('bar', 'foo', $previousException);
         self::assertSame($previousException, $e->getPrevious());
     }

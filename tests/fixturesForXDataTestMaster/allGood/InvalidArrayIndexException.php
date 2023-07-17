@@ -13,7 +13,8 @@ use pvc\err\stock\LogicException;
 use Throwable;
 
 /**
- * InvalidArrayIndexException should be thrown when someone tries to access an array element using an invalid index
+ * ExceptionWithParametersNotMatchingMessage should be thrown when someone tries to access an array element using an
+ * invalid index
  */
 class InvalidArrayIndexException extends LogicException
 {

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace pvcTests\err\fixturesForXDataTestMaster\moreMessagesThanExceptions;
+namespace pvcTests\err\fixturesForXDataTestMaster\xDataFixtures;
 
 use pvc\err\stock\LogicException;
 use Throwable;

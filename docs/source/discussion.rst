@@ -86,7 +86,7 @@ Here is an example of a small exception data class::
 Keeping all the codes and all the message templates in one file makes it far easier to keep local codes and message
 conventions consistent in the library.  You can name the exception data class file anything you want.  I typically
 use a filename that starts with an underscore ("_") so that the file system automatically sorts it to appear at the
-top of the directory which is holding my exceptions, even if phpcs complains about it stylistically.  As an
+top of the directory which is holding my exceptions, even if phpcs complains about it not being in camel case.  As an
 example, I have an exception library for the exceptions that can be thrown in a pvc library for handling tree data
 structures.  The exception data file is called "_TreeExceptionData".
 
@@ -119,11 +119,22 @@ For example, here's an exception that goes with the example above::
     }
   }
 
-There are a couple of rules about declaring parameters in the exceptions.  The rules are
+There are a couple of rules about declaring parameters in the exceptions.  If there is an explicit constructor in
+your exception, the rules are
 
 * there must be at least one parameter
 * except for the $prev parameter, the name of each parameter must match a variable name in the message
 * the last parameter must be typed \Throwable and must have a default of null.
+
+It is not necessary, however, to have an explicit constructor in your exception if the corresponding message has no
+message variables in it.  In other words, imagine an exception message like "You should not have done that." (ok, not
+a great message, but whatever).  The exception definition can be this simple::
+
+    use pvc\err\LogicException;
+
+    class MyNonsenseException extends LogicException
+    {
+    }
 
 These rules are embedded in the automatic testing of your exception library (see the Testing section for more info).
 If you break one of these parameter rules, the automatically generated tests will fail.

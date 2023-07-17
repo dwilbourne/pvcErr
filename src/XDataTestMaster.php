@@ -16,6 +16,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionType;
 use Throwable;
 
 /**
@@ -26,28 +27,46 @@ class XDataTestMaster extends TestCase
     /**
      * verifyLibrary
      * @param XDataInterface $xData
+     * @throws ReflectionException
+     * @throws ReflectionException
      */
     public function verifyLibrary(XDataInterface $xData): bool
     {
-        $result = $this->verifyKeysMatchClassStringsFromDir($xData);
+        /** @var array<class-string<Throwable>> $throwableClassStrings */
+        $throwableClassStrings = $this->getThrowableClassStrings($xData);
+
+        $result = $this->verifyXDataKeysMatchClassStringsFromDir($xData, $throwableClassStrings);
         $result = $result && $this->verifyGetLocalCodesArrayHasUniqueIntegerValues($xData);
         $result = $result && $this->verifyGetLocalMessagesArrayHasStringsForValues($xData);
-        $result = $result && $this->verifyExceptionParametersAndMessageParametersMatch($xData);
-        $result = $result && $this->verifyExceptionsCanBeInstantiated($xData);
+
+        foreach ($throwableClassStrings as $classString) {
+            $message = $xData->getXMessageTemplate($classString);
+            $messageVariables = $this->parseVariableNamesFromMessage($message);
+
+            $result = $result && $this->verifyExceptionConstructorIsCorrect($classString);
+            $result = $result && $this->verifyExceptionAndMessageParametersMatch($classString, $messageVariables);
+            $result = $result && $this->verifyExceptionCanBeInstantiated($classString);
+            $result = $result && $this->verifyExceptionExtendsPvcStockException($classString);
+        }
         return $result;
     }
 
-    public function verifyKeysMatchClassStringsFromDir(XDataInterface $xData): bool
+    /**
+     * verifyXDataKeysMatchClassStringsFromDir
+     * @param XDataInterface $xData
+     * @param array<string> $throwableClassStrings
+     * @return bool
+     */
+    public function verifyXDataKeysMatchClassStringsFromDir(XDataInterface $xData, array $throwableClassStrings): bool
     {
         $codesArray = $xData->getLocalXCodes();
         $messagesArray = $xData->getXMessageTemplates();
-        $exceptionClassStrings = $this->getExceptionClassStrings($xData);
         $keysForCodes = array_keys($codesArray);
         $keysForMessages = array_keys($messagesArray);
 
         $result = true;
 
-        $keysForCodesThatHaveNoExceptionDefined = array_diff($keysForCodes, $exceptionClassStrings);
+        $keysForCodesThatHaveNoExceptionDefined = array_diff($keysForCodes, $throwableClassStrings);
         if (!empty($keysForCodesThatHaveNoExceptionDefined)) {
             foreach ($keysForCodesThatHaveNoExceptionDefined as $key) {
                 echo sprintf("codes key %s has no corresponding exception defined.\n", $key);
@@ -56,7 +75,7 @@ class XDataTestMaster extends TestCase
         }
 
 
-        $keysForMessagesThatHaveNoExceptionDefined = array_diff($keysForMessages, $exceptionClassStrings);
+        $keysForMessagesThatHaveNoExceptionDefined = array_diff($keysForMessages, $throwableClassStrings);
         if (!empty($keysForMessagesThatHaveNoExceptionDefined)) {
             foreach ($keysForMessagesThatHaveNoExceptionDefined as $key) {
                 echo sprintf("messages key %s has no corresponding exception defined.\n", $key);
@@ -64,7 +83,7 @@ class XDataTestMaster extends TestCase
             $result = false;
         }
 
-        $exceptionsWithNoCodeDefined = array_diff($exceptionClassStrings, $keysForCodes);
+        $exceptionsWithNoCodeDefined = array_diff($throwableClassStrings, $keysForCodes);
         if (!empty($exceptionsWithNoCodeDefined)) {
             foreach ($exceptionsWithNoCodeDefined as $key) {
                 echo sprintf("exception %s has no corresponding code defined.\n", $key);
@@ -72,7 +91,7 @@ class XDataTestMaster extends TestCase
             $result = false;
         }
 
-        $exceptionsWithNoMessageDefined = array_diff($exceptionClassStrings, $keysForMessages);
+        $exceptionsWithNoMessageDefined = array_diff($throwableClassStrings, $keysForMessages);
         if (!empty($exceptionsWithNoMessageDefined)) {
             foreach ($exceptionsWithNoMessageDefined as $key) {
                 echo sprintf("exception %s has no corresponding message defined.\n", $key);
@@ -87,7 +106,7 @@ class XDataTestMaster extends TestCase
      * getExceptionClassStringsFromDir
      * @return array<int, class-string>
      */
-    public function getExceptionClassStrings(XDataInterface $xData): array
+    public function getThrowableClassStrings(XDataInterface $xData): array
     {
         /**
          * reflect XData and get the directory portion of the file name
@@ -109,30 +128,30 @@ class XDataTestMaster extends TestCase
             }
         }
 
-        /**
-         * initialize the private array
-         */
+        /** @var array<int, class-string> $classStrings */
         $classStrings = [];
 
         foreach ($files as $file) {
             /**
              * get the class string by parsing the file
-             * @var class-string $classString
              */
-            $fileContents = file_get_contents($dir . DIRECTORY_SEPARATOR . $file);
+            $fileContents = file_get_contents($dir . DIRECTORY_SEPARATOR . $file) ?: '';
             $classString = Exception::getClassStringFromFileContents($fileContents);
 
             /**
-             * validate the class string:  must be reflectable (i.e. an object) and must implement Throwable.  If
-             * it is valid, add it to our array of exceptions in the library
+             * validate the class string:  must be reflectable (i.e. an object) and Throwable.  In order to provide
+             * better diagnostic information, we are not checking to see if the exception extends
+             * \pvc\err\stock\Exception at this point.
              */
-            try {
-                $reflectedFile = new ReflectionClass($classString);
-                if ($reflectedFile->implementsInterface(Throwable::class)) {
-                    $classStrings[] = $classString;
+            if ($classString) {
+                try {
+                    $reflected = new ReflectionClass($classString);
+                    if ($reflected->implementsInterface(Throwable::class)) {
+                        $classStrings[] = $classString;
+                    }
+                } catch (ReflectionException $e) {
+                    /** either reflection failed or it was not Throwable */
                 }
-            } catch (ReflectionException $e) {
-                /** either reflection failed or it was not Throwable */
             }
         }
 
@@ -152,7 +171,7 @@ class XDataTestMaster extends TestCase
          * verify that the count of unique codes equals the total count of codes
          */
         if (count(array_unique($codesArray)) != count($codesArray)) {
-            echo sprintf("not all exception codes are unique.\n");
+            echo "not all exception codes are unique.\n";
             $result = false;
         }
 
@@ -164,8 +183,9 @@ class XDataTestMaster extends TestCase
         $callback = function ($carry, $x) {
             return ($carry && is_int($x));
         };
+        /** @noinspection PhpPointlessBooleanExpressionInConditionInspection */
         if (false == (array_reduce($codesArray, $callback, $initialValue))) {
-            echo sprintf("not all exception codes are integers.\n");
+            echo "not all exception codes are integers.\n";
             $result = false;
         }
         return $result;
@@ -189,120 +209,216 @@ class XDataTestMaster extends TestCase
         $callback = function ($carry, $x) {
             return ($carry && is_string($x));
         };
+        /** @noinspection PhpPointlessBooleanExpressionInConditionInspection */
         if (false == (array_reduce($messagesArray, $callback, $initialValue))) {
-            echo sprintf("not all exception messages are strings.\n");
+            echo "not all exception messages are strings.\n";
             $result = false;
         }
         return $result;
     }
 
     /**
-     * verifyExceptionParametersAndMessageParametersMatch
-     * @param XDataInterface $xData
+     * verifyExceptionConstructorIsCorrect
+     * @param class-string<Throwable> $classString
      * @return bool
      * @throws ReflectionException
      */
-    public function verifyExceptionParametersAndMessageParametersMatch(XDataInterface $xData): bool
+    public function verifyExceptionConstructorIsCorrect(string $classString): bool
     {
-        $result = true;
-        foreach ($this->getExceptionClassStrings($xData) as $classString) {
-            $reflected = new ReflectionClass($classString);
-            $reflectionParams = $reflected->getConstructor()->getParameters();
-            $countOfParams = count($reflectionParams);
+        $reflected = new ReflectionClass($classString);
+        if (!$this->exceptionHasExplicitConstructor($reflected)) {
             /**
-             * all exceptions must have at least one parameter
+             * It is OK if there is no constructor for the exception as long as the message has no variables in it.
+             * The rest of the tests depend on there being a constructor defined, so return true now.
              */
-            if ($countOfParams == 0) {
-                echo sprintf("%s has no parameters and must have at least a \$prev parameter.\n", $classString);
-                $result = false;
-                /**
-                 * need to break from the loop because the rest of these tests depend on there being at least one
-                 * parameter
-                 */
-                break;
-            }
-            /**
-             * ensure that last param is Throwable
-             */
-            $lastParam = $reflectionParams[$countOfParams - 1];
-            if (!$this->parameterIsThrowable($lastParam)) {
-                echo sprintf("The last parameter (e.g. \$prev) of %s is not Throwable.\n", $classString);
-                $result = false;
-            }
-            /**
-             * ensure that the last parameter has a default of null
-             */
-            if (!$this->parameterHasDefaultValueOfNull($lastParam)) {
-                $format = "The last parameter (e.g. \$prev) of %s does not have a default value of null.\n";
-                echo sprintf($format, $classString);
-                $result = false;
-            }
-
-            /**
-             * bump the last parameter ($prev) off the array.
-             */
-            array_pop($reflectionParams);
-
-            /**
-             * verify that the parameter names all match the variable names in the messages.  Variable names in the
-             * messages do NOT have to be in the same order as they appear in the constructor declaration for the
-             * exception.
-             */
-            $paramNames = [];
-            foreach ($reflectionParams as $param) {
-                $paramNames[] = $param->getName();
-            }
-
-            $messageVariableNames = $this->parseVariableNamesFromMessage($xData->getXMessageTemplate($classString));
-
-            sort($paramNames);
-            sort($messageVariableNames);
-
-            if ($paramNames != $messageVariableNames) {
-                $format = "The parameters of %s do not match the variable names in the corresponding message.\n";
-                echo sprintf($format, $classString);
-                $result = false;
-            }
+            return true;
         }
-        /** end of foreach loop through the class strings */
+
+        $result = true;
+        $constructor = $reflected->getConstructor();
+        $reflectionParams = $constructor ? $constructor->getParameters() : [];
+        $countOfParams = count($reflectionParams);
+
+        /**
+         * all exceptions with a constructor must have at least one parameter.  Return false because subsequent tests
+         * depend on there being at least one parameter
+         */
+        if ($countOfParams == 0) {
+            echo sprintf("%s has no parameters and must have at least a \$prev parameter.\n", $classString);
+            return false;
+        }
+
+        /**
+         * ensure that last param is Throwable
+         */
+        $lastParam = $reflectionParams[$countOfParams - 1];
+        if (!$this->parameterIsThrowable($lastParam)) {
+            echo sprintf("The last parameter (e.g. \$prev) of %s is not Throwable.\n", $classString);
+            $result = false;
+        }
+
+        /**
+         * ensure that the last parameter has a default of null
+         */
+        if (!$this->parameterHasDefaultValueOfNull($lastParam)) {
+            $format = "The last parameter (e.g. \$prev) of %s does not have a default value of null.\n";
+            echo sprintf($format, $classString);
+            $result = false;
+        }
         return $result;
     }
 
     /**
-     * verifyExceptionsCanBeInstantiated
-     * @param XDataInterface $xData
+     * verifyExceptionAndMessageParametersMatch
+     * @param class-string<Throwable> $classString
+     * @param array<string> $messageParameters
      * @return bool
      * @throws ReflectionException
      */
-    public function verifyExceptionsCanBeInstantiated(XDataInterface $xData): bool
-    {
-        $result = true;
-        foreach ($this->getExceptionClassStrings($xData) as $classString) {
-            $reflected = new ReflectionClass($classString);
-            $reflectionParams = $reflected->getConstructor()->getParameters();
-
-            /**
-             * create array of dummy parameters, so we can instantiate the class.  Do not create a dummy parameter
-             * for the $prev parameter, which has been tested separately, and we know is both Throwable and has a
-             * default of null
-             */
-            array_pop($reflectionParams);
-            $paramValues = [];
-            foreach ($reflectionParams as $param) {
-                $typeName = $this->getReflectionTypeName($param->getType());
-                $paramValues[] = $this->createDummyParamValueBasedOnType($typeName);
+    public function verifyExceptionAndMessageParametersMatch(
+        string $classString,
+        array $messageParameters
+    ): bool {
+        $reflected = new ReflectionClass($classString);
+        /**
+         * if the exception has no constructor but there are variables in the message then return false. If the
+         * exception has non constructor and there are no variables in the message, then return true.
+         */
+        if (!$this->exceptionHasExplicitConstructor($reflected)) {
+            if (!empty($messageParameters)) {
+                echo sprintf(
+                    "%s has no constructor but has message variables in its exception data file.\n",
+                    $classString
+                );
+                return false;
             }
-
-            /**
-             * verify that we can instantiate the exception class so the constructor is exercised.  Then we can
-             * claim 100% line coverage in the testing
-             */
-            $instance = $reflected->newInstanceArgs($paramValues);
-            $result = $result && ($instance instanceof $classString);
+            return true;
         }
-        return $result;
+
+        /**
+         * We know the exception has a constructor, so now we can get the parameters into an array, remove the $prev
+         * parameter because it does not appear in the message and then compare parameter names and message variable
+         * names.
+         */
+        $constructor = $reflected->getConstructor();
+        $reflectionParams = $constructor ? $constructor->getParameters() : [];
+
+        /**
+         * bump the last parameter ($prev) off the array.
+         */
+        array_pop($reflectionParams);
+
+        /**
+         * verify that the parameter names all match the variable names in the messages.  Variable names in the
+         * messages do NOT have to be in the same order as they appear in the constructor declaration for the
+         * exception.
+         */
+        $paramNames = [];
+        foreach ($reflectionParams as $param) {
+            $paramNames[] = $param->getName();
+        }
+
+        sort($paramNames);
+        sort($messageParameters);
+
+        if ($paramNames != $messageParameters) {
+            $format = "The parameters of %s do not match the variable names in the corresponding message.\n";
+            echo sprintf($format, $classString);
+            return false;
+        }
+
+        return true;
     }
 
+    /**
+     * exceptionHasExplicitConstructor
+     * @param ReflectionClass<Throwable> $reflected
+     * @return bool
+     * returns true if there is a __construct method explicit defined in the class
+     * returns false if this is a child class and the constructor is inherited
+     * returns false if this is a child class and there is no constructor anywhere up the inheritance chain
+     */
+    public function exceptionHasExplicitConstructor(ReflectionClass $reflected): bool
+    {
+        /**
+         * The getConstructor method returns null if there is no constructor for the class at all.  This can occur in
+         * either of two ways: 1) this class has no parent and no __construct method.  2) This class has a parent
+         * AND there is no constructor anywhere up the inheritance chain.
+         *
+         * Because all exceptions in the exception library SHOULD extend \pvc\err\stock\Exception, the getConstructor
+         * method should never return null in this context.  But, it is a public method so to be safe.....
+         */
+        $isChildClass = (bool)$reflected->getParentClass();
+
+        $parent = $reflected->getParentClass();
+
+        $parentConstructor = ($parent ? $parent->getConstructor() : false);
+
+        $myConstructor = $reflected->getConstructor();
+
+        /**
+         * if $myConstructor is not null and the constructor of the parent class is the same as the constructor of this
+         * class, then this class inherited the constructor, e.g. we know that there is no explicit constructor
+         * in $myException
+         */
+        if ($isChildClass) {
+            return !($myConstructor && ($myConstructor == $parentConstructor));
+        }
+        /**
+         * otherwise, this is a standalone class
+         */
+        return (bool)$myConstructor;
+    }
+
+    /**
+     * verifyExceptionCanBeInstantiated
+     * @param class-string $classString
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function verifyExceptionCanBeInstantiated(string $classString): bool
+    {
+        $reflected = new ReflectionClass($classString);
+        $constructor = $reflected->getConstructor();
+        $reflectionParams = $constructor ? $constructor->getParameters() : [];
+
+        /**
+         * create array of dummy parameters, so we can instantiate the class.  Do not create a dummy parameter
+         * for the $prev parameter, which has been tested separately, and we know is both Throwable and has a
+         * default of null
+         */
+        array_pop($reflectionParams);
+        $paramValues = [];
+        foreach ($reflectionParams as $param) {
+            $typeName = $this->getReflectionTypeName($param->getType());
+            $paramValues[] = $this->createDummyParamValueBasedOnType($typeName);
+        }
+
+        /**
+         * verify that we can instantiate the exception class so the constructor is exercised.  Then we can
+         * claim 100% line coverage in the testing
+         */
+        $instance = $reflected->newInstanceArgs($paramValues);
+        return ($instance instanceof $classString);
+    }
+
+    /**
+     * verifyExceptionExtendsPvcStockException
+     * @param class-string $classString
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function verifyExceptionExtendsPvcStockException(string $classString): bool
+    {
+        $reflected = new ReflectionClass($classString);
+        return $reflected->isSubclassOf(Exception::class);
+    }
+
+    /**
+     * parseVariableNamesFromMessage
+     * @param string $message
+     * @return array<string>
+     */
     public function parseVariableNamesFromMessage(string $message): array
     {
         /**
@@ -326,7 +442,6 @@ class XDataTestMaster extends TestCase
      */
     public function parameterIsThrowable(ReflectionParameter $param): bool
     {
-
         $reflectionType = $param->getType();
 
         /**
@@ -334,7 +449,8 @@ class XDataTestMaster extends TestCase
          * we are looking for Throwable only (e.g. a named type, not an intersection or a union), we can test for
          * ReflectionNamedType.
          */
-        if (is_null($reflectionType) || (false == ($reflectionType instanceof ReflectionNamedType))) {
+        /** @noinspection PhpPointlessBooleanExpressionInConditionInspection */
+        if ((false == ($reflectionType instanceof ReflectionNamedType))) {
             return false;
         }
 
@@ -354,7 +470,7 @@ class XDataTestMaster extends TestCase
 
     /**
      * createDummyParamValueBasedOnType
-     * @param \ReflectionType $paramType
+     * @param string $paramType
      * @return int|string|true
      *
      * In the event that the method parameter is untyped, $paramType will be null.
@@ -366,35 +482,23 @@ class XDataTestMaster extends TestCase
      * array as a suitable candidate.  Because PHP does not support abstract data types per se, we do not need to
      * recurse.  We know that the types inside the array must be bool|int|float|string|array|resource|object.
      */
-    public function createDummyParamValueBasedOnType(string $paramType)
+    public function createDummyParamValueBasedOnType(string $paramType): bool|int|string
     {
-        switch ($paramType) {
-            case 'string':
-                return 'foo';
-                break;
-            /**
-             * evidently, the type can be either int or integer.........
-             */
-            case 'integer':
-            case 'int':
-                return 5;
-                break;
-            case 'bool':
-                return true;
-                break;
-            default:
-                return '{' . $paramType . '}';
-                break;
-        }
+        return match ($paramType) {
+            'string' => 'foo',
+            'integer', 'int' => 5,
+            'bool' => true,
+            default => '{' . $paramType . '}',
+        };
     }
 
     /**
      * getReflectionNamedType
-     * @param \ReflectionType|null $paramType
+     * @param ReflectionType|null $paramType
      * @return string
      * returns a base datatype suitable for creating a dummy parameter value
      */
-    public function getReflectionTypeName(?\ReflectionType $paramType): string
+    public function getReflectionTypeName(?ReflectionType $paramType): string
     {
         /**
          * if the parameter is untyped, put in a string.
@@ -411,8 +515,9 @@ class XDataTestMaster extends TestCase
         }
 
         /**
-         * if it's an intersection or union type, pick the first element in the array
+         * we know it is an intersection or union type, pick the first element in the array
          */
+        /** @var \ReflectionUnionType|\ReflectionIntersectionType $paramType */
         $typesArray = $paramType->getTypes();
         $type = $typesArray[0];
         return $type->getName();

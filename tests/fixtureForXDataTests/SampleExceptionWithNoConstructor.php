@@ -12,8 +12,8 @@ namespace pvcTests\err\fixtureForXDataTests;
 use pvc\err\stock\LogicException;
 
 /**
- * Class SampleExceptionDuplicate
+ * Class ExceptionWithImplicitConstructor
  */
-class SampleExceptionDuplicate extends LogicException
+class SampleExceptionWithNoConstructor extends LogicException
 {
 }

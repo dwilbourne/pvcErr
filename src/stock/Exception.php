@@ -104,7 +104,7 @@ class Exception extends \Exception
          * @var array<string> $files
          */
         $files = scandir($dir);
-        $files = array_diff($files, array('.', '..'));
+        $files = array_diff($files, ['.', '..']);
 
         /**
          * iterate through the list of files, trying to reflect each one and test it for XDataInterface
@@ -155,9 +155,9 @@ class Exception extends \Exception
      *
      * @function getClassStringFromFileContents
      * @param string $fileContents
-     * @return string
+     * @return class-string|false
      */
-    public static function getClassStringFromFileContents(string $fileContents): string
+    public static function getClassStringFromFileContents(string $fileContents): string|false
     {
         /**
          * create the parser and parse the file.  Result is an array of nodes, which is the AST
@@ -176,14 +176,21 @@ class Exception extends \Exception
         $traverser->traverse($nodes);
 
         /**
-         * two parts to the class string: the namespace and the class name.  Concatenate the two properly depending
-         * on whether there was a class declaration present.
+         * two parts to the class string: the namespace and the class name.  If there is no classname, then the file
+         * contents did not declare a class and return false.  If $className is not empty, then check for a namespace.
+         * If the namespace is not empty, prepend it to the className.
          */
-        if ($classString = $classVisitor->getClassname()) {
-            if ($namespaceName = $classVisitor->getNamespaceName()) {
-                $classString = $namespaceName . '\\' . $classString;
-            }
+
+        $className = $classVisitor->getClassname();
+        if (empty($className)) {
+            return false;
         }
+
+        $namespaceName = $classVisitor->getNamespaceName();
+
+        /** @var class-string $classString */
+        $classString = (empty($namespaceName)) ? $className : $namespaceName . '\\' . $className;
+
         return $classString;
     }
 
@@ -233,22 +240,12 @@ class Exception extends \Exception
      */
     protected function sanitizeParameterValue($value): string
     {
-        switch ($type = gettype($value)) {
-            case 'string':
-                $result = $value;
-                break;
-            case 'integer':
-                /** @var int $value */
-                $result = (string)$value;
-                break;
-            case 'boolean':
-                $result = ($value ? 'true' : 'false');
-                break;
-            default:
-                $result = $type;
-                break;
-        }
-        /** @phpstan-ignore-next-line */
-        return $result;
+        return match ($type = gettype($value)) {
+            'string' => $value,
+            /** @phpstan-ignore-next-line */
+            'integer' => (string)$value,
+            'boolean' => ($value ? 'true' : 'false'),
+            default => $type,
+        };
     }
 }

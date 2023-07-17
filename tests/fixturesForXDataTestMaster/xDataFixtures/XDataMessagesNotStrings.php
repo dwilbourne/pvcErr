@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoThrowableParameter;
+namespace pvcTests\err\fixturesForXDataTestMaster\xDataFixtures;
 
 use pvc\err\XDataAbstract;
 use pvc\interfaces\err\XDataInterface;
@@ -17,7 +17,7 @@ use pvc\interfaces\err\XDataInterface;
  * Class _PvcExceptionLibrary
  * @package pvcErr
  */
-class _pvcXData extends XDataAbstract implements XDataInterface
+class XDataMessagesNotStrings extends XDataAbstract implements XDataInterface
 {
     /**
      * @function getLocalXCodes
@@ -27,6 +27,8 @@ class _pvcXData extends XDataAbstract implements XDataInterface
     {
         return [
             InvalidArrayIndexException::class => 1001,
+            InvalidArrayValueException::class => 1002,
+            InvalidFilenameException::class => 1003,
         ];
     }
 
@@ -37,7 +39,9 @@ class _pvcXData extends XDataAbstract implements XDataInterface
     public function getXMessageTemplates(): array
     {
         return [
-            InvalidArrayIndexException::class => 'Invalid array index ${index}.',
+            InvalidArrayIndexException::class => 9002,
+            InvalidArrayValueException::class => 'Invalid array value ${value}.',
+            InvalidFilenameException::class => 'filename %s is not valid.',
         ];
     }
 }

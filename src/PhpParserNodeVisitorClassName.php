@@ -20,14 +20,15 @@ use PhpParser\NodeVisitorAbstract;
  * running a NameResolver through the node prior to this visitor.  Need to write a decorator for NameResolver that
  * has a method to get the namespacedName property of the node......
  */
+
 class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
 {
     /**
      * @var string
      */
-    protected string $className = '';
+    protected string $className;
 
-    protected string $namespaceName = '';
+    protected string $namespaceName;
 
     /**
      * enterNode inspects the current node and if it is an instance of Class_, returns the class string/class name
@@ -54,13 +55,21 @@ class PhpParserNodeVisitorClassName extends NodeVisitorAbstract
         return null;
     }
 
+    /**
+     * getClassname
+     * @return string
+     */
     public function getClassname(): string
     {
-        return $this->className;
+        return $this->className ?? '';
     }
 
+    /**
+     * getNamespaceName
+     * @return string
+     */
     public function getNamespaceName(): string
     {
-        return $this->namespaceName;
+        return $this->namespaceName ?? '';
     }
 }

@@ -7,14 +7,13 @@
 
 declare(strict_types=1);
 
-namespace pvcTests\err\fixturesForXDataTestMaster\exceptionWithNoDefaultForPrev;
+namespace pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures;
 
 use pvc\err\stock\LogicException;
-use Throwable;
 
-class InvalidArrayIndexException extends LogicException
+class ExceptionWithNoThrowableParameter extends LogicException
 {
-    public function __construct(Throwable $prev)
+    public function __construct(string $prev)
     {
         parent::__construct($prev);
     }
