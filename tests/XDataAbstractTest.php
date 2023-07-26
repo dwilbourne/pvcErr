@@ -57,13 +57,13 @@ class XDataAbstractTest extends TestCase
     /**
      * @function testCountXMessageVariables
      * @param string $message
-     * @param int $expectNumParameters
-     * @covers       \pvc\err\XDataAbstract::countXMessageVariables
+     * @param array $parameters
+     * @covers       \pvc\err\XDataAbstract::getXMessageVariables
      * @dataProvider dataProvider
      */
-    public function testCountXMessageVariables(string $message, int $expectNumParameters): void
+    public function testGetXMessageVariables(string $message, array $parameters): void
     {
-        self::assertEquals($expectNumParameters, $this->mock->countXMessageVariables($message));
+        self::assertEqualsCanonicalizing($parameters, $this->mock->getXMessageVariables($message));
     }
 
     /**
@@ -73,14 +73,11 @@ class XDataAbstractTest extends TestCase
     protected function dataProvider(): array
     {
         return [
-            'messageWithNoParameters' => ['This is a test message', 0],
-            'messageWithOneParameter' => ['Your function parameter ${param} is invalid.', 1],
-            'messageWithTwoParameters' => ['preg match failed.  regex = ${regex}, subject = ${subject}', 2],
-            'messageWithThreeParameters' => [
-                'preg replace failed.  regex = ${regex}, subject = ${subject}, replace = ${replace}',
-                3
-            ],
-            'messageWithMalformedParameter' => ['Your function parameter ${param is invalid.', 0],
+            'messageWithNoParameters' => ['This is a test message', []],
+            'messageWithOneParameter' => ['Your function parameter ${param} is invalid.', ['${param}']],
+            'messageWithTwoParameters' => ['preg match failed.  regex = ${regex}, subject = ${subject}', ['${regex}', '${subject}']],
+            'messageWithThreeParameters' => ['preg replace failed.  regex = ${regex}, subject = ${subject}, replace = ${replace}', ['${regex}', '${subject}', '${replace}']],
+            'messageWithMalformedParameter' => ['Your function parameter ${param is invalid.', []],
         ];
     }
 }

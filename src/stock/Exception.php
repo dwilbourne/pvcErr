@@ -57,11 +57,13 @@ class Exception extends \Exception
         $code = (int)($globalPrefix . $localCode);
 
         /**
-         * get the message template and variables and do the string substitution
+         * get the message template and variables and do the string substitution.
          */
         $messageTemplate = $xData->getXMessageTemplate($myClassString);
-        /** parsing the parameters sets $this->previous as a by-product */
-        $messageParams = $this->parseParams($allParams, $xData->countXMessageVariables($messageTemplate));
+        $messageVariables = $xData->getXMessageVariables($messageTemplate);
+
+        /** parsing the parameters sets $this->previous as a side effect */
+        $messageParams = $this->parseParams($allParams, $messageVariables);
         $message = strtr($messageTemplate, $messageParams);
 
         parent::__construct($message, $code, $this->previous);
@@ -200,7 +202,7 @@ class Exception extends \Exception
      * @param int $countOfMessageVariables
      * @return array<mixed>
      */
-    protected function parseParams(array $paramValues, int $countOfMessageVariables): array
+    protected function parseParams(array $paramValues, array $messageVariables): array
     {
         $reflected = new ReflectionClass($this);
         /** @var ReflectionMethod $constructor */
@@ -214,7 +216,7 @@ class Exception extends \Exception
          * should be $index and $limit.  The array produced by this method would be ['index' => value1, 'limit' =>
          * value2].
          */
-        for ($i = 0, $messageParams = []; $i < $countOfMessageVariables; $i++) {
+        for ($i = 0, $messageParams = []; $i < count($messageVariables); $i++) {
             $templateVariable = '${' . $paramNames[$i]->name . '}';
             $messageParams[$templateVariable] = $this->sanitizeParameterValue($paramValues[$i]);
         }

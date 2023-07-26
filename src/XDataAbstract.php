@@ -50,13 +50,8 @@ abstract class XDataAbstract implements XDataInterface
      */
     abstract public function getXMessageTemplates(): array;
 
-    /**
-     * @function countXMessageVariables
-     * @param string $messageTemplate
-     * @return int<0, max>
-     * @noinspection GrazieInspection
-     */
-    public function countXMessageVariables(string $messageTemplate): int
+
+    public function getXMessageVariables(string $messageTemplate): array
     {
         /**
          * starts with '${', character class includes any combo of characters except '}' (at least one), finishes
@@ -67,12 +62,12 @@ abstract class XDataAbstract implements XDataInterface
          * compile error when you created the exception with bad dummy variable names, so we can afford to slack here
          * a bit.....
          *
-         * preg_match_all returns the number of matches it finds.
+         * $matches[1] is an array of all the strings in the subject that match the first capturing subpattern.  In
+         * this case, that is the variable name without the delimiters.  I.e. if it looks like ${variable} in the
+         * message, then it appears as 'variable' in the array.
          */
-        $regex = '/\$\{[^}]+\}/';
-        /**
-         * phpstan thinks preg_match_all can return false so use intval to coalesce it to 0.
-         */
-        return intval(preg_match_all($regex, $messageTemplate));
+        $regex = '/\$\{[^}]+}/';
+        preg_match_all($regex, $messageTemplate, $matches);
+        return $matches[0];
     }
 }
