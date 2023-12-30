@@ -167,7 +167,7 @@ class Exception extends \Exception
          *
          * The result is an array of nodes, which is the AST
          */
-        $parser = (new ParserFactory())->createForVersion(PhpVersion::getHostVersion());
+        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
         /** @var Node[] $nodes */
         $nodes = $parser->parse($fileContents);
 

@@ -31,7 +31,7 @@ class PhpParserNodeVisitorClassNameTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->parser = (new ParserFactory())->createForVersion(PhpVersion::getHostVersion());
+        $this->parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
         $this->fixtureDir = __DIR__ . DIRECTORY_SEPARATOR . 'fixtureForXDataTests';
     }
 
