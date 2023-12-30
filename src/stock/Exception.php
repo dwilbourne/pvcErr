@@ -12,6 +12,7 @@ namespace pvc\err\stock;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
+use PhpParser\PhpVersion;
 use pvc\err\PhpParserNodeVisitorClassName;
 use pvc\err\XCodePrefixes;
 use pvc\interfaces\err\XDataInterface;
@@ -162,9 +163,11 @@ class Exception extends \Exception
     public static function getClassStringFromFileContents(string $fileContents): string|false
     {
         /**
-         * create the parser and parse the file.  Result is an array of nodes, which is the AST
+         * create a parser for the version of PHP currently running on the host, then parse the file.
+         *
+         * The result is an array of nodes, which is the AST
          */
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $parser = (new ParserFactory())->createForVersion(PhpVersion::getHostVersion());
         /** @var Node[] $nodes */
         $nodes = $parser->parse($fileContents);
 

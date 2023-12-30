@@ -22,7 +22,7 @@
 	"minimum-stability": "dev",
 	"require": {
 		"pvc/interfaces": "*",
-		"nikic/php-parser": "*"
+		"nikic/php-parser": "^4"
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "*",
