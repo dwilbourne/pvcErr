@@ -12,7 +12,6 @@ namespace pvc\err\stock;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
-use PhpParser\PhpVersion;
 use pvc\err\PhpParserNodeVisitorClassName;
 use pvc\err\XCodePrefixes;
 use pvc\interfaces\err\XDataInterface;
