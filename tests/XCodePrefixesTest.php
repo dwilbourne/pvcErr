@@ -77,4 +77,14 @@ class XCodePrefixesTest extends TestCase
     {
         self::assertIsArray(XCodePrefixes::getXCodePrefixes());
     }
+
+    /**
+     * testAllXCodePrefixesAreUnique
+     * @covers \pvc\err\XCodePrefixes
+     */
+    public function testAllXCodePrefixesAreUnique(): void
+    {
+        $prefixes = XCodePrefixes::getXCodePrefixes();
+        self::assertTrue(count($prefixes) == count(array_unique($prefixes)));
+    }
 }

@@ -61,7 +61,12 @@ class XDataTestMaster extends TestCase
     public function verifyGlobalPrefixCodeIsConfiguredForLibrary(XDataInterface $xData): bool
     {
         $xDataReflection = new ReflectionClass(get_class($xData));
-        return (0 !== XCodePrefixes::getXCodePrefix($xDataReflection->getNamespaceName()));
+        $nsName = $xDataReflection->getNamespaceName();
+        if (0 == XCodePrefixes::getXCodePrefix($nsName)) {
+            echo sprintf('%s is not a registered namespace in the XCodePrefixes registry', $nsName);
+            return false;
+        }
+        return true;
     }
 
     /**
