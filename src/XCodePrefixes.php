@@ -25,9 +25,10 @@ class XCodePrefixes implements XCodePrefixesInterface
         "pvcTests\\err\\fixtureForXDataTests" => 901,
         "pvc\\err\\err" => 902,
         "pvc\\err\\pvc" => 903,
-        "pvc\\regex" => 904,
-        "pvc\\validator" => 905,
-        "pvc\\parser" => 906,
+        "pvc\\config\\err" => 904,
+        "pvc\\regex\\err" => 905,
+        "pvc\\validator\\err" => 906,
+        "pvc\\parser\\err" => 907,
     ];
 
     /**
