@@ -21,15 +21,15 @@ class XCodePrefixes implements XCodePrefixesInterface
      * array of namespace => exception code prefix pairs, each prefix must be unique
      */
     protected static array $prefixes = [
-        "pvcExamples\\err\\err" => 900,
-        "pvcTests\\err\\fixtureForXDataTests" => 901,
-        "pvc\\err\\err" => 902,
-        "pvc\\err\\pvc" => 903,
-        "pvc\\config\\err" => 904,
-        "pvc\\msg\\err" => 905,
-        "pvc\\regex\\err" => 906,
-        "pvc\\validator\\err" => 907,
-        "pvc\\parser\\err" => 908,
+        'pvcExamples\\err\\err' => 900,
+        'pvcTests\\err\\fixtureForXDataTests' => 901,
+        'pvc\\err\\err' => 902,
+        'pvc\\err\\pvc' => 903,
+        'pvc\\config\\err' => 904,
+        'pvc\\msg\\err' => 905,
+        'pvc\\regex\\err' => 906,
+        'pvc\\validator\\err' => 907,
+        'pvc\\parser\\err' => 908,
     ];
 
     /**
