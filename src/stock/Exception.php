@@ -34,7 +34,8 @@ class Exception extends \Exception
     public function __construct(...$allParams)
     {
         /**
-         * initialize some things that we need to create the message and the code
+         * initialize some things that we need to create the message and the code.  get_class($this) returns the
+         * class string of the child class.
          */
         $myClassString = get_class($this);
         $reflected = new ReflectionClass($myClassString);
@@ -201,7 +202,7 @@ class Exception extends \Exception
     /**
      * @function parseParams
      * @param array<mixed> $paramValues
-     * @param int $countOfMessageVariables
+     * @param array<mixed> $messageVariables
      * @return array<mixed>
      */
     protected function parseParams(array $paramValues, array $messageVariables): array

@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package pvcErr
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
@@ -9,22 +8,26 @@ declare(strict_types=1);
 
 namespace pvc\err;
 
+use pvc\err\err\InvalidXCodePrefixNumberException;
 use pvc\interfaces\err\XCodePrefixesInterface;
 
 /**
- * Class ErrConfig
+ * Class XCodePrefixes
  */
 class XCodePrefixes implements XCodePrefixesInterface
 {
     /**
-     * array of namespace => exception code prefix pairs
+     * @var array<string, int>
+     * array of namespace => exception code prefix pairs, each prefix must be unique
      */
-    protected const PREFIXES = [
+    protected static array $prefixes = [
         "pvcExamples\\err\\err" => 900,
         "pvcTests\\err\\fixtureForXDataTests" => 901,
-        "pvc\\err\\pvc" => 902,
-        "pvc\\regex" => 903,
-        "pvc\\validator" => 904,
+        "pvc\\err\\err" => 902,
+        "pvc\\err\\pvc" => 903,
+        "pvc\\regex" => 904,
+        "pvc\\validator" => 905,
+        "pvc\\parser" => 906,
     ];
 
     /**
@@ -44,50 +47,30 @@ class XCodePrefixes implements XCodePrefixesInterface
     }
 
     /**
-     * combines pvc's exception prefixes with external application's prefixes.
      * @function getXCodePrefixes
      * @return array<string, int>
      */
     public static function getXCodePrefixes(): array
     {
-        return array_merge(self::getPvcXCodePrefixes(), self::getExternalXCodePrefixes());
+        return self::$prefixes;
     }
 
     /**
-     * @function getPvcXCodePrefixes
-     * @return int[]
+     * addXCodePrefix
+     * @param string $nameSpace
+     * @param int $prefix
+     * @throws InvalidXCodePrefixNumberException
      */
-    public static function getPvcXCodePrefixes(): array
+    public static function addXCodePrefix(string $nameSpace, int $prefix): void
     {
-        return self::PREFIXES;
-    }
-
-    /**
-     * returns empty array if environment variable is not set, points to a non-existent / non-readable file,
-     * unparseable file, php file which does not return an array, or if the array is badly shaped / typed.
-     *
-     * @function getExternalXCodePrefixes
-     * @return array<string, int>
-     */
-    public static function getExternalXCodePrefixes(): array
-    {
-        $prefixes = [];
-
-        $filePath = getenv('XCodePrefixes');
-
-        if ($filePath !== false && is_readable($filePath)) {
-            /**
-             * include returns false if the file is not parseable but unlike require, it does NOT halt script execution
-             */
-            $applicationPrefixes = include $filePath;
-            if (is_array($applicationPrefixes)) {
-                foreach ($applicationPrefixes as $namespace => $prefix) {
-                    if (is_string($namespace) && is_int($prefix) && ($prefix >= self::MIN_APPLICATION_PREFIX)) {
-                        $prefixes[$namespace] = $prefix;
-                    }
-                }
-            }
+        /**
+         * there is no need to check if $nameSpace is a valid namespace name.  The code inside the pvc exception
+         * class supplies the namespace name it needs to getXCodePrefix.  The worst that can happen is it does not find
+         * it in the prefixes array and getXCodePrefix returns 0.
+         */
+        if (in_array($prefix, self::$prefixes) || ($prefix < self::MIN_APPLICATION_PREFIX)) {
+            throw new InvalidXCodePrefixNumberException($prefix);
         }
-        return $prefixes;
+        self::$prefixes[$nameSpace] = $prefix;
     }
 }

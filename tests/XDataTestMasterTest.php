@@ -16,7 +16,6 @@ use pvcTests\err\fixtureForXDataTests\SampleExceptionWithNonOptionalPrevParamete
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithoutPrevParameter;
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithUnionTypedPrevParameter;
 use pvcTests\err\fixtureForXDataTests\SampleExceptionWithUntypedPrevParameter;
-use pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData;
 use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionDoesNotExtendPvcStockException;
 use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionWithImplicitConstructor;
 use pvcTests\err\fixturesForXDataTestMaster\exceptionFixtures\ExceptionWithNoConstructor;
@@ -43,12 +42,31 @@ class XDataTestMasterTest extends TestCase
     }
 
     /**
+     * testVerifyGlobalPrefixCodeIsConfiguredForLibrary
+     * @covers \pvc\err\XDataTestMaster::verifyGlobalPrefixCodeIsConfiguredForLibrary
+     */
+    public function testVerifyGlobalPrefixCodeIsConfiguredForLibrary(): void
+    {
+        /**
+         * even though this fixture has all good data in it, it is not registered in the XCodePrefixes registry
+         */
+        $xData = new \pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData();
+        self::assertFalse($this->xDataTestMaster->verifyGlobalPrefixCodeIsConfiguredForLibrary($xData));
+
+        /**
+         * this one is registered
+         */
+        $xData = new \pvc\err\err\_ErrXData();
+        self::assertTrue($this->xDataTestMaster->verifyGlobalPrefixCodeIsConfiguredForLibrary($xData));
+    }
+
+    /**
      * testGetExceptionClassStrings
      * @covers \pvc\err\XDataTestMaster::getThrowableClassStrings
      */
     public function testGetExceptionClassStrings(): void
     {
-        $xData = new _pvcXData();
+        $xData = new \pvcTests\err\fixturesForXDataTestMaster\allGood\_pvcXData();
         /**
          * There are 10 files in the fixture dir, 6 of which are exceptions
          */
@@ -546,7 +564,10 @@ class XDataTestMasterTest extends TestCase
      */
     public function testVerifyLibrary(): void
     {
-        $xData = new _pvcXData();
+        /**
+         * confirm that its own exception data is registered and consistent
+         */
+        $xData = new \pvc\err\err\_ErrXData();
         self::assertTrue($this->xDataTestMaster->verifyLibrary($xData));
     }
 }

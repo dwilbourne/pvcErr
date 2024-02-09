@@ -159,13 +159,13 @@ correspond to the namespaces of your exception libraries.  The prefixes in the a
 prefixes will be prepended to the local exception codes defined in your exception library data classes.  This is the
 mechanism that guarantees uniqueness among exception codes.
 
-In terms of implementation, there are actually two mechanisms that work in parallel.  Internally, i.e.
-only as pertains to exceptions defined in the pvc libraries, I use
-a static class to store the namespaces and integers.  If you install this package and look in the vendor directory
-under pvc\\err\\src, you will see XCodePrefixes.php.
+But in order to make the package usable for others, the XCodePrefixes class exposes a static method called
+addXCodePrefix.  Ot takes two parameters, the first being the namespace of an exception code library and the second
+being a unique positive integer greater than 1000.  When you bootstrap your application, just add your exception
+library namespaces and their corresponding prefixes and the configuration is complete.  If you test your exception
+library, it will fail if the library is not registered with XCodePrefixes as just described.  If you thrown an
+exception using a library which is not registered, your integer exception code is returned with no prefix.
 
-But in order to make the package usable for others, the code looks for an environment variable named "XCodePrefixes".
-If such a variable exists, then the value of the variable should be the filepath of *your* exception code prefixes.
 In order that I could create this library with no other dependencies, this file must be in php format.  Yaml and XML
 formats would require a dependency on a parser.  Json would be a possibility since php can natively parse json, but
 in the interests of keeping things as simple as possible......

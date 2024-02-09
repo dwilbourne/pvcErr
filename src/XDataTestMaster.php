@@ -39,6 +39,8 @@ class XDataTestMaster extends TestCase
         $result = $result && $this->verifyGetLocalCodesArrayHasUniqueIntegerValues($xData);
         $result = $result && $this->verifyGetLocalMessagesArrayHasStringsForValues($xData);
 
+        $result = $result && $this->verifyGlobalPrefixCodeIsConfiguredForLibrary($xData);
+
         foreach ($throwableClassStrings as $classString) {
             $message = $xData->getXMessageTemplate($classString);
             $messageVariables = $this->parseVariableNamesFromMessage($message);
@@ -49,6 +51,17 @@ class XDataTestMaster extends TestCase
             $result = $result && $this->verifyExceptionExtendsPvcStockException($classString);
         }
         return $result;
+    }
+
+    /**
+     * verifyGlobalPrefixCodeIsConfiguredForLibrary
+     * @param XDataInterface $xData
+     * @return bool
+     */
+    public function verifyGlobalPrefixCodeIsConfiguredForLibrary(XDataInterface $xData): bool
+    {
+        $xDataReflection = new ReflectionClass(get_class($xData));
+        return (0 !== XCodePrefixes::getXCodePrefix($xDataReflection->getNamespaceName()));
     }
 
     /**
@@ -501,13 +514,6 @@ class XDataTestMaster extends TestCase
     public function getReflectionTypeName(?ReflectionType $paramType): string
     {
         /**
-         * if the parameter is untyped, put in a string.
-         */
-        if (is_null($paramType)) {
-            return 'string';
-        }
-
-        /**
          * if it's a named type, return the name
          */
         if ($paramType instanceof \ReflectionNamedType) {
@@ -515,11 +521,12 @@ class XDataTestMaster extends TestCase
         }
 
         /**
-         * we know it is an intersection or union type, pick the first element in the array
+         * If the parameter type is not a 'named type' (one of the basic php data types), it must be a compound type
+         * (intersection or union).  While it is not too hard to convert basic types to a sensible string (casting
+         * integers to strings, boolean to true / false, etc.), it is hard to see a sensible strategy for automagically
+         * converting a compound type to a string.  By returning 'string', we are really just saying 'don't do
+         * anything to the parameter, let php do whatever it is going to do to cast it to a string on the fly.'
          */
-        /** @var \ReflectionUnionType|\ReflectionIntersectionType $paramType */
-        $typesArray = $paramType->getTypes();
-        $type = $typesArray[0];
-        return $type->getName();
+        return 'string';
     }
 }
