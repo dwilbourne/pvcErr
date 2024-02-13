@@ -24,6 +24,7 @@ class _pvcXDataTest extends XDataTestMaster
      * @covers \pvc\err\pvc\InvalidPHPVersionException::__construct
      * @covers \pvc\err\pvc\PregMatchFailureException::__construct
      * @covers \pvc\err\pvc\PregReplaceFailureException::__construct
+     * @covers \pvc\err\pvc\UnsetAttributeException::__construct
      */
     public function testPvcExceptionLibrary(): void
     {

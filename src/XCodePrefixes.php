@@ -33,6 +33,7 @@ class XCodePrefixes implements XCodePrefixesInterface
         'pvc\\validator\\err' => 909,
         'pvc\\http\\err' => 910,
         'pvc\\parser\\err' => 911,
+        'pvc\\struct\\err' => 912,
     ];
 
     /**
