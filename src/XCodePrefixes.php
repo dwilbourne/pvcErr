@@ -35,6 +35,7 @@ class XCodePrefixes implements XCodePrefixesInterface
         'pvc\\parser\\err' => 911,
         'pvc\\struct\\collection\\err' => 912,
         'pvc\\struct\\tree\\err' => 913,
+        'pvc\\frmtr\\err' => 914,
     ];
 
     /**
