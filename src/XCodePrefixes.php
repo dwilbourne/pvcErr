@@ -38,6 +38,7 @@ class XCodePrefixes implements XCodePrefixesInterface
         'pvc\\frmtr\\err' => 914,
         'pvc\\storage\\err' => 915,
         'pvc\\html\\err' => 916,
+        'pvc\\file\\err' => 917,
     ];
 
     /**
