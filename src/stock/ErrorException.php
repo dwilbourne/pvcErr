@@ -12,4 +12,12 @@ namespace pvc\err\stock;
  */
 class ErrorException extends \ErrorException
 {
+    /**
+     * pvc does not make use of the code parameter when creating ErrorExceptions, it is always set to zero.
+     */
+    public function __construct()
+    {
+        $errinfo = error_get_last();
+        parent::__construct($errinfo['message'], 0, $errinfo['type'], $errinfo['file'], $errinfo['line'],);
+    }
 }
