@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace pvc\err;
 
 use pvc\err\stock\ErrorException;
+use UnhandledMatchError;
 
 /**
  * Class ErrorHandler
@@ -25,39 +26,44 @@ class ErrorHandler
 
     public function friendlyErrorType(int $type): string
     {
-        switch ($type) {
-            case E_ERROR: // 1 //
-                return 'E_ERROR';
-            case E_WARNING: // 2 //
-                return 'E_WARNING';
-            case E_PARSE: // 4 //
-                return 'E_PARSE';
-            case E_NOTICE: // 8 //
-                return 'E_NOTICE';
-            case E_CORE_ERROR: // 16 //
-                return 'E_CORE_ERROR';
-            case E_CORE_WARNING: // 32 //
-                return 'E_CORE_WARNING';
-            case E_COMPILE_ERROR: // 64 //
-                return 'E_COMPILE_ERROR';
-            case E_COMPILE_WARNING: // 128 //
-                return 'E_COMPILE_WARNING';
-            case E_USER_ERROR: // 256 //
-                return 'E_USER_ERROR';
-            case E_USER_WARNING: // 512 //
-                return 'E_USER_WARNING';
-            case E_USER_NOTICE: // 1024 //
-                return 'E_USER_NOTICE';
-            case E_STRICT: // 2048 //
-                return 'E_STRICT';
-            case E_RECOVERABLE_ERROR: // 4096 //
-                return 'E_RECOVERABLE_ERROR';
-            case E_DEPRECATED: // 8192 //
-                return 'E_DEPRECATED';
-            case E_USER_DEPRECATED: // 16384 //
-                return 'E_USER_DEPRECATED';
+        try {
+            $type = match ($type) {
+                E_ERROR => 'E_ERROR',
+                E_WARNING => 'E_WARNING',
+                E_PARSE => 'E_PARSE',
+                E_NOTICE => 'E_NOTICE',
+                E_CORE_ERROR => 'E_CORE_ERROR',
+                E_CORE_WARNING => 'E_CORE_WARNING',
+                E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+                E_COMPILE_WARNING => 'E_COMPILE_WARNING',
+                E_USER_ERROR => 'E_USER_ERROR',
+                E_USER_WARNING => 'E_USER_WARNING',
+                E_USER_NOTICE => 'E_USER_NOTICE',
+                E_STRICT => 'E_STRICT',
+                E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+                E_DEPRECATED => 'E_DEPRECATED',
+                E_USER_DEPRECATED => 'E_USER_DEPRECATED',
+            };
+        } catch (UnhandledMatchError $e) {
+            $type = '(undefined error constant)';
         }
-        return '';
+        return $type;
+    }
+
+    public function friendlyErrorSeverity(int $severity): string
+    {
+        try {
+            $severity = match ($severity) {
+                self::NONE => 'NONE',
+                self::NOTICE => 'NOTICE',
+                self::WARNING => 'WARNING',
+                self::PARSE => 'PARSE',
+                self::FATAL => 'FATAL',
+            };
+        } catch (UnhandledMatchError $e) {
+            $severity = '(undefined error severity)';
+        }
+        return $severity;
     }
 
     public function getErrorSeverity(): int
