@@ -15,11 +15,11 @@ use pvc\err\stock\ErrorException;
  */
 class ErrorHandler
 {
-    protected const NONE = 0;
-    protected const  NOTICE = 1;
-    protected const  WARNING = 2;
-    protected const  PARSE = 3;
-    protected const  FATAL = 4;
+    public const NONE = 0;
+    public const  NOTICE = 1;
+    public const  WARNING = 2;
+    public const  PARSE = 3;
+    public const  FATAL = 4;
 
     protected int $errorSeverity = self::NONE;
 
