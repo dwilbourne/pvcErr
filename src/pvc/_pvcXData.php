@@ -30,8 +30,6 @@ class _pvcXData extends XDataAbstract implements XDataInterface
             InvalidArrayValueException::class => 1002,
             InvalidFilenameException::class => 1003,
             InvalidPHPVersionException::class => 1004,
-            PregMatchFailureException::class => 1005,
-            PregReplaceFailureException::class => 1006,
         ];
     }
 
@@ -46,8 +44,6 @@ class _pvcXData extends XDataAbstract implements XDataInterface
             InvalidArrayValueException::class => 'Invalid array value ${value}.',
             InvalidFilenameException::class => 'filename ${badFileName} is not valid.',
             InvalidPHPVersionException::class => 'Invalid PHP version ${currentVersion} - must be at least ${minVersion}',
-            PregMatchFailureException::class => 'preg_match failed: regex=${regex}; subject=${subject};',
-            PregReplaceFailureException::class => 'preg_replace failed: regex=${regex}; subject=${subject}; replacement=${replacement}',
         ];
     }
 }
