@@ -89,7 +89,7 @@ class ExceptionTest extends TestCase
     /**
      * @function testExceptionCorrectlySanitizesParametersBasedOnType
      * @throws ReflectionException
-     * @covers \pvc\err\stock\Exception::sanitizeParameterValue
+     * @covers \pvc\err\stock\Exception::stringify
      */
     public function testExceptionCorrectlySanitizesParametersBasedOnType(): void
     {
@@ -101,8 +101,8 @@ class ExceptionTest extends TestCase
         $expectedMsg = '';
         $expectedMsg .= 'string parameter = some string, ';
         $expectedMsg .= 'int parameter = 42, ';
-        $expectedMsg .= 'bool parameter = false, ';
-        $expectedMsg .= 'object parameter = object.';
+        $expectedMsg .= 'bool parameter = {bool (false)}, ';
+        $expectedMsg .= 'object parameter = O:8:"stdClass":0:{}.';
         self::assertEquals($expectedMsg, $e->getMessage());
     }
 }

@@ -18,6 +18,7 @@ use pvc\interfaces\err\XDataInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use Stringable;
 use Throwable;
 
 /**
@@ -221,7 +222,7 @@ class Exception extends \Exception
          */
         for ($i = 0, $messageParams = []; $i < count($messageVariables); $i++) {
             $templateVariable = '${' . $paramNames[$i]->name . '}';
-            $messageParams[$templateVariable] = $this->sanitizeParameterValue($paramValues[$i]);
+            $messageParams[$templateVariable] = $this->stringify($paramValues[$i]);
         }
 
         /**
@@ -239,18 +240,30 @@ class Exception extends \Exception
     }
 
     /**
-     * @function sanitizeParameterValue
-     * @param mixed $value
+     * stringify
+     * handy for converting exception arguments to strings
+     * @param mixed $var
      * @return string
      */
-    protected function sanitizeParameterValue($value): string
+    protected function stringify(mixed $var): string
     {
-        return match ($type = gettype($value)) {
-            'string' => $value,
-            /** @phpstan-ignore-next-line */
-            'integer' => (string)$value,
-            'boolean' => ($value ? 'true' : 'false'),
-            default => $type,
-        };
+        if (is_object($var)) {
+            if ($var instanceof Stringable) {
+                return $var->__toString();
+            } else {
+                return serialize($var);
+            }
+        }
+
+        if (is_array($var)) {
+            return print_r($var, true);
+        }
+
+        if (is_bool($var)) {
+            return '{bool (' . ($var ? 'true' : 'false') . ')}';
+        }
+
+        /** @phpstan-ignore argument.type */
+        return strval($var);
     }
 }
