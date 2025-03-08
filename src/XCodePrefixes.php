@@ -34,11 +34,12 @@ class XCodePrefixes implements XCodePrefixesInterface
         'pvc\\http\\err' => 910,
         'pvc\\parser\\err' => 911,
         'pvc\\struct\\collection\\err' => 912,
-        'pvc\\struct\\tree\\err' => 913,
-        'pvc\\frmtr\\err' => 914,
-        'pvc\\storage\\err' => 915,
-        'pvc\\html\\err' => 916,
-        'pvc\\storage\filesys\\err' => 917,
+        'pvc\\struct\\dto\\err' => 913,
+        'pvc\\struct\\tree\\err' => 914,
+        'pvc\\frmtr\\err' => 915,
+        'pvc\\storage\\err' => 916,
+        'pvc\\html\\err' => 917,
+        'pvc\\storage\filesys\\err' => 918,
     ];
 
     /**
