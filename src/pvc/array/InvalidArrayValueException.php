@@ -17,7 +17,7 @@ use Throwable;
  */
 class InvalidArrayValueException extends LogicException
 {
-    public function __construct(string $value, Throwable $prev = null)
+    public function __construct(string $value, ?Throwable $prev = null)
     {
         parent::__construct($value, $prev);
     }

@@ -17,7 +17,7 @@ use Throwable;
  */
 class InvalidFilenameException extends LogicException
 {
-    public function __construct(string $badFileName, Throwable $previous = null)
+    public function __construct(string $badFileName, ?Throwable $previous = null)
     {
         parent::__construct($badFileName, $previous);
     }

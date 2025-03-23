@@ -18,7 +18,7 @@ use Throwable;
  */
 class InvalidArrayIndexException extends LogicException
 {
-    public function __construct(string $index, Throwable $prev = null)
+    public function __construct(string $index, ?Throwable $prev = null)
     {
         parent::__construct($index, $prev);
     }

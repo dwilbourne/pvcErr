@@ -17,7 +17,7 @@ use Throwable;
  */
 class InvalidPHPVersionException extends RuntimeException
 {
-    public function __construct(string $currentVersion, string $minVersion, Throwable $previous = null)
+    public function __construct(string $currentVersion, string $minVersion, ?Throwable $previous = null)
     {
         parent::__construct($currentVersion, $minVersion, $previous);
     }

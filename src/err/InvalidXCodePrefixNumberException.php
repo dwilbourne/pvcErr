@@ -16,7 +16,7 @@ use Throwable;
  */
 class InvalidXCodePrefixNumberException extends LogicException
 {
-    public function __construct(int $badPrefix, Throwable $prev = null)
+    public function __construct(int $badPrefix, ?Throwable $prev = null)
     {
         parent::__construct($badPrefix, $prev);
     }
