@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\err\pvc;
+namespace pvc\err\pvc\php;
 
 use pvc\err\stock\RuntimeException;
 use Throwable;

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\err\pvc;
+namespace pvc\err\pvc\array;
 
 use pvc\err\stock\LogicException;
 use Throwable;

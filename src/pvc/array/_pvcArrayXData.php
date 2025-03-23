@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\err\pvc;
+namespace pvc\err\pvc\array;
 
 use pvc\err\XDataAbstract;
 use pvc\interfaces\err\XDataInterface;
@@ -17,7 +17,7 @@ use pvc\interfaces\err\XDataInterface;
  * Class _PvcExceptionLibrary
  * @package pvcErr
  */
-class _pvcXData extends XDataAbstract implements XDataInterface
+class _pvcArrayXData extends XDataAbstract implements XDataInterface
 {
     /**
      * @function getLocalXCodes
@@ -28,8 +28,6 @@ class _pvcXData extends XDataAbstract implements XDataInterface
         return [
             InvalidArrayIndexException::class => 1001,
             InvalidArrayValueException::class => 1002,
-            InvalidFilenameException::class => 1003,
-            InvalidPHPVersionException::class => 1004,
         ];
     }
 
@@ -42,8 +40,6 @@ class _pvcXData extends XDataAbstract implements XDataInterface
         return [
             InvalidArrayIndexException::class => 'Invalid array index ${index}.',
             InvalidArrayValueException::class => 'Invalid array value ${value}.',
-            InvalidFilenameException::class => 'filename ${badFileName} is not valid.',
-            InvalidPHPVersionException::class => 'Invalid PHP version ${currentVersion} - must be at least ${minVersion}',
         ];
     }
 }
