@@ -46,7 +46,7 @@ class Exception extends \Exception
          * of course this should never happen if the library has been tested.......
          */
         if (is_null($xData)) {
-            $msg = 'No exception data file found for exception $myClassString!';
+            $msg = 'No exception data file found for exception ' . $myClassString;
             $code = 0;
             throw new \Exception($msg, $code);
         }
