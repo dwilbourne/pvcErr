@@ -40,12 +40,12 @@ class Exception extends \Exception
          */
         $myClassString = get_class($this);
         $reflected = new ReflectionClass($myClassString);
-        $xData = $this->getXDataFromClassString($myClassString);
 
         /**
-         * of course this should never happen if the library has been tested.......
+         * @var XDataInterface $xData
+         * of course, it should never be null if the library has been tested.......
          */
-        if (is_null($xData)) {
+        if (is_null($xData = $this->getXDataFromClassString($myClassString))) {
             $msg = 'No exception data file found for exception ' . $myClassString;
             $code = 0;
             throw new \Exception($msg, $code);
