@@ -78,7 +78,6 @@ class ErrorHandler
             case E_USER_NOTICE:
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
-            case E_STRICT:
                 $this->errorSeverity = self::NOTICE;
                 break;
 
