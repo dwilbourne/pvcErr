@@ -10,11 +10,9 @@ declare(strict_types=1);
 namespace pvcExamples\err\tests;
 
 use PHPUnit\Framework\TestCase;
-use pvcExamples\err\src\err\MyException;
 use pvcExamples\err\src\ExampleClass;
 use Throwable;
 
-#[\PHPUnit\Framework\Attributes\CoversMethod(\pvcExamples\err\src\ExampleClass::class, 'ThrowAnException')]
 class ExampleClassTest extends TestCase
 {
     /**
