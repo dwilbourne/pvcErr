@@ -26,17 +26,17 @@ enum ExampleXcode: string implements XCodeInterface
         };
     }
 
-    public function package(): string
+    public function package(): int
     {
         return Packages::PVC_EXAMPLES->value;
     }
 
-    public function severity(): string
+    public function severity(): int
     {
         return Severity::ERROR->value;
     }
 
-    public function exceptionType(): string
+    public function exceptionType(): int
     {
         return ExceptionType::NotFound->value;
     }
