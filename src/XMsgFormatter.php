@@ -44,8 +44,8 @@ final class XMsgFormatter
                 &
                 $usedKeys
             ): string {
-                $key = $matches;
-                $specifier = $matches ?? '%s';
+                $key = $matches[1];
+                $specifier = $matches[2] ?? '%s';
 
                 if (!array_key_exists($key, $context)) {
                     throw new \InvalidArgumentException(

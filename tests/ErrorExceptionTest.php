@@ -2,12 +2,11 @@
 
 namespace pvcTests\err;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use pvc\err\ErrorException;
 
-#[\PHPUnit\Framework\Attributes\CoversMethod(\pvc\err\ErrorException::class, '__construct')]
-#[\PHPUnit\Framework\Attributes\CoversMethod(\pvc\err\ErrorException::class, 'getFriendlyType')]
-#[\PHPUnit\Framework\Attributes\CoversMethod(\pvc\err\ErrorException::class, 'getFriendlySeverity')]
+#[CoversClass(ErrorException::class)]
 class ErrorExceptionTest extends TestCase
 {
     /**

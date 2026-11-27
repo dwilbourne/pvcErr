@@ -2,13 +2,14 @@
 
 namespace pvcTests\err;
 
-use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use pvc\err\ErrorException;
 use pvc\err\ErrorHandler;
-use pvc\err\stock\ErrorException;
 
 
+#[CoversClass(ErrorHandler::class)]
 class ErrorHandlerTest extends TestCase
 {
     protected ErrorHandler $handler;
@@ -48,7 +49,6 @@ class ErrorHandlerTest extends TestCase
      * E_STRICT is deprecated as of PHP 8.4.
      * TODO: remove E_STRICT when it is removed from the language
      */
-    #[CoversMethod(ErrorHandler::class, 'friendlyErrorType')]
     public function testFriendlyErrorTypeReturnsString(): void
     {
         $testErrorType = E_DEPRECATED;
@@ -58,7 +58,6 @@ class ErrorHandlerTest extends TestCase
     /**
      * @return void
      */
-    #[CoversMethod(ErrorHandler::class, 'friendlyErrorType')]
     public function testFriendlyErrorTypeReturnsUnknownWithBadType(): void
     {
         $testErrorType = 7346583764;
@@ -72,7 +71,6 @@ class ErrorHandlerTest extends TestCase
     /**
      * @return void
      */
-    #[CoversMethod(ErrorHandler::class, 'friendlyErrorSeverity')]
     #[DataProvider('severityDataProvider')]
     public function testFriendlyErrorSeverityReturnsString(
         int $severity,
@@ -87,8 +85,6 @@ class ErrorHandlerTest extends TestCase
     /**
      * @return void
      */
-    #[CoversMethod(ErrorHandler::class, 'friendlyErrorSeverity')]
-    #[CoversMethod(ErrorHandler::class, 'getErrorSeverity')]
     public function testFriendlyErrorSeverityReturnsUnknownWithBadSeverity(
     ): void
     {
@@ -118,10 +114,6 @@ class ErrorHandlerTest extends TestCase
     }
 
 
-    /**
-     * @return void
-     */
-    #[CoversMethod(ErrorHandler::class, 'handle')]
     public function testHandle(): void
     {
         $errstr = 'some error string';
