@@ -21,9 +21,13 @@ class ExampleClass
         /**
          * I prefer to type all the arguments as strings before pushing them into the exception constructor
          */
-        $index = (string)32;
-        $param = 'a string';
+        $index = 'a string';
+        $param = 42;
         $previous = null;
-        throw new MyException($index, $param, $previous);
+        throw new ExampleException(
+            ExampleXcode::InvalidData,
+            ['index' => $index, 'param' => $param],
+            $previous
+        );
     }
 }

@@ -7,6 +7,7 @@ namespace pvc\err\metadata;
 
 enum Packages: int
 {
-    case PVC_FRMTR = 1;
-    case PVC_PARSER = 2;
+    case PVC_EXAMPLES = 10;
+    case PVC_FRMTR = 11;
+    case PVC_PARSER = 12;
 }

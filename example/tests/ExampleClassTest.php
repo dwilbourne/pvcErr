@@ -11,6 +11,7 @@ namespace pvcExamples\err\tests;
 
 use PHPUnit\Framework\TestCase;
 use pvcExamples\err\src\ExampleClass;
+use pvcExamples\err\src\ExampleException;
 use Throwable;
 
 class ExampleClassTest extends TestCase
@@ -21,7 +22,7 @@ class ExampleClassTest extends TestCase
      */
     public function testExampleClassThrowsException(): void
     {
-        $this->expectException(MyException::class);
+        $this->expectException(ExampleException::class);
         $exampleClass = new ExampleClass();
         $exampleClass->ThrowAnException();
     }

@@ -12,6 +12,9 @@ final class XMsgFormatter
      *
      * Allowed specifiers: %s, %d, %.Nf (or omitted, which defaults to %s).
      *
+     * $context must contain keys that match the placeholders in the template.  To continue
+     * the above example, $context must contain keys 'gateway', 'ms', and 'fee'.
+     *
      * @param  array<string, string|float|int>  $context
      *
      * @throws \InvalidArgumentException When placeholders are malformed, keys are missing, or parameter counts mismatch.
