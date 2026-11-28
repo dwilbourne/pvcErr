@@ -12,8 +12,9 @@ use pvc\interfaces\err\XCodeInterface;
 class Exception extends \Exception
 {
     private const PACKAGE_WIDTH = 2;
-    private const EXCEPTION_TYPE_WIDTH = 2;
+    private const ERROR_CATEGORY_WIDTH = 2;
     private const SEVERITY_WIDTH = 2;
+    private const RETRY_POLICY_WIDTH = 2;
 
     /**
      * @param  array<string, int|float|string>  $context
@@ -39,13 +40,18 @@ class Exception extends \Exception
         $result = sprintf('%0*d', self::PACKAGE_WIDTH, $this->xCode->package());
         $result .= sprintf(
             '%0*d',
-            self::EXCEPTION_TYPE_WIDTH,
-            $this->xCode->exceptionType()
+            self::ERROR_CATEGORY_WIDTH,
+            $this->xCode->errorCategory()
         );
         $result .= sprintf(
             '%0*d',
             self::SEVERITY_WIDTH,
             $this->xCode->severity()
+        );
+        $result .= sprintf(
+            '%0*d',
+            self::RETRY_POLICY_WIDTH,
+            $this->xCode->retryPolicy()
         );
         return (int)$result;
     }

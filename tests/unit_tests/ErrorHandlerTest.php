@@ -1,6 +1,6 @@
 <?php
 
-namespace pvcTests\err;
+namespace pvcTests\err\unit_tests;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;

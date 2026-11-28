@@ -2,16 +2,15 @@
 
 namespace pvcExamples\err\src;
 
-use pvc\err\metadata\ExceptionType;
+use pvc\err\metadata\ErrorCategory;
 use pvc\err\metadata\Packages;
+use pvc\err\metadata\RetryPolicy;
 use pvc\err\metadata\Severity;
 use pvc\interfaces\err\XCodeInterface;
 
 enum ExampleXcode: string implements XCodeInterface
 {
     case InvalidData = 'PVC_ERR_001';
-    case SomethingBad = 'PVC_ERR_002';
-
 
     public function code(): string
     {
@@ -22,13 +21,12 @@ enum ExampleXcode: string implements XCodeInterface
     {
         return match ($this) {
             self::InvalidData => 'Invalid data: index = {index:%s}, parameter = {param:%d}',
-            self::SomethingBad => 'Something bad happened: {param4:%s}',
         };
     }
 
     public function package(): int
     {
-        return Packages::PVC_EXAMPLES->value;
+        return Packages::PVC_ERR->value;
     }
 
     public function severity(): int
@@ -38,6 +36,11 @@ enum ExampleXcode: string implements XCodeInterface
 
     public function exceptionType(): int
     {
-        return ExceptionType::NotFound->value;
+        return ErrorCategory::Validation->value;
+    }
+
+    public function retryPolicy(): int
+    {
+        return RetryPolicy::None->value;
     }
 }
